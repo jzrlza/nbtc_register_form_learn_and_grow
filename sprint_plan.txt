@@ -1,6 +1,38 @@
 Primary Features :
+1. หน้าจอลงทะเบียน ประกอบด้วย
+  - เพิ่มรูป Bandner ตามรูปข้างล่างนี้นะ
+  - เลือกสายงาน
+  - เลือกสำนัก (กรองข้อมูลตามสายงาน)
+  - เลือกชื่อ-นามสกุล (กรองข้อมูลตามสำนัก)
+  - ป้อนเบอร์โทรโต๊ะ
+  - sytem date วันที่และเวลาลงทะเบียน (แต่ไม่ต้องแสดงตรง frontend ให้แสดงตรง Backend)
+  - มีปุ่มให้คลิกลงทะเบียน เมื่อคลิกให้แล้วขึ้น Popup ขอบคุณ ลงทะเบียนสำเร็จ (ดูจากรูปด้านล่าง)
 
+***หน้าจอลงทะเบียน เจเจ อาจจะเอาจาก one nbtc ก็ได้นะครับ แล้วมาปรับเอา Filed ที่ไม่จำเป็นออกอีกที เพราะคล้ายๆกัน
+
+2. สามารถออกรายงานเป็น Excel สรุปผู้มาลงทะเบียนตามรูปแบบ Excel ข้างล่างนี้ครับ
+
+3. มีหลังบ้านสามารถแก้ไขข้อมูลได้ตามนี้
+  -ข้อมูลพนักงาน เช่น ชื่อ-นามสกุล ตำแหน่ง สำนัก สายงาน
+  -ข้อมูลการลงทะเบียน กรณีเขาลงผิด สามารถลบ ได้
+  -สามารถ import ข้อมูลพนักงาน อัพเดตได้
+
+ถ้าติดปัญหาอะไร แจ้งพี่อีกทีนะครับ...
+
+
+frontend มีหน้าลงทะเบียน หน้าจอเดียวครับ
+backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 Today
 
+
 Tomorrow
+- Solidify front end pages
+- Make Back end pages for admin only
+
+
+Done
+- Design and solidify database structure
+  (pair thai name and english name for front-back balance)
+  "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe" --no-defaults -u root -p -h localhost --port=3307 --no-data onenbtc > template.sql
+  pwd : rootsql
