@@ -1,0 +1,7 @@
+.env
+/register_form_learn_and_grow_backend/.env
+/register_form_learn_and_grow_frontend/.env
+/register_form_learn_and_grow_database_production/.env
+*/node_modules/
+*/package-lock.json
+*/dist/
