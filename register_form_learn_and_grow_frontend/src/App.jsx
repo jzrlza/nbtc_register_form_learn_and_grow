@@ -45,6 +45,15 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
+          <Route 
+            path="/" 
+            element={
+              <PublicRoute>
+                <Home />
+              </PublicRoute>
+            } 
+          />
+
           {/* Public route - login */}
           <Route 
             path="/login" 
@@ -52,16 +61,6 @@ function App() {
               <PublicRoute>
                 <Login onLogin={handleLogin} />
               </PublicRoute>
-            } 
-          />
-          
-          {/* Protected route - home */}
-          <Route 
-            path="/" 
-            element={
-              <ProtectedRoute>
-                <Home user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
             } 
           />
           
