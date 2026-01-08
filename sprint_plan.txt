@@ -24,10 +24,9 @@ frontend มีหน้าลงทะเบียน หน้าจอเด�
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 Today
-
+- Solidify front end pages
 
 Tomorrow
-- Solidify front end pages
 - Make Back end pages for admin only
 
 

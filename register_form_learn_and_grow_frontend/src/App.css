@@ -2,8 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #fff 0%, #fff 100%);
+  color: #1f029e;
 }
 
 .app-header {
@@ -218,22 +218,22 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
 }
 
 .nav-brand {
   font-size: 1.5rem;
   font-weight: bold;
-  color: white;
+  color: #1f029e;
 }
 
 .nav-user {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: white;
+  color: #1f029e;
 }
 
 .logout-btn {
