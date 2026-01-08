@@ -35,3 +35,5 @@ Done
   (pair thai name and english name for front-back balance)
   "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe" --no-defaults -u root -p -h localhost --port=3307 --no-data onenbtc > template.sql
   pwd : rootsql
+
+  "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe" --no-defaults -u root -prootsql -h localhost --port=3307 onenbtc > complete_backup.sql
