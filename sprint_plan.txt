@@ -26,12 +26,12 @@ backend มีหน้าจอตามรายละเอียดข้า
 Today
 
 Tomorrow
+- Beautify Font in front end
 - Make Back end pages for admin only
   -ข้อมูลพนักงาน เช่น ชื่อ-นามสกุล ตำแหน่ง สำนัก สายงาน
   -ข้อมูลการลงทะเบียน กรณีเขาลงผิด สามารถลบ ได้
   -สามารถ import ข้อมูลพนักงาน อัพเดตได้
   -export excel report button
-
 
 Done
 - Solidify front end pages
