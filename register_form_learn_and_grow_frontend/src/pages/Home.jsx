@@ -206,7 +206,7 @@ const Home = ({ user, onLogout }) => {
         showModal('success', 'อัพเดทการลงทะเบียนเรียบร้อยแล้ว');
       } else {
         await axios.post('/api/registers', submitData);
-        showModal('success', 'เพิ่มการลงทะเบียนเรียบร้อยแล้ว');
+        showModal('success', 'Thank You! ลงทะเบียนสำเร็จ');
       }
     } catch (error) {
       console.error('Error saving registration:', error);
@@ -237,9 +237,25 @@ const Home = ({ user, onLogout }) => {
   const handleModalClose = () => {
     closeModal();
     if (modal.type === 'success') {
-      navigate('/attendance');
+      clearFormInput();
     }
   };
+
+  const clearFormInput = () => {
+      setFormData({
+        emp_name: '',
+        emp_id: '',
+        table_number: ''
+      });
+
+      setSelectedDivision('');
+
+      setSelectedDepartment('');
+      setDepartments([]);
+      
+      setSelectedEmployee('');
+      setEmployees([]);
+  }
 
   const handleLogout = () => {
     onLogout();
@@ -354,6 +370,17 @@ const Home = ({ user, onLogout }) => {
           </form>
         </section>
       </main>
+
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={handleModalClose}
+        title={modal.type === 'success' ? 'สำเร็จ' : 'ข้อผิดพลาด'}
+      >
+        <p>{modal.message}</p>
+        <div className="modal-actions">
+          <button onClick={handleModalClose} className="modal-btn primary">ปิด</button>
+        </div>
+      </Modal>
     </div>
   );
 };
