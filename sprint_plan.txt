@@ -24,13 +24,13 @@ frontend มีหน้าลงทะเบียน หน้าจอเด�
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 Today
-- Solidify front end pages
 
 Tomorrow
 - Make Back end pages for admin only
 
 
 Done
+- Solidify front end pages
 - Design and solidify database structure
   (pair thai name and english name for front-back balance)
   "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe" --no-defaults -u root -p -h localhost --port=3307 --no-data onenbtc > template.sql
