@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import bannerImage from '../res/banner.jpg';
 
 const Home = ({ user, onLogout }) => {
   const [backendHealth, setBackendHealth] = useState(null);
@@ -32,6 +33,14 @@ const Home = ({ user, onLogout }) => {
       
       <main className="app-main">
         <section className="health-section">
+
+        <img src={bannerImage} alt="Banner" style={{
+              width: '100%',
+              maxWidth: '100%',
+              height: 'auto',
+              display: 'block'
+            }}/>
+
         </section>
 
         <section className="users-section">
