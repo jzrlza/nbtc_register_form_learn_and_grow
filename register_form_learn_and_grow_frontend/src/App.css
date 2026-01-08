@@ -34,9 +34,9 @@
 .users-section {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 0.4rem;
   border-radius: 15px;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -117,7 +117,7 @@ button:disabled {
   
   .health-section,
   .users-section {
-    padding: 1rem;
+    padding: 0.5rem;
   }
 }
 
@@ -263,17 +263,21 @@ body {
 .users-section {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 0.5rem;
   border-radius: 15px;
   margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  color: #1f029e;
+}
+
+.users-section {
+  border: 1px solid rgba(100, 100, 100, 0.7);
 }
 
 .health-section h2,
 .users-section h2 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
+  color: #1f029e;
 }
 
 .health-status {
@@ -371,7 +375,7 @@ body {
   
   .health-section,
   .users-section {
-    padding: 1rem;
+    padding: 0.5rem;
   }
   
   .users-grid {
@@ -664,11 +668,10 @@ input:focus, select:focus, textarea:focus {
 .form-section {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 0.4rem;
   border-radius: 15px;
-  margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  margin-bottom: 0.1rem;
+  color: #1f029e;
 }
 
 .section-header {
