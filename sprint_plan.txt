@@ -32,7 +32,12 @@ Tomorrow
   -สามารถ import ข้อมูลพนักงาน อัพเดตได้
   -export excel report button
 
-Done
+
+
+
+
+
+[Done]
 - Beautify Font in front end
 - Solidify front end pages
 - Design and solidify database structure
