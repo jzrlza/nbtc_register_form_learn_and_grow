@@ -1,13 +1,229 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import Modal from '../components/Modal';
 import bannerImage from '../res/banner.jpg';
 
 const Home = ({ user, onLogout }) => {
+  const { id } = useParams();
   const [backendHealth, setBackendHealth] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const isEditMode = !!id;
+  
+  const [formData, setFormData] = useState({
+    emp_name: '',
+    emp_id: '',
+    table_number: ''
+  });
+  
+  // New state for hierarchical selection
+  const [divisions, setDivisions] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [selectedDivision, setSelectedDivision] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
+
+  const [pageLoading, setPageLoading] = useState(true);
+  const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
+
+  const showModal = (type, message) => {
+    setModal({ isOpen: true, type, message });
+  };
+
+  const closeModal = () => {
+    setModal({ isOpen: false, type: '', message: '' });
+  };
+
+  useEffect(() => {
+    fetchDivisions();
+    if (isEditMode) {
+      fetchRegisterData();
+    } else {
+      setPageLoading(false);
+    }
+  }, [id]);
+
+  // Fetch divisions on component mount
+  const fetchDivisions = async () => {
+    try {
+      const response = await axios.get('/api/registers/divisions');
+      setDivisions(response.data);
+    } catch (error) {
+      console.error('Error fetching divisions:', error);
+      showModal('error', 'ไม่สามารถโหลดข้อมูลสายงานได้');
+    }
+  };
+
+  // Fetch departments based on selected division
+  const fetchDepartments = async (divId) => {
+    try {
+      const response = await axios.get(`/api/registers/departments?div_id=${divId}`);
+      setDepartments(response.data);
+      setSelectedDepartment('');
+      setEmployees([]);
+      setSelectedEmployee('');
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      showModal('error', 'ไม่สามารถโหลดข้อมูลสำนักได้');
+    }
+  };
+
+  // Fetch employees based on selected department
+  const fetchEmployees = async (deptId) => {
+    try {
+      const response = await axios.get(`/api/registers/employees?dept_id=${deptId}`);
+      setEmployees(response.data);
+      setSelectedEmployee('');
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      showModal('error', 'ไม่สามารถโหลดข้อมูลพนักงานได้');
+    }
+  };
+
+  const fetchRegisterData = async () => {
+    try {
+      const response = await axios.get(`/api/registers/single/${id}`);
+      const register = response.data;
+      
+      setFormData({
+        emp_name: register.emp_name || '',
+        emp_id: register.emp_id || '',
+        table_number: register.table_number || ''
+      });
+
+      // If editing, we need to fetch the employee's division and department
+      if (register.emp_id) {
+        try {
+          const employeeInfo = await axios.get(`/api/registers/employee-info/${register.emp_id}`);
+          const { division_id, department_id } = employeeInfo.data;
+          
+          setSelectedDivision(division_id?.toString() || '');
+          if (division_id) {
+            await fetchDepartments(division_id);
+            setSelectedDepartment(department_id?.toString() || '');
+            if (department_id) {
+              await fetchEmployees(department_id);
+            }
+          }
+          setSelectedEmployee(register.emp_id.toString());
+        } catch (error) {
+          console.error('Error fetching employee info:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching register:', error);
+      showModal('error', 'ไม่สามารถโหลดข้อมูลการลงทะเบียนได้');
+    } finally {
+      setPageLoading(false);
+    }
+  };
+
+  const handleDivisionChange = (e) => {
+    const divisionId = e.target.value;
+    setSelectedDivision(divisionId);
+    setSelectedDepartment('');
+    setSelectedEmployee('');
+    setEmployees([]);
+    
+    if (divisionId) {
+      fetchDepartments(divisionId);
+    } else {
+      setDepartments([]);
+    }
+
+    // Clear employee selection
+    setFormData(prev => ({
+      ...prev,
+      emp_name: '',
+      emp_id: ''
+    }));
+  };
+
+  const handleDepartmentChange = (e) => {
+    const departmentId = e.target.value;
+    setSelectedDepartment(departmentId);
+    setSelectedEmployee('');
+    
+    if (departmentId) {
+      fetchEmployees(departmentId);
+    } else {
+      setEmployees([]);
+    }
+
+    // Clear employee selection
+    setFormData(prev => ({
+      ...prev,
+      emp_name: '',
+      emp_id: ''
+    }));
+  };
+
+  const handleEmployeeChange = (e) => {
+    const employeeId = e.target.value;
+    setSelectedEmployee(employeeId);
+    
+    if (employeeId) {
+      const employee = employees.find(emp => emp.id.toString() === employeeId);
+      if (employee) {
+        setFormData(prev => ({
+          ...prev,
+          emp_name: employee.emp_name,
+          emp_id: employee.id.toString()
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        emp_name: '',
+        emp_id: ''
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate employee selection
+    if (!formData.emp_id) {
+      showModal('error', 'กรุณาเลือกพนักงาน');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const submitData = {
+        emp_id: formData.emp_id,
+        table_number: formData.table_number
+      };
+      
+      if (isEditMode) {
+        await axios.put(`/api/registers/${id}`, submitData);
+        showModal('success', 'อัพเดทการลงทะเบียนเรียบร้อยแล้ว');
+      } else {
+        await axios.post('/api/registers', submitData);
+        showModal('success', 'เพิ่มการลงทะเบียนเรียบร้อยแล้ว');
+      }
+    } catch (error) {
+      console.error('Error saving registration:', error);
+      showModal('error', 'ไม่สามารถบันทึกการลงทะเบียนได้: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const checkBackendHealth = async () => {
     try {
@@ -15,6 +231,13 @@ const Home = ({ user, onLogout }) => {
       setBackendHealth(response.data);
     } catch (error) {
       setBackendHealth({ status: 'ERROR', error: error.message });
+    }
+  };
+
+  const handleModalClose = () => {
+    closeModal();
+    if (modal.type === 'success') {
+      navigate('/attendance');
     }
   };
 
@@ -26,6 +249,10 @@ const Home = ({ user, onLogout }) => {
   useEffect(() => {
     checkBackendHealth();
   }, []);
+
+  if (pageLoading) {
+    return <div className="loading">กำลังโหลด...</div>;
+  }
 
   return (
     <div className="app">
@@ -44,6 +271,87 @@ const Home = ({ user, onLogout }) => {
         </section>
 
         <section className="users-section">
+        <h2>{isEditMode ? 'แก้ไขการลงทะเบียน' : 'เพิ่มการลงทะเบียนใหม่'}</h2>
+          
+          <form onSubmit={handleSubmit} className="employee-form">
+            {/* Division Selection */}
+            <div className="form-group">
+              <label>สายงาน:</label>
+              <select
+                value={selectedDivision}
+                onChange={handleDivisionChange}
+                required
+              >
+                <option value="">เลือกสายงาน</option>
+                {divisions.map(division => (
+                  <option key={division.id} value={division.id}>
+                    {division.div_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Department Selection */}
+            <div className="form-group">
+              <label>สำนัก:</label>
+              <select
+                value={selectedDepartment}
+                onChange={handleDepartmentChange}
+                disabled={!selectedDivision}
+                required
+              >
+                <option value="">เลือกสำนัก</option>
+                {departments.map(department => (
+                  <option key={department.id} value={department.id}>
+                    {department.dept_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Employee Selection */}
+            <div className="form-group">
+              <label>ชื่อ-นามสกุล:</label>
+              <select
+                value={selectedEmployee}
+                onChange={handleEmployeeChange}
+                disabled={!selectedDepartment}
+                required
+              >
+                <option value="">เลือกพนักงาน</option>
+                {employees.map(employee => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.emp_name}
+                  </option>
+                ))}
+              </select>
+              {formData.emp_id && (
+                <small className="form-hint">เลือกพนักงานแล้ว: {formData.emp_name} (รหัส: {formData.emp_id})</small>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>เบอร์โต๊ะ:</label>
+              <input
+                type="text"
+                name="table_number"
+                value={formData.table_number}
+                onChange={handleChange}
+                placeholder="ป้อนเบอร์โต๊ะ"
+              />
+            </div>
+
+            
+
+            <br/>
+
+            <div className="form-actions">
+              <button type="submit" disabled={loading} 
+              className="submit-btn">
+                {loading ? 'กำลังบันทึก...' : (isEditMode ? 'อัพเดท' : 'บันทึก')}
+              </button>
+            </div>
+          </form>
         </section>
       </main>
     </div>
