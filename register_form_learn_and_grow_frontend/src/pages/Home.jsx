@@ -277,15 +277,16 @@ const Home = ({ user, onLogout }) => {
       <main className="app-main">
         <section className="health-section">
 
-        <img src={bannerImage} alt="Banner" style={{
+        <img src={bannerImage} 
+            alt={
+              `Register Now | กิจกรรม NBTC Learn and Grow | Uptrend, Level Up, Grow Together | by NBTC Academy`
+            } style={{
               width: '100%',
               maxWidth: '100%',
               height: 'auto',
               display: 'block'
             }}
-            alt={
-              `Register Now | กิจกรรม NBTC Learn and Grow | Uptrend, Level Up, Grow Together | by NBTC Academy`
-            }/>
+            />
 
         </section>
 
