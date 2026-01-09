@@ -171,7 +171,7 @@ const Login = ({ onLogin }) => {
   // Initial Login Screen
   return (
     <div className="login-container">
-      <h2>Admin Backend Login</h2>
+      <h2>ลงชื่อเข้าใช้งานสำหรับผู้ดูแลระบบ</h2>
       <form onSubmit={handleLogin}>
         <input
           type="text"
@@ -188,7 +188,7 @@ const Login = ({ onLogin }) => {
           required
         />
         <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? 'กำลังดำเนินการ...' : 'ลงชื่อเข้าใช้'}
         </button>
       </form>
     </div>

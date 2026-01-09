@@ -8,7 +8,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
   return (
     <nav className="navbar">
       <div className="nav-left">
-        <div className="nav-brand">Admin</div>
+        <div className="nav-brand">สำหรับผู้ดูแลระบบ</div>
         <div className="nav-tabs">
           <button 
             onClick={() => navigate('/employee')}
@@ -20,7 +20,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
             onClick={() => navigate('/attendance')}
             className={`nav-tab ${location.pathname === '/attendance' ? 'active' : ''}`}
           >
-            หน้ารายการลงทะเบียนเข้าร่วมงาน
+            หน้ารายการลงทะเบียน
           </button>
         </div>
       </div>
