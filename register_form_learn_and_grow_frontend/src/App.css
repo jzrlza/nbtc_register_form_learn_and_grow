@@ -686,7 +686,6 @@ input:focus, select:focus, textarea:focus {
     background: white;
     border-radius: 8px;
     padding: 0;
-    max-width: 400px;
     width: 90%;
     color: #1f029e;
 }
