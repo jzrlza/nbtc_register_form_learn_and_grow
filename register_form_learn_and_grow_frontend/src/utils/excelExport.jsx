@@ -35,9 +35,6 @@ export const exportToExcel = (registers, unregisteredEmployees) => {
 const prepareSheet1 = (registers) => {
   const headers = ['ลำดับ', 'ชื่อ', 'สกุล', 'ตำแหน่ง', 'สำนัก', 'สายงาน', 'เบอร์โต๊ะ'];
 
-
-  console.log(registers)
-
   const rows = registers.map((reg, index) => [
     index + 1,
     reg.emp_name.split(" ")[0] || '-',
