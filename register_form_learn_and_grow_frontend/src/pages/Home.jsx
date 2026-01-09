@@ -282,7 +282,10 @@ const Home = ({ user, onLogout }) => {
               maxWidth: '100%',
               height: 'auto',
               display: 'block'
-            }}/>
+            }}
+            alt={
+              `Register Now | กิจกรรม NBTC Learn and Grow | Uptrend, Level Up, Grow Together | by NBTC Academy`
+            }/>
 
         </section>
 

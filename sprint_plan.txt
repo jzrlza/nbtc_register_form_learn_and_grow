@@ -28,10 +28,9 @@ Today
 
 Tomorrow
 - Test cases (users)
- - 
-- Test cases (admin)
- - Import excel for updating employees
- - Import excel
+ - Blind accessibility in form page
+   - banner got "alt" to read
+   - modal's auto focus for easy tab
 
 
 
@@ -39,6 +38,34 @@ Tomorrow
 
 
 [Done]
+- Test cases (admin)
+ - Import excel for updating employees
+ 1. **File validation**
+   - Non-Excel file upload (.txt, .pdf, .jpg)
+   - Corrupted Excel file
+   - Empty Excel file
+   - Very large Excel file (>50MB)
+2. **Excel data scenarios**
+   - Missing columns in Excel
+   - Extra columns in Excel
+   - Different column order
+   - Mixed data types in columns
+   - Special characters in names
+   - Unicode/Thai characters
+3. **Data matching failures**
+   - Division name misspelled
+   - Department not in selected division
+   - Position name variations (with spaces, abbreviations)
+   - Duplicate employee names
+4. **Import confirmation flow**
+   - Cancel during test import
+   - Cancel during real import
+   - Navigate away during import
+   - Browser refresh during import
+1. **Export scenarios**
+   - Export with 0 registrations
+   - Export with 1000+ registrations
+   - Export while data is changing
 - Make Back end pages for admin only
   -ข้อมูลพนักงาน เช่น ชื่อ-นามสกุล ตำแหน่ง สำนัก สายงาน
   -ข้อมูลการลงทะเบียน กรณีเขาลงผิด สามารถลบ ได้
