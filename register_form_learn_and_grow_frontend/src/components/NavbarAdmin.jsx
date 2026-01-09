@@ -14,13 +14,13 @@ const NavbarAdmin = ({ user, onLogout }) => {
             onClick={() => navigate('/employee')}
             className={`nav-tab ${location.pathname === '/employee' ? 'active' : ''}`}
           >
-            พนักงาน
+            หน้ารายการพนักงาน
           </button>
           <button 
             onClick={() => navigate('/attendance')}
             className={`nav-tab ${location.pathname === '/attendance' ? 'active' : ''}`}
           >
-            การลงทะเบียนเข้าร่วมงาน
+            หน้ารายการลงทะเบียนเข้าร่วมงาน
           </button>
         </div>
       </div>
