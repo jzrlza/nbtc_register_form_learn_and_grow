@@ -27,10 +27,7 @@ Today
 
 
 Tomorrow
-- Test cases (users)
- - Blind accessibility in form page
-   - banner got "alt" to read
-   - modal's auto focus for easy tab
+- submit for the real test
 
 
 
@@ -38,6 +35,10 @@ Tomorrow
 
 
 [Done]
+- Test cases (users)
+ - Blind accessibility in form page
+   - banner got "alt" to read
+   - modal's auto focus for easy tab
 - Test cases (admin)
  - Import excel for updating employees
  1. **File validation**
