@@ -27,11 +27,12 @@ Today
 - Make Back end pages for admin only
   -ข้อมูลพนักงาน เช่น ชื่อ-นามสกุล ตำแหน่ง สำนัก สายงาน
   -ข้อมูลการลงทะเบียน กรณีเขาลงผิด สามารถลบ ได้
-  
-Tomorrow
-- Make Back end pages for admin only
   -สามารถ import ข้อมูลพนักงาน อัพเดตได้
   -export excel report button
+  
+Tomorrow
+
+
 
 
 
