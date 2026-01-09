@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
+import NavbarAdmin from '../components/NavbarAdmin';
 import Modal from '../components/Modal';
 
 const EmployeeInput = ({ user, onLogout }) => {
@@ -155,7 +155,7 @@ const EmployeeInput = ({ user, onLogout }) => {
   const handleModalClose = () => {
     closeModal();
     if (modal.type === 'success') {
-      navigate('/');
+      navigate('/employee');
     }
   };
 
@@ -170,7 +170,7 @@ const EmployeeInput = ({ user, onLogout }) => {
 
   return (
     <div className="app">
-      <Navbar user={user} onLogout={handleLogout} />
+      <NavbarAdmin user={user} onLogout={handleLogout} />
       
       <main className="app-main">
         <section className="form-section">
@@ -253,7 +253,7 @@ const EmployeeInput = ({ user, onLogout }) => {
               </button>
               <button 
                 type="button" 
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/employee')}
                 className="cancel-btn"
               >
                 ยกเลิก

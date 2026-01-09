@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
+import NavbarAdmin from '../components/NavbarAdmin';
 import Modal from '../components/Modal';
 import { registerEnums } from '../utils/enum_config';
 
@@ -13,11 +13,7 @@ const AttendeeInput = ({ user, onLogout }) => {
   const [formData, setFormData] = useState({
     emp_name: '',
     emp_id: '',
-    phone_number: '',
-    is_attend: '1',
-    take_van_id: '1',
-    van_round_id: '1',
-    take_food: '1'
+    table_number: ''
   });
   
   // New state for hierarchical selection
@@ -94,11 +90,7 @@ const AttendeeInput = ({ user, onLogout }) => {
       setFormData({
         emp_name: register.emp_name || '',
         emp_id: register.emp_id || '',
-        phone_number: register.phone_number || '',
-        is_attend: register.is_attend?.toString() || '1',
-        take_van_id: register.take_van_id?.toString() || '1',
-        van_round_id: register.van_round_id?.toString() || '1',
-        take_food: register.take_food?.toString() || '1'
+        table_number: register.table_number || ''
       });
 
       // If editing, we need to fetch the employee's division and department
@@ -204,14 +196,7 @@ const AttendeeInput = ({ user, onLogout }) => {
     try {
       const submitData = {
         emp_id: formData.emp_id,
-        phone_number: formData.phone_number,
-        is_attend: parseInt(formData.is_attend),
-        take_van_id: parseInt(formData.take_van_id),
-        // Only include van_round_id if take_van_id is 1 or 2
-        van_round_id: (formData.take_van_id === '1' || formData.take_van_id === '2') 
-          ? parseInt(formData.van_round_id) 
-          : null,
-        take_food: parseInt(formData.take_food)
+        table_number: formData.table_number
       };
       
       if (isEditMode) {
@@ -259,7 +244,7 @@ const AttendeeInput = ({ user, onLogout }) => {
 
   return (
     <div className="app">
-      <Navbar user={user} onLogout={handleLogout} />
+      <NavbarAdmin user={user} onLogout={handleLogout} />
       
       <main className="app-main">
         <section className="form-section">
@@ -323,85 +308,14 @@ const AttendeeInput = ({ user, onLogout }) => {
             </div>
 
             <div className="form-group">
-              <label>เบอร์โทรศัพท์มือถือ:</label>
+              <label>เบอร์โต๊ะ:</label>
               <input
                 type="text"
-                name="phone_number"
-                value={formData.phone_number}
+                name="table_number"
+                value={formData.table_number}
                 onChange={handleChange}
-                placeholder="ป้อนเบอร์โทรศัพท์"
+                placeholder="ป้อนเบอร์โต๊ะ"
               />
-            </div>
-
-            <div className="form-group">
-              <label>ประสงค์เข้าร่วมงาน:</label>
-              <select
-                name="is_attend"
-                value={formData.is_attend}
-                onChange={handleChange}
-                required
-              >
-                {Object.entries(registerEnums.is_attend).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>ประสงค์ขึ้นรถตู้ของสำนักงาน:</label>
-              <select
-                name="take_van_id"
-                value={formData.take_van_id}
-                onChange={handleChange}
-                required
-              >
-                {Object.entries(registerEnums.take_van_id).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>รอบรถตู้สำนักงานเดินทางในช่วงเช้า:</label>
-              <select
-                name="van_round_id"
-                value={formData.van_round_id}
-                onChange={handleChange}
-                disabled={isVanRoundDisabled}
-                required={!isVanRoundDisabled}
-                className={isVanRoundDisabled ? 'disabled-field' : ''}
-              >
-                {Object.entries(registerEnums.van_round_id).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-              {isVanRoundDisabled && (
-                <small className="form-hint">
-                  รอบรถตู้ไม่สามารถเลือกได้เมื่อเลือก "กลับอย่างเดียว" หรือ "ไม่ประสงค์ (เดินทางเอง)"
-                </small>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>อาหาร:</label>
-              <select
-                name="take_food"
-                value={formData.take_food}
-                onChange={handleChange}
-                required
-              >
-                {Object.entries(registerEnums.take_food).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <br/>

@@ -171,7 +171,7 @@ const Login = ({ onLogin }) => {
   // Initial Login Screen
   return (
     <div className="login-container">
-      <h2>Login to ONE NBTC</h2>
+      <h2>Admin Backend Login</h2>
       <form onSubmit={handleLogin}>
         <input
           type="text"

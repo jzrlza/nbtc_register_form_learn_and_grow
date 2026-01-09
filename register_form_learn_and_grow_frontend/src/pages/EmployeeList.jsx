@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
+import NavbarAdmin from '../components/NavbarAdmin';
 import Modal from '../components/Modal';
 import { parseExcelToArray } from '../utils/excelParser';
 
@@ -96,7 +96,7 @@ const EmployeeList = ({ user, onLogout }) => {
   };
 
   const handleAddEmployee = () => {
-    navigate('/employee');
+    navigate('/employee/edit');
   };
 
   const handleLogout = () => {
@@ -188,7 +188,7 @@ const EmployeeList = ({ user, onLogout }) => {
 
   return (
     <div className="app">
-      <Navbar user={user} onLogout={handleLogout} />
+      <NavbarAdmin user={user} onLogout={handleLogout} />
 
       {/* Hidden file input */}
     <input
