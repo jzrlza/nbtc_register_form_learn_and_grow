@@ -130,10 +130,10 @@ const AttendRegisterList = ({ user, onLogout }) => {
           
           
 
-          <div className="pagination">
+          {registers.length > 0 ? <div className="pagination">
                 <button 
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
                   ก่อนหน้า
@@ -150,7 +150,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
                 >
                   ถัดไป
                 </button>
-              </div>
+              </div> : ""}
           
           {registers.length > 0 ? (
             <>
@@ -195,7 +195,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
               <div className="pagination">
                 <button 
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
                   ก่อนหน้า

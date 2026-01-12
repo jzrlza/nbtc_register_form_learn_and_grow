@@ -211,7 +211,7 @@ const EmployeeList = ({ user, onLogout }) => {
             </button>
           </div>
           
-          <div className="controls">
+          {employees.length > 0 ? <div className="controls">
             <form onSubmit={handleSearch} className="search-form">
               <input
                 type="text"
@@ -239,12 +239,12 @@ const EmployeeList = ({ user, onLogout }) => {
             <button onClick={() => fetchEmployees(currentPage, search)} disabled={loading} className="refresh-btn">
               {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
             </button>
-          </div>
+          </div> : ""}
 
-          <div className="pagination">
+          {employees.length > 0 ? <div className="pagination">
                 <button 
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
                   ก่อนหน้า
@@ -261,7 +261,7 @@ const EmployeeList = ({ user, onLogout }) => {
                 >
                   ถัดไป
                 </button>
-              </div>
+              </div> : ""}
           
           {employees.length > 0 ? (
             <>
@@ -308,7 +308,7 @@ const EmployeeList = ({ user, onLogout }) => {
               <div className="pagination">
                 <button 
                   onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
+                  disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
                   ก่อนหน้า
