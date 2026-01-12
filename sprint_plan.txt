@@ -25,7 +25,7 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 Today
 - submit for the real test
-- do the add, edit, delete dept, div, and position pages
+- do the add, edit, delete dept, div, and position pages (if needed)
 
 Tomorrow
 
