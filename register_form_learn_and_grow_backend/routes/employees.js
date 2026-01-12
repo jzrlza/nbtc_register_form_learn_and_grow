@@ -54,13 +54,15 @@ router.get('/', async (req, res) => {
     const [countResult] = await connection.execute(countQuery, queryParams);
     
     await connection.end();
+
+    const totalPages = Math.ceil(countResult[0].total / limit);
     
     res.json({
       employees: rows,
       total: countResult[0].total,
-      page: parseInt(page),
+      page: totalPages > 0 ? parseInt(page) : 0,
       limit: parseInt(limit),
-      totalPages: Math.ceil(countResult[0].total / limit)
+      totalPages: totalPages
     });
   } catch (error) {
     console.log('Database error:', error.message);
