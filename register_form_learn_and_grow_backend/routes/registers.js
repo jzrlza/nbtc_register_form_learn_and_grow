@@ -323,12 +323,13 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// GET export data for Excel (raw data only)
+// GET export data for Excel (most efficient)
 router.get('/export-data', async (req, res) => {
+  let connection;
   try {
-    const connection = await getConnection();
+    connection = await getConnection();
     
-    // Get all register data with employee details
+    // Get latest registers with employee details in one query
     const [registers] = await connection.execute(`
       SELECT 
         r.*,
@@ -337,15 +338,25 @@ router.get('/export-data', async (req, res) => {
         d.dept_name,
         division_obj.div_name
       FROM register r
-      LEFT JOIN employee e ON r.emp_id = e.id
+      INNER JOIN employee e ON r.emp_id = e.id
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
       LEFT JOIN division division_obj ON d.div_id = division_obj.id
-      ORDER BY e.id
+      INNER JOIN (
+        -- Subquery to get latest register for each employee
+        SELECT 
+          emp_id,
+          MAX(id) as latest_id
+        FROM register
+        WHERE is_deleted = 0
+        GROUP BY emp_id
+      ) latest ON r.id = latest.latest_id
+      WHERE r.is_deleted = 0
+      ORDER BY e.emp_name
     `);
     
-    // Get all employees to find unregistered ones
-    const [allEmployees] = await connection.execute(`
+    // Get unregistered employees
+    const [unregisteredEmployees] = await connection.execute(`
       SELECT 
         e.id,
         e.emp_name,
@@ -357,26 +368,27 @@ router.get('/export-data', async (req, res) => {
       LEFT JOIN dept d ON e.dept_id = d.id
       LEFT JOIN division division_obj ON d.div_id = division_obj.id
       WHERE e.is_deleted = 0
-      ORDER BY e.id
+        AND e.id NOT IN (
+          SELECT DISTINCT emp_id 
+          FROM register 
+          WHERE is_deleted = 0
+        )
+      ORDER BY e.emp_name
     `);
-    
-    await connection.end();
-    
-    // Get registered employee IDs
-    const registeredEmpIds = new Set(registers.map(r => r.emp_id));
-    
-    // Find unregistered employees
-    const unregisteredEmployees = allEmployees.filter(emp => !registeredEmpIds.has(emp.id));
     
     res.json({
       success: true,
       registers: registers,
-      unregisteredEmployees: unregisteredEmployees
+      unregisteredEmployees: unregisteredEmployees,
+      count: registers.length,
+      unregisteredCount: unregisteredEmployees.length
     });
     
   } catch (error) {
     console.log('Export error:', error.message);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (connection) await connection.end();
   }
 });
 

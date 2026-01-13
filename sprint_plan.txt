@@ -24,7 +24,7 @@ frontend มีหน้าลงทะเบียน หน้าจอเด�
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 Today
-- duplicate register is allowed, but for same name, only allow recent entry for each employee name for excel export
+
 
 Tomorrow
 
@@ -36,6 +36,7 @@ maybe
 
 
 [Done]
+- duplicate register is allowed, but for same name, only allow recent entry for each employee name for excel export
 - submit for the real test
 - Test cases (users)
  - Blind accessibility in form page
