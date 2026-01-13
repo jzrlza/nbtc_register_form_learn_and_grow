@@ -24,18 +24,19 @@ frontend มีหน้าลงทะเบียน หน้าจอเด�
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 Today
-- submit for the real test
-- do the add, edit, delete dept, div, and position pages (if needed)
+- duplicate register is allowed, but for same name, only allow recent entry for each employee name for excel export
 
 Tomorrow
 
 
 
 
-
+maybe
+- do the add, edit, delete dept, div, and position pages (if needed)
 
 
 [Done]
+- submit for the real test
 - Test cases (users)
  - Blind accessibility in form page
    - banner got "alt" to read
