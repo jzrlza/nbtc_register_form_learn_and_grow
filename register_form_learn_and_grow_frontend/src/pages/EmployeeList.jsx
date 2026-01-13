@@ -75,7 +75,7 @@ const EmployeeList = ({ user, onLogout }) => {
   };
 
   const handleEdit = (employeeId) => {
-    navigate(`/employee/${employeeId}`);
+    navigate(`/employee/edit/${employeeId}`);
   };
 
   const handleDelete = (employeeId) => {
