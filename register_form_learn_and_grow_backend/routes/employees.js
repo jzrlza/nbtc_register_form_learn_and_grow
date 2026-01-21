@@ -387,6 +387,9 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
     pos.position_name.toLowerCase() === positionStr.toLowerCase()
   );
 
+  /*
+  error messages logic
+  */
   let errorMsg = `Row ${rowNumber}: `;
 
   if (!division) {
@@ -406,13 +409,12 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
     errorMsg += `| Position "${positionStr}" not found. |`
   }
 
+  //throw error when at least 1 error occurs
   if (!division || !department || !position) {
     return { 
       error: errorMsg// Available: ${availableDivisions}` 
     };
   }
-
-  
   
   return {
     success: true,
