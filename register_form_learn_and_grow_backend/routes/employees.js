@@ -210,6 +210,24 @@ router.delete('/:id/force', async (req, res) => {
 // ==================== REUSABLE IMPORT FUNCTIONS ====================
 
 /**
+ * Find the first data row by detecting when the first column becomes numerical
+ */
+const findDataStartIndex = (excelData) => {
+  // Start from row 1 (skip header row 0)
+  for (let i = 1; i < excelData.length; i++) {
+    const row = excelData[i];
+    if (!row || row.length === 0) continue;
+    
+    const firstCell = row[0]?.toString().trim();
+    
+    // Check if first cell is a number (row index)
+    if (firstCell && !isNaN(firstCell) && firstCell !== '') {
+      return i; // Found the first data row
+    }
+  }
+  return 2; // Default to row 2 if no numerical first column found
+};
+/**
  * Parse and validate Excel row data
  */
 const parseExcelRow = (row, rowNumber, divisions, departments, positions) => {
@@ -300,7 +318,7 @@ const processExcelValidation = async (excelData, connection) => {
   const errors = [];
   
   // Skip header row
-  const dataRows = excelData.slice(1);
+  const dataRows = excelData.slice(findDataStartIndex(excelData));
   
   dataRows.forEach((row, index) => {
     const rowNumber = index + 2;
@@ -347,7 +365,7 @@ const processExcelImport = async (excelData, connection) => {
   const errors = [];
   
   // Skip header row
-  const dataRows = excelData.slice(1);
+  const dataRows = excelData.slice(findDataStartIndex(excelData));
   
   for (let index = 0; index < dataRows.length; index++) {
     const row = dataRows[index];
