@@ -24,7 +24,8 @@ frontend มีหน้าลงทะเบียน หน้าจอเด�
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 Today
-
+- import excel large problem (maybe to csv)
+- export group by : order by : dept and div (for orderly read for users)
 
 Tomorrow
 
