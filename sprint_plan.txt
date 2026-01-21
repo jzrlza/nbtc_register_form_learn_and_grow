@@ -28,7 +28,7 @@ Today
 - export group by : order by : dept and div (for orderly read for users)
 
 Tomorrow
-
+- put deploy test server (this week)
 
 
 
