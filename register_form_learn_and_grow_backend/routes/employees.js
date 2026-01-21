@@ -207,164 +207,238 @@ router.delete('/:id/force', async (req, res) => {
   }
 });
 
-// POST test Excel import (console.log only)
+// ==================== REUSABLE IMPORT FUNCTIONS ====================
+
+/**
+ * Parse and validate Excel row data
+ */
+const parseExcelRow = (row, rowNumber, divisions, departments, positions) => {
+  if (!row || row.length === 0 || row.every(cell => !cell)) {
+    return { skipped: true, reason: 'Empty row' };
+  }
+  
+  const divisionStr = row[1]?.toString().trim();
+  const deptStr = row[2]?.toString().trim();
+  const empName = row[3]?.toString().trim();
+  const positionStr = row[4]?.toString().trim();
+  
+  // Validate required fields
+  const missingFields = [];
+  if (!empName) missingFields.push('Employee name');
+  if (!divisionStr) missingFields.push('Division');
+  if (!deptStr) missingFields.push('Department');
+  if (!positionStr) missingFields.push('Position');
+  
+  if (missingFields.length > 0) {
+    return { 
+      error: `Row ${rowNumber}: Missing required fields: ${missingFields.join(', ')}` 
+    };
+  }
+  
+  // Find division
+  const division = divisions.find(div => 
+    div.div_name.toLowerCase() === divisionStr.toLowerCase()
+  );
+  if (!division) {
+    const availableDivisions = divisions.map(d => d.div_name).join(', ');
+    return { 
+      error: `Row ${rowNumber}: Division "${divisionStr}" not found. Available: ${availableDivisions}` 
+    };
+  }
+  
+  // Find department
+  const department = departments.find(dept => 
+    dept.dept_name.toLowerCase() === deptStr.toLowerCase() && 
+    dept.div_id == division.id
+  );
+  if (!department) {
+    const availableDepts = departments
+      .filter(d => d.div_id == division.id)
+      .map(d => d.dept_name);
+    return { 
+      error: `Row ${rowNumber}: Department "${deptStr}" not found in division "${divisionStr}". Available: ${availableDepts.join(', ')}` 
+    };
+  }
+  
+  // Find position
+  const position = positions.find(pos => 
+    pos.position_name.toLowerCase() === positionStr.toLowerCase()
+  );
+  if (!position) {
+    const availablePositions = positions.map(p => p.position_name).join(', ');
+    return { 
+      error: `Row ${rowNumber}: Position "${positionStr}" not found. Available: ${availablePositions}` 
+    };
+  }
+  
+  return {
+    success: true,
+    data: {
+      emp_name: empName,
+      division_id: division.id,
+      division_name: division.div_name,
+      dept_id: department.id,
+      dept_name: department.dept_name,
+      position_id: position.id,
+      position_name: position.position_name,
+      rowNumber
+    }
+  };
+};
+
+/**
+ * Process Excel data rows (validation only)
+ */
+const processExcelValidation = async (excelData, connection) => {
+  const [divisions, departments, positions] = await Promise.all([
+    connection.execute('SELECT * FROM division').then(([rows]) => rows),
+    connection.execute('SELECT * FROM dept').then(([rows]) => rows),
+    connection.execute('SELECT * FROM position').then(([rows]) => rows)
+  ]);
+  
+  const results = [];
+  const errors = [];
+  
+  // Skip header row
+  const dataRows = excelData.slice(1);
+  
+  dataRows.forEach((row, index) => {
+    const rowNumber = index + 2;
+    const result = parseExcelRow(row, rowNumber, divisions, departments, positions);
+    
+    if (result.skipped) {
+      console.log(`Row ${rowNumber}: ${result.reason}`);
+      return;
+    }
+    
+    if (result.error) {
+      console.log(`Row ${rowNumber} ERROR: ${result.error}`);
+      errors.push(result.error);
+      return;
+    }
+    
+    console.log(`Row ${rowNumber}: Validated successfully`, result.data);
+    results.push({
+      ...result.data,
+      status: 'VALID'
+    });
+  });
+  
+  return {
+    results,
+    errors,
+    totalRows: dataRows.length,
+    validRows: results.length,
+    errorRows: errors.length
+  };
+};
+
+/**
+ * Process Excel data rows with database saving
+ */
+const processExcelImport = async (excelData, connection) => {
+  const [divisions, departments, positions] = await Promise.all([
+    connection.execute('SELECT * FROM division').then(([rows]) => rows),
+    connection.execute('SELECT * FROM dept').then(([rows]) => rows),
+    connection.execute('SELECT * FROM position').then(([rows]) => rows)
+  ]);
+  
+  const savedEmployees = [];
+  const errors = [];
+  
+  // Skip header row
+  const dataRows = excelData.slice(1);
+  
+  for (let index = 0; index < dataRows.length; index++) {
+    const row = dataRows[index];
+    const rowNumber = index + 2;
+    
+    // Parse and validate row
+    const validation = parseExcelRow(row, rowNumber, divisions, departments, positions);
+    
+    if (validation.skipped) {
+      console.log(`Row ${rowNumber}: ${validation.reason}`);
+      continue;
+    }
+    
+    if (validation.error) {
+      errors.push(validation.error);
+      continue;
+    }
+    
+    // Check for existing employee
+    const { emp_name: empName, dept_id, position_id } = validation.data;
+    
+    try {
+      const [existingEmployees] = await connection.execute(
+        'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
+        [empName]
+      );
+      
+      if (existingEmployees.length > 0) {
+        errors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
+        continue;
+      }
+      
+      // Insert employee
+      const [insertResult] = await connection.execute(
+        'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+        [empName, position_id, dept_id]
+      );
+      
+      const savedEmployee = {
+        ...validation.data,
+        id: insertResult.insertId,
+        status: 'SAVED'
+      };
+      
+      console.log(`Row ${rowNumber}: Employee saved successfully`, savedEmployee);
+      savedEmployees.push(savedEmployee);
+      
+    } catch (dbError) {
+      errors.push(`Row ${rowNumber}: Database error - ${dbError.message}`);
+    }
+  }
+  
+  return {
+    saved: savedEmployees,
+    errors,
+    totalRows: dataRows.length,
+    savedCount: savedEmployees.length,
+    errorCount: errors.length
+  };
+};
+
+// ==================== ROUTE HANDLERS ====================
+
+// POST test Excel import (validation only)
 router.post('/test-import', async (req, res) => {
+  console.log('=== EXCEL IMPORT TEST START ===');
+  
   try {
     const { excelData } = req.body;
-    
-    console.log('=== EXCEL IMPORT TEST START ===');
-    console.log('Raw Excel Data Received:', excelData);
+    console.log('Raw Excel Data Received (first 5 rows):', excelData?.slice(0, 5));
     
     if (!excelData || !Array.isArray(excelData)) {
       console.log('ERROR: Invalid Excel data format');
       return res.json({ success: false, error: 'Invalid Excel data format' });
     }
     
-    // Get all enums for matching
     const connection = await getConnection();
-    const [divisions] = await connection.execute('SELECT * FROM division');
-    const [departments] = await connection.execute('SELECT * FROM dept');
-    const [positions] = await connection.execute('SELECT * FROM position');
+    const result = await processExcelValidation(excelData, connection);
     await connection.end();
     
-    console.log('Available Divisions:', divisions);
-    console.log('Available Departments:', departments);
-    console.log('Available Positions:', positions);
-    
-    const results = [];
-    const errors = [];
-    
-    // Skip first row (header)
-    const dataRows = excelData.slice(1);
-    
-    dataRows.forEach((row, index) => {
-      const rowNumber = index + 2; // +2 for header row and 0-based index
-      
-      try {
-        // Skip empty rows
-        if (!row || row.length === 0 || row.every(cell => !cell)) {
-          console.log(`Row ${rowNumber}: Skipping empty row`);
-          return;
-        }
-        
-        const divisionStr = row[1]?.toString().trim();
-        const deptStr = row[2]?.toString().trim();
-        const empName = row[3]?.toString().trim();
-        const positionStr = row[4]?.toString().trim();
-        
-        console.log(`\n--- Row ${rowNumber} Processing ---`);
-        console.log('Raw Data:', { divisionStr, deptStr, empName, positionStr });
-        
-        // Validate required fields
-        if (!empName) {
-          const error = `Row ${rowNumber}: Employee name is required`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        if (!divisionStr) {
-          const error = `Row ${rowNumber}: Division is required`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        if (!deptStr) {
-          const error = `Row ${rowNumber}: Department is required`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        if (!positionStr) {
-          const error = `Row ${rowNumber}: Position is required`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        // Find division ID
-        const division = divisions.find(div => 
-          div.div_name.toLowerCase() === divisionStr.toLowerCase()
-        );
-        
-        if (!division) {
-          const error = `Row ${rowNumber}: Division "${divisionStr}" not found. Available: ${divisions.map(d => d.div_name).join(', ')}`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        console.log(`Division Match: "${divisionStr}" -> ID ${division.id}`);
-        
-        // Find department ID (must belong to the found division)
-        const department = departments.find(dept => 
-          dept.dept_name.toLowerCase() === deptStr.toLowerCase() && 
-          dept.div_id == division.id
-        );
-        
-        if (!department) {
-          const availableDepts = departments.filter(d => d.div_id == division.id).map(d => d.dept_name);
-          const error = `Row ${rowNumber}: Department "${deptStr}" not found in division "${divisionStr}". Available in this division: ${availableDepts.join(', ')}`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        console.log(`Department Match: "${deptStr}" -> ID ${department.id}`);
-        
-        // Find position ID
-        const position = positions.find(pos => 
-          pos.position_name.toLowerCase() === positionStr.toLowerCase()
-        );
-        
-        if (!position) {
-          const error = `Row ${rowNumber}: Position "${positionStr}" not found. Available: ${positions.map(p => p.position_name).join(', ')}`;
-          console.log('ERROR:', error);
-          errors.push(error);
-          return;
-        }
-        
-        console.log(`Position Match: "${positionStr}" -> ID ${position.id}`);
-        
-        const result = {
-          emp_name: empName,
-          division_id: division.id,
-          division_name: division.div_name,
-          dept_id: department.id,
-          dept_name: department.dept_name,
-          position_id: position.id,
-          position_name: position.position_name,
-          rowNumber,
-          status: 'VALID'
-        };
-        
-        console.log('SUCCESS: Row processed successfully', result);
-        results.push(result);
-        
-      } catch (error) {
-        const errorMsg = `Row ${rowNumber}: ${error.message}`;
-        console.log('EXCEPTION:', errorMsg);
-        errors.push(errorMsg);
-      }
-    });
-    
-    console.log('\n=== EXCEL IMPORT TEST SUMMARY ===');
-    console.log('Total Rows Processed:', dataRows.length);
-    console.log('Successful Rows:', results.length);
-    console.log('Error Rows:', errors.length);
-    console.log('Results:', results);
-    console.log('Errors:', errors);
+    console.log('=== EXCEL IMPORT TEST SUMMARY ===');
+    console.log('Total Rows Processed:', result.totalRows);
+    console.log('Successful Rows:', result.validRows);
+    console.log('Error Rows:', result.errorRows);
+    console.log('Results (first 5):', result.results.slice(0, 5));
+    console.log('Errors (first 5):', result.errors.slice(0, 5));
     console.log('=== EXCEL IMPORT TEST END ===\n');
     
     res.json({
       success: true,
-      data: results,
-      errors: errors,
-      totalRows: dataRows.length,
-      validRows: results.length,
-      errorRows: errors.length
+      ...result
     });
     
   } catch (error) {
@@ -378,154 +452,104 @@ router.post('/test-import', async (req, res) => {
 
 // POST real Excel import (save to database)
 router.post('/import', async (req, res) => {
+  console.log('=== EXCEL IMPORT START (SAVING TO DATABASE) ===');
+  
   const connection = await getConnection();
   
   try {
-    await connection.beginTransaction();
-    
     const { excelData } = req.body;
-    
-    console.log('=== EXCEL IMPORT START (SAVING TO DATABASE) ===');
     
     if (!excelData || !Array.isArray(excelData)) {
       throw new Error('Invalid Excel data format');
     }
     
-    // Get all enums for matching
-    const [divisions] = await connection.execute('SELECT * FROM division');
-    const [departments] = await connection.execute('SELECT * FROM dept');
-    const [positions] = await connection.execute('SELECT * FROM position');
-    
-    const results = [];
-    const errors = [];
-    const savedEmployees = [];
-    
-    // Skip first row (header)
-    const dataRows = excelData.slice(1);
-    
-    for (let index = 0; index < dataRows.length; index++) {
-      const row = dataRows[index];
-      const rowNumber = index + 2;
-      
-      try {
-        // Skip empty rows
-        if (!row || row.length === 0 || row.every(cell => !cell)) {
-          console.log(`Row ${rowNumber}: Skipping empty row`);
-          continue;
-        }
-        
-        const divisionStr = row[1]?.toString().trim();
-        const deptStr = row[2]?.toString().trim();
-        const empName = row[3]?.toString().trim();
-        const positionStr = row[4]?.toString().trim();
-        
-        // Validate required fields
-        if (!empName) {
-          errors.push(`Row ${rowNumber}: Employee name is required`);
-          continue;
-        }
-        
-        if (!divisionStr) {
-          errors.push(`Row ${rowNumber}: Division is required`);
-          continue;
-        }
-        
-        if (!deptStr) {
-          errors.push(`Row ${rowNumber}: Department is required`);
-          continue;
-        }
-        
-        if (!positionStr) {
-          errors.push(`Row ${rowNumber}: Position is required`);
-          continue;
-        }
-        
-        // Find division ID
-        const division = divisions.find(div => 
-          div.div_name.toLowerCase() === divisionStr.toLowerCase()
-        );
-        
-        if (!division) {
-          errors.push(`Row ${rowNumber}: Division "${divisionStr}" not found`);
-          continue;
-        }
-        
-        // Find department ID (must belong to the found division)
-        const department = departments.find(dept => 
-          dept.dept_name.toLowerCase() === deptStr.toLowerCase() && 
-          dept.div_id == division.id
-        );
-        
-        if (!department) {
-          errors.push(`Row ${rowNumber}: Department "${deptStr}" not found in division "${divisionStr}"`);
-          continue;
-        }
-        
-        // Find position ID
-        const position = positions.find(pos => 
-          pos.position_name.toLowerCase() === positionStr.toLowerCase()
-        );
-        
-        if (!position) {
-          errors.push(`Row ${rowNumber}: Position "${positionStr}" not found`);
-          continue;
-        }
-        
-        // Check if employee already exists
-        const [existingEmployees] = await connection.execute(
-          'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
-          [empName]
-        );
-        
-        if (existingEmployees.length > 0) {
-          errors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
-          continue;
-        }
-        
-        // Insert employee
-        const [insertResult] = await connection.execute(
-          'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
-          [empName, position.id, department.id]
-        );
-        
-        const result = {
-          emp_name: empName,
-          division_name: division.div_name,
-          dept_name: department.dept_name,
-          position_name: position.position_name,
-          rowNumber,
-          id: insertResult.insertId,
-          status: 'SAVED'
-        };
-        
-        console.log(`Row ${rowNumber}: Employee saved successfully`, result);
-        results.push(result);
-        savedEmployees.push(result);
-        
-      } catch (error) {
-        errors.push(`Row ${rowNumber}: ${error.message}`);
-      }
-    }
-    
+    await connection.beginTransaction();
+    const result = await processExcelImport(excelData, connection);
     await connection.commit();
     
     console.log('=== EXCEL IMPORT COMPLETE ===');
-    console.log('Total Rows Processed:', dataRows.length);
-    console.log('Successfully Saved:', savedEmployees.length);
-    console.log('Errors:', errors.length);
+    console.log('Total Rows Processed:', result.totalRows);
+    console.log('Successfully Saved:', result.savedCount);
+    console.log('Errors:', result.errorCount);
+    console.log('First 5 Saved Employees:', result.saved.slice(0, 5));
     
     res.json({
       success: true,
-      saved: savedEmployees,
-      errors: errors,
-      totalRows: dataRows.length,
-      savedCount: savedEmployees.length,
-      errorCount: errors.length
+      ...result
     });
     
   } catch (error) {
     await connection.rollback();
     console.log('IMPORT ERROR:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  } finally {
+    await connection.end();
+  }
+});
+
+// Optional: Add batch processing for large files
+router.post('/import-batch', async (req, res) => {
+  const { excelData, batchSize = 100 } = req.body;
+  
+  if (!excelData || !Array.isArray(excelData)) {
+    return res.status(400).json({ success: false, error: 'Invalid Excel data format' });
+  }
+  
+  console.log(`Starting batch import with batch size: ${batchSize}`);
+  
+  const connection = await getConnection();
+  const results = { saved: [], errors: [], batches: [] };
+  
+  try {
+    await connection.beginTransaction();
+    
+    // Skip header row
+    const dataRows = excelData.slice(1);
+    const totalBatches = Math.ceil(dataRows.length / batchSize);
+    
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const start = batchIndex * batchSize;
+      const end = start + batchSize;
+      const batchRows = dataRows.slice(start, end);
+      
+      console.log(`Processing batch ${batchIndex + 1}/${totalBatches}`);
+      
+      const batchResult = await processExcelImport(
+        ['HEADER', ...batchRows], // Add header back for slice(1) to work
+        connection
+      );
+      
+      results.saved.push(...batchResult.saved);
+      results.errors.push(...batchResult.errors);
+      results.batches.push({
+        batch: batchIndex + 1,
+        saved: batchResult.savedCount,
+        errors: batchResult.errorCount
+      });
+      
+      // Optional: Commit each batch individually
+      // await connection.commit();
+      // await connection.beginTransaction();
+    }
+    
+    await connection.commit();
+    
+    res.json({
+      success: true,
+      totalRows: dataRows.length,
+      totalSaved: results.saved.length,
+      totalErrors: results.errors.length,
+      batches: results.batches,
+      saved: results.saved,
+      errors: results.errors
+    });
+    
+  } catch (error) {
+    await connection.rollback();
+    console.log('BATCH IMPORT ERROR:', error.message);
     res.status(500).json({ 
       success: false, 
       error: error.message 
