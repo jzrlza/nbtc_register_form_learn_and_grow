@@ -394,19 +394,19 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
 
   if (!division) {
     //const availableDivisions = divisions.map(d => d.div_name).join(', ');
-    errorMsg += `| Division "${divisionStr}" not found. |`
+    errorMsg += `| ไม่พบสายงายชื่อ "${divisionStr}" |`
   }
 
   if (!department) {
     //const availableDepts = departments
     //  .filter(d => d.div_id == division.id)
     //  .map(d => d.dept_name);
-    errorMsg += `| Department "${deptStr}" not found in division "${divisionStr}". |`
+    errorMsg += `| ไม่พบสังกัดชื่อ "${deptStr}" ในสายงาน "${divisionStr}". |`
   }
   
   if (!position) {
     //const availablePositions = positions.map(p => p.position_name).join(', ');
-    errorMsg += `| Position "${positionStr}" not found. |`
+    errorMsg += `| ไม่พบตำแหน่งชื่อ "${positionStr}" |`
   }
 
   //throw error when at least 1 error occurs

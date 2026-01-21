@@ -23,53 +23,14 @@ Primary Features :
 frontend มีหน้าลงทะเบียน หน้าจอเดียวครับ
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
+
+
 Today
-- import excel large problem (maybe to csv)
 - export group by : order by : dept and div (for orderly read for users)
 
 Tomorrow
 - put deploy test server (this week)
 
-
-Ubuntu Server
-Minimum Requirements:
-- OS: Ubuntu 22.04 LTS or 20.04 LTS
-- RAM: 4 GB (8 GB recommended for development)
-- Storage: 20 GB SSD (40 GB recommended)
-- CPU: 2 cores (4 cores recommended)
-- Network: Bridged adapter for local access
-
-Production Requirements:
-- RAM: 8 GB+
-- Storage: 50 GB+
-- CPU: 4 cores+
-- Backup storage for database
-
-
-Project Structure:          Estimated Size:
-- Node.js modules           ~300 MB
-- React build               ~50-100 MB
-- MySQL data                ~1-5 GB (grows with usage)
-- Logs                      ~2-5 GB (monthly)
-- Backups                   ~2-10 GB
-----------------------------
-Total Minimum:             ~3.5 GB (fresh)
-Recommended Buffer:        +20 GB for growth
----------------------------
-✅ Your 50 GB spec is PERFECT
-
-Recommended Upgrade:
-- RAM: 8 GB (instead of 4 GB)
-  Reason: MySQL 8.0 + Node.js + Chrome/Firefox + IDE
-- Storage: 40 GB SSD
-  Reason: Snapshots + Docker images + node_modules
-- CPU: 4 cores (your recommendation is perfect)
-
-Production
-Your Spec is PERFECT:
-- RAM: 8 GB (consider 16 GB if >100 concurrent users)
-- Storage: 50 GB + external backup (excellent!)
-- CPU: 4 cores (ideal for workload distribution)
 
 
 maybe
@@ -77,6 +38,7 @@ maybe
 
 
 [Done]
+- import excel large problem (maybe to csv)
 - duplicate register is allowed, but for same name, only allow recent entry for each employee name for excel export
 - submit for the real test
 - Test cases (users)
@@ -124,3 +86,58 @@ maybe
   pwd : rootsql
 
   "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe" --no-defaults -u root -prootsql -h localhost --port=3307 onenbtc > complete_backup.sql
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Ubuntu Server
+Minimum Requirements:
+- OS: Ubuntu 22.04 LTS or 20.04 LTS
+- RAM: 4 GB (8 GB recommended for development)
+- Storage: 20 GB SSD (40 GB recommended)
+- CPU: 2 cores (4 cores recommended)
+- Network: Bridged adapter for local access
+
+Production Requirements:
+- RAM: 8 GB+
+- Storage: 50 GB+
+- CPU: 4 cores+
+- Backup storage for database
+
+
+Project Structure:          Estimated Size:
+- Node.js modules           ~300 MB
+- React build               ~50-100 MB
+- MySQL data                ~1-5 GB (grows with usage)
+- Logs                      ~2-5 GB (monthly)
+- Backups                   ~2-10 GB
+----------------------------
+Total Minimum:             ~3.5 GB (fresh)
+Recommended Buffer:        +20 GB for growth
+---------------------------
+✅ Your 50 GB spec is PERFECT
+
+Recommended Upgrade:
+- RAM: 8 GB (instead of 4 GB)
+  Reason: MySQL 8.0 + Node.js + Chrome/Firefox + IDE
+- Storage: 40 GB SSD
+  Reason: Snapshots + Docker images + node_modules
+- CPU: 4 cores (your recommendation is perfect)
+
+Production
+Your Spec is PERFECT:
+- RAM: 8 GB (consider 16 GB if >100 concurrent users)
+- Storage: 50 GB + external backup (excellent!)
+- CPU: 4 cores (ideal for workload distribution)
+
