@@ -31,6 +31,21 @@ Tomorrow
 - put deploy test server (this week)
 
 
+Ubuntu Server
+Minimum Requirements:
+- OS: Ubuntu 22.04 LTS or 20.04 LTS
+- RAM: 4 GB (8 GB recommended for development)
+- Storage: 20 GB SSD (40 GB recommended)
+- CPU: 2 cores (4 cores recommended)
+- Network: Bridged adapter for local access
+
+Production Requirements:
+- RAM: 8 GB+
+- Storage: 50 GB+
+- CPU: 4 cores+
+- Backup storage for database
+
+
 
 maybe
 - do the add, edit, delete dept, div, and position pages (if needed)
