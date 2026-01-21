@@ -227,18 +227,136 @@ const findDataStartIndex = (excelData) => {
   }
   return 2; // Default to row 2 if no numerical first column found
 };
+
 /**
- * Parse and validate Excel row data
+ * Find the header row and map column indices based on content
  */
-const parseExcelRow = (row, rowNumber, divisions, departments, positions) => {
-  if (!row || row.length === 0 || row.every(cell => !cell)) {
-    return { skipped: true, reason: 'Empty row' };
+const detectColumnIndices = (excelData) => {
+  // Find the header row that contains "ลำดับ" in the first column
+  let headerRowIndex = -1;
+  let headerRow = null;
+  
+  for (let i = 0; i < excelData.length; i++) {
+    const row = excelData[i];
+    if (!row || row.length === 0) continue;
+    
+    const firstCell = row[0]?.toString().trim();
+    if (firstCell === "ลำดับ") {
+      headerRowIndex = i;
+      headerRow = row;
+      break;
+    }
   }
   
-  const divisionStr = row[1]?.toString().trim();
-  const deptStr = row[2]?.toString().trim();
-  const empName = row[3]?.toString().trim();
-  const positionStr = row[4]?.toString().trim();
+  if (headerRowIndex === -1) {
+    throw new Error('Header row with "ลำดับ" not found in Excel file');
+  }
+  
+  console.log(`Found header row at index: ${headerRowIndex}`, headerRow);
+  
+  // Find column indices based on header content
+  const columnMap = {
+    seqIndex: 0, // "ลำดับ" column is always index 0
+    empNameIndex: null,
+    positionIndex: null,
+    divisionIndex: null,
+    deptIndex: null
+  };
+  
+  // Scan through header row to find column positions
+  for (let colIndex = 0; colIndex < headerRow.length; colIndex++) {
+    const cellValue = headerRow[colIndex]?.toString().trim().toLowerCase();
+    if (!cellValue) continue;
+    
+    if (cellValue.startsWith("ชื่อ")) {
+      columnMap.empNameIndex = colIndex;
+    }
+    if (cellValue.startsWith("ตำแหน่ง")) {
+      columnMap.positionIndex = colIndex;
+    }
+    if (cellValue.startsWith("สายงาน")) {
+      columnMap.divisionIndex = colIndex;
+    }
+    if (cellValue.startsWith("สำนัก") || cellValue.startsWith("สังกัด")) {
+      columnMap.deptIndex = colIndex;
+    }
+  }
+  
+  // Validate that all required columns were found
+  const missingColumns = [];
+  if (columnMap.empNameIndex === null) missingColumns.push('"ชื่อ"');
+  if (columnMap.positionIndex === null) missingColumns.push('"ตำแหน่ง"');
+  if (columnMap.divisionIndex === null) missingColumns.push('"สายงาน"');
+  if (columnMap.deptIndex === null) missingColumns.push('"สำนัก"');
+  
+  if (missingColumns.length > 0) {
+    throw new Error(`Missing required columns in header row: ${missingColumns.join(', ')}`);
+  }
+  
+  console.log('Detected column indices:', columnMap);
+  return {
+    headerRowIndex,
+    columnMap,
+    dataStartIndex: headerRowIndex + 1 // Data starts right after header
+  };
+};
+
+/**
+ * Parse and validate Excel row data using dynamic column mapping
+ */
+const parseExcelRow = (row, rowNumber, divisions, departments, positions, columnMap) => {
+  // Check if row is empty or all cells are null/undefined/empty
+  if (!row || row.length === 0 || row.every(cell => cell == null || cell === '')) {
+    return { skipped: true, reason: 'Empty row' };
+  }
+
+  //console.log(row, rowNumber, divisions, departments, positions, columnMap)
+
+  // Helper function to safely extract cell values
+  const getCellValue = (cell) => {
+    // Handle null, undefined, or empty string
+    if (cell == null || cell === '') {
+      return '';
+    }
+    // Convert to string and trim whitespace
+    return String(cell).trim();
+  };
+  
+  // Safely get column indices
+  const divisionIndex = columnMap?.divisionIndex ?? -1;
+  const deptIndex = columnMap?.deptIndex ?? -1;
+  const empNameIndex = columnMap?.empNameIndex ?? -1;
+  const positionIndex = columnMap?.positionIndex ?? -1;
+  
+  // Extract values safely
+  const divisionStr = divisionIndex >= 0 && row[divisionIndex] != null 
+    ? getCellValue(row[divisionIndex]) 
+    : '';
+  
+  const deptStr = deptIndex >= 0 && row[deptIndex] != null 
+    ? getCellValue(row[deptIndex]) 
+    : '';
+  
+  const empName = empNameIndex >= 0 && row[empNameIndex] != null 
+    ? getCellValue(row[empNameIndex]) 
+    : '';
+  
+  const positionStr = positionIndex >= 0 && row[positionIndex] != null 
+    ? getCellValue(row[positionIndex]) 
+    : '';
+  
+  // Debug logging
+  /*console.log(`Row ${rowNumber} extracted values:`, {
+    divisionStr,
+    deptStr,
+    empName,
+    positionStr,
+    divisionIndex,
+    deptIndex,
+    empNameIndex,
+    positionIndex,
+    rowLength: row.length
+  });*/
   
   // Validate required fields
   const missingFields = [];
@@ -253,10 +371,11 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions) => {
     };
   }
   
-  // Find division
+  // Find division - case insensitive comparison
   const division = divisions.find(div => 
     div.div_name.toLowerCase() === divisionStr.toLowerCase()
   );
+  
   if (!division) {
     const availableDivisions = divisions.map(d => d.div_name).join(', ');
     return { 
@@ -264,24 +383,26 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions) => {
     };
   }
   
-  // Find department
+  // Find department - must belong to the found division
   const department = departments.find(dept => 
     dept.dept_name.toLowerCase() === deptStr.toLowerCase() && 
     dept.div_id == division.id
   );
+  
   if (!department) {
     const availableDepts = departments
       .filter(d => d.div_id == division.id)
       .map(d => d.dept_name);
     return { 
-      error: `Row ${rowNumber}: Department "${deptStr}" not found in division "${divisionStr}". Available: ${availableDepts.join(', ')}` 
+      error: `Row ${rowNumber}: Department "${deptStr}" not found in division "${divisionStr}". Available in this division: ${availableDepts.join(', ')}` 
     };
   }
   
-  // Find position
+  // Find position - case insensitive comparison
   const position = positions.find(pos => 
     pos.position_name.toLowerCase() === positionStr.toLowerCase()
   );
+  
   if (!position) {
     const availablePositions = positions.map(p => p.position_name).join(', ');
     return { 
@@ -317,44 +438,66 @@ const processExcelValidation = async (excelData, connection) => {
   const results = [];
   const errors = [];
   
-  // Skip header row
-  const dataRows = excelData.slice(findDataStartIndex(excelData));
-  
-  dataRows.forEach((row, index) => {
-    const rowNumber = index + 2;
-    const result = parseExcelRow(row, rowNumber, divisions, departments, positions);
+  try {
+    // Detect column indices from header row
+    const { headerRowIndex, columnMap, dataStartIndex } = detectColumnIndices(excelData);
     
-    if (result.skipped) {
-      console.log(`Row ${rowNumber}: ${result.reason}`);
-      return;
-    }
+    // Get data rows starting after the header
+    const dataRows = excelData.slice(dataStartIndex);
     
-    if (result.error) {
-      console.log(`Row ${rowNumber} ERROR: ${result.error}`);
-      errors.push(result.error);
-      return;
-    }
+    //console.log(`Processing ${dataRows.length} data rows starting from row ${dataStartIndex + 1}`);
     
-    console.log(`Row ${rowNumber}: Validated successfully`, result.data);
-    results.push({
-      ...result.data,
-      status: 'VALID'
+    dataRows.forEach((row, index) => {
+      //if (index == 0) console.log(columnMap)
+      const rowNumber = dataStartIndex + index + 1; // +1 for 1-based Excel row numbers
+      const result = parseExcelRow(row, rowNumber, divisions, departments, positions, columnMap);
+      
+      if (result.skipped) {
+        //console.log(`Row ${rowNumber}: ${result.reason}`);
+        return;
+      }
+      
+      if (result.error) {
+        //console.log(`Row ${rowNumber} ERROR: ${result.error}`);
+        errors.push(result.error);
+        return;
+      }
+      
+     // console.log(`Row ${rowNumber}: Validated successfully`, result.data);
+      results.push({
+        ...result.data,
+        status: 'VALID'
+      });
     });
-  });
-  
-  return {
-    results,
-    errors,
-    totalRows: dataRows.length,
-    validRows: results.length,
-    errorRows: errors.length
-  };
+    
+    return {
+      results,
+      errors,
+      totalRows: dataRows.length,
+      validRows: results.length,
+      errorRows: errors.length,
+      headerRowIndex,
+      columnMap
+    };
+    
+  } catch (detectionError) {
+    console.log('Column detection error:', detectionError.message);
+    return {
+      results: [],
+      errors: [detectionError.message],
+      totalRows: 0,
+      validRows: 0,
+      errorRows: 1,
+      headerRowIndex: -1,
+      columnMap: null
+    };
+  }
 };
 
 /**
  * Process Excel data rows with database saving
  */
-const processExcelImport = async (excelData, connection) => {
+const processExcelImport = async (excelData, connection, testing = false) => {
   const [divisions, departments, positions] = await Promise.all([
     connection.execute('SELECT * FROM division').then(([rows]) => rows),
     connection.execute('SELECT * FROM dept').then(([rows]) => rows),
@@ -364,67 +507,103 @@ const processExcelImport = async (excelData, connection) => {
   const savedEmployees = [];
   const errors = [];
   
-  // Skip header row
-  const dataRows = excelData.slice(findDataStartIndex(excelData));
-  
-  for (let index = 0; index < dataRows.length; index++) {
-    const row = dataRows[index];
-    const rowNumber = index + 2;
+  try {
+    // Detect column indices from header row
+    const { headerRowIndex, columnMap, dataStartIndex } = detectColumnIndices(excelData);
     
-    // Parse and validate row
-    const validation = parseExcelRow(row, rowNumber, divisions, departments, positions);
+    // Get data rows starting after the header
+    const dataRows = excelData.slice(dataStartIndex);
     
-    if (validation.skipped) {
-      console.log(`Row ${rowNumber}: ${validation.reason}`);
-      continue;
-    }
+    console.log(`Processing ${dataRows.length} data rows starting from row ${dataStartIndex + 1}, Testing mode: ${testing}`);
     
-    if (validation.error) {
-      errors.push(validation.error);
-      continue;
-    }
-    
-    // Check for existing employee
-    const { emp_name: empName, dept_id, position_id } = validation.data;
-    
-    try {
-      const [existingEmployees] = await connection.execute(
-        'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
-        [empName]
-      );
+    for (let index = 0; index < dataRows.length; index++) {
+      const row = dataRows[index];
+      const rowNumber = dataStartIndex + index + 1;
       
-      if (existingEmployees.length > 0) {
-        errors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
+      // Parse and validate row
+      const validation = parseExcelRow(row, rowNumber, divisions, departments, positions, columnMap);
+      
+      if (validation.skipped) {
+        console.log(`Row ${rowNumber}: ${validation.reason}`);
         continue;
       }
       
-      // Insert employee
-      const [insertResult] = await connection.execute(
-        'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
-        [empName, position_id, dept_id]
-      );
+      if (validation.error) {
+        errors.push(validation.error);
+        continue;
+      }
       
-      const savedEmployee = {
-        ...validation.data,
-        id: insertResult.insertId,
-        status: 'SAVED'
-      };
+      const { emp_name: empName, dept_id, position_id } = validation.data;
       
-      console.log(`Row ${rowNumber}: Employee saved successfully`, savedEmployee);
-      savedEmployees.push(savedEmployee);
-      
-    } catch (dbError) {
-      errors.push(`Row ${rowNumber}: Database error - ${dbError.message}`);
+      try {
+        // Check for existing employee (only in non-testing mode)
+        if (!testing) {
+          const [existingEmployees] = await connection.execute(
+            'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
+            [empName]
+          );
+          
+          if (existingEmployees.length > 0) {
+            errors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
+            continue;
+          }
+        }
+        
+        // Insert employee only in non-testing mode
+        if (!testing) {
+          const [insertResult] = await connection.execute(
+            'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+            [empName, position_id, dept_id]
+          );
+          
+          const savedEmployee = {
+            ...validation.data,
+            id: insertResult.insertId,
+            status: 'SAVED'
+          };
+          
+          console.log(`Row ${rowNumber}: Employee saved successfully`, savedEmployee);
+          savedEmployees.push(savedEmployee);
+        } else {
+          // In testing mode, just validate
+          const testEmployee = {
+            ...validation.data,
+            status: 'VALIDATED'
+          };
+          
+          console.log(`Row ${rowNumber}: Employee validated (testing mode)`, testEmployee);
+          savedEmployees.push(testEmployee); // Still add to results for reporting
+        }
+        
+      } catch (dbError) {
+        errors.push(`Row ${rowNumber}: Database error - ${dbError.message}`);
+      }
     }
+    
+    return {
+      saved: savedEmployees,
+      errors,
+      totalRows: dataRows.length,
+      savedCount: savedEmployees.length,
+      errorCount: errors.length,
+      headerRowIndex,
+      columnMap,
+      testingMode: testing
+    };
+    
+  } catch (detectionError) {
+    console.log('Column detection error:', detectionError.message);
+    return {
+      saved: [],
+      errors: [detectionError.message],
+      totalRows: 0,
+      savedCount: 0,
+      errorCount: 1,
+      headerRowIndex: -1,
+      columnMap: null,
+      testingMode: testing
+    };
   }
-  
-  return {
-    saved: savedEmployees,
-    errors,
-    totalRows: dataRows.length,
-    savedCount: savedEmployees.length,
-    errorCount: errors.length
-  };
 };
 
 // ==================== ROUTE HANDLERS ====================
