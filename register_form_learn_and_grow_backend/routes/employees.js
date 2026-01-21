@@ -376,39 +376,43 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
     div.div_name.toLowerCase() === divisionStr.toLowerCase()
   );
   
-  if (!division) {
-    const availableDivisions = divisions.map(d => d.div_name).join(', ');
-    return { 
-      error: `Row ${rowNumber}: Division "${divisionStr}" not found. Available: ${availableDivisions}` 
-    };
-  }
-  
   // Find department - must belong to the found division
   const department = departments.find(dept => 
     dept.dept_name.toLowerCase() === deptStr.toLowerCase() && 
     dept.div_id == division.id
   );
   
-  if (!department) {
-    const availableDepts = departments
-      .filter(d => d.div_id == division.id)
-      .map(d => d.dept_name);
-    return { 
-      error: `Row ${rowNumber}: Department "${deptStr}" not found in division "${divisionStr}". Available in this division: ${availableDepts.join(', ')}` 
-    };
-  }
-  
   // Find position - case insensitive comparison
   const position = positions.find(pos => 
     pos.position_name.toLowerCase() === positionStr.toLowerCase()
   );
+
+  let errorMsg = `Row ${rowNumber}: `;
+
+  if (!division) {
+    //const availableDivisions = divisions.map(d => d.div_name).join(', ');
+    errorMsg += `| Division "${divisionStr}" not found. |`
+  }
+
+  if (!department) {
+    //const availableDepts = departments
+    //  .filter(d => d.div_id == division.id)
+    //  .map(d => d.dept_name);
+    errorMsg += `| Department "${deptStr}" not found in division "${divisionStr}". |`
+  }
   
   if (!position) {
-    const availablePositions = positions.map(p => p.position_name).join(', ');
+    //const availablePositions = positions.map(p => p.position_name).join(', ');
+    errorMsg += `| Position "${positionStr}" not found. |`
+  }
+
+  if (!division || !department || !position) {
     return { 
-      error: `Row ${rowNumber}: Position "${positionStr}" not found. Available: ${availablePositions}` 
+      error: errorMsg// Available: ${availableDivisions}` 
     };
   }
+
+  
   
   return {
     success: true,
