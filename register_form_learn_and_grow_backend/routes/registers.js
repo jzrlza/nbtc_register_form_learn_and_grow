@@ -336,7 +336,9 @@ router.get('/export-data', async (req, res) => {
         e.emp_name,
         p.position_name,
         d.dept_name,
-        division_obj.div_name
+        division_obj.div_name,
+        division_obj.id as division_id,
+        d.id as dept_id
       FROM register r
       INNER JOIN employee e ON r.emp_id = e.id
       LEFT JOIN position p ON e.position_id = p.id
@@ -352,7 +354,7 @@ router.get('/export-data', async (req, res) => {
         GROUP BY emp_id
       ) latest ON r.id = latest.latest_id
       WHERE r.is_deleted = 0
-      ORDER BY e.emp_name
+      ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
     // Get unregistered employees
@@ -362,7 +364,9 @@ router.get('/export-data', async (req, res) => {
         e.emp_name,
         p.position_name,
         d.dept_name,
-        division_obj.div_name
+        division_obj.div_name,
+        division_obj.id as division_id,
+        d.id as dept_id
       FROM employee e
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
@@ -373,7 +377,7 @@ router.get('/export-data', async (req, res) => {
           FROM register 
           WHERE is_deleted = 0
         )
-      ORDER BY e.emp_name
+      ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
     res.json({

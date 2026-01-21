@@ -26,7 +26,7 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-- export group by : order by : dept and div (for orderly read for users)
+
 
 Tomorrow
 - put deploy test server (this week)
@@ -38,6 +38,7 @@ maybe
 
 
 [Done]
+- export group by : order by : dept and div (for orderly read for users)
 - import excel large problem (maybe to csv)
 - duplicate register is allowed, but for same name, only allow recent entry for each employee name for excel export
 - submit for the real test
