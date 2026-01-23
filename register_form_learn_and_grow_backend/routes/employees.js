@@ -520,7 +520,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
     // Get data rows starting after the header
     const dataRows = excelData.slice(dataStartIndex);
     
-    console.log(`Processing ${dataRows.length} data rows starting from row ${dataStartIndex + 1}, Testing mode: ${testing}`);
+    //console.log(`Processing ${dataRows.length} data rows starting from row ${dataStartIndex + 1}, Testing mode: ${testing}`);
     
     for (let index = 0; index < dataRows.length; index++) {
       const row = dataRows[index];
@@ -568,7 +568,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
             status: 'SAVED'
           };
           
-          console.log(`Row ${rowNumber}: Employee saved successfully`, savedEmployee);
+          //console.log(`Row ${rowNumber}: Employee saved successfully`, savedEmployee);
           savedEmployees.push(savedEmployee);
         } else {
           // In testing mode, just validate
@@ -577,7 +577,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
             status: 'VALIDATED'
           };
           
-          console.log(`Row ${rowNumber}: Employee validated (testing mode)`, testEmployee);
+          //console.log(`Row ${rowNumber}: Employee validated (testing mode)`, testEmployee);
           savedEmployees.push(testEmployee); // Still add to results for reporting
         }
         
