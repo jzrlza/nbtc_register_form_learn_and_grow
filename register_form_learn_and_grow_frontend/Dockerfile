@@ -1,5 +1,4 @@
-# Dockerfile for port 4173
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -7,11 +6,25 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+# Copy source code
 COPY . .
+
+# Build the app
 RUN npm run build
 
-# Expose the container port (4173)
+# Production stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install serve globally
+RUN npm install -g serve
+
+# Copy built files from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Expose port
 EXPOSE 3000
 
-# Serve on port 4173
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Start server with SPA support
+CMD ["serve", "-s", "dist", "-l", "3000"]
