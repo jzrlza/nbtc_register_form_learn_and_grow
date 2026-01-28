@@ -30,6 +30,7 @@ Today
 
 Tomorrow
 - Make sure use simple nginx and front end setup from deepseek
+- set up simple certbot for https nginx native service (ref: ChatGPT)
 
 
 

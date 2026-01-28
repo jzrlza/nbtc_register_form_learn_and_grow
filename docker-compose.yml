@@ -46,19 +46,19 @@ services:
     networks:
       - learngrow-network
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - learngrow-network
+  #nginx: (no need to, just run in native ubuntu, not here for cripe sake, no wonder yesterday it sucked)
+  #  image: nginx:alpine
+  #  ports:
+  #    - "80:80"
+  #    - "443:443"
+  #  volumes:
+  #    - ./nginx.conf:/etc/nginx/nginx.conf
+  #    - ./ssl:/etc/nginx/ssl
+  #  depends_on:
+  #    - frontend
+  #    - backend
+  #  networks:
+  #    - learngrow-network
 
 volumes:
   mysql_data:
