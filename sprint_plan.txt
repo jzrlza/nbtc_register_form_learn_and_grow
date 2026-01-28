@@ -31,6 +31,9 @@ Today
 Tomorrow
 - in NGINX chat in ChatGPT, do the certbot and nginx simple steps in real environment (ref: ChatGPT)
   - be sure to renew .env file in front-end and *project-root folder
+  - run nginx in ubuntu, not in docker
+  - put files as for nginx per how in chatgpt
+  - kill the old images and use new image with init.sql, also clear caches and ***volumes
 
 
 maybe
