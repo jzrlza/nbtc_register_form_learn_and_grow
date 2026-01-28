@@ -26,10 +26,10 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-
+- put deploy test server (this week)
 
 Tomorrow
-- put deploy test server (this week)
+- Make sure use simple nginx and front end setup from deepseek
 
 
 
