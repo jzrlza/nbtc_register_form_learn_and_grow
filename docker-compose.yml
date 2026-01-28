@@ -10,8 +10,6 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DB_PORT}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./register_form_learn_and_grow_database_production/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -21,7 +19,7 @@ services:
   backend:
     build: ./register_form_learn_and_grow_backend
     ports:
-      - "127.0.0.1:5000:5000"
+      - "5000:5000"
     environment:
       DB_HOST: database
       DB_PORT: 3306
@@ -30,19 +28,15 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       NODE_ENV: production
-    depends_on:
-      - database
     networks:
       - learngrow-network
 
   frontend:
     build: ./register_form_learn_and_grow_frontend
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
     environment:
       VITE_API_URL: ${VITE_API_URL}
-    depends_on:
-      - backend
     networks:
       - learngrow-network
 
