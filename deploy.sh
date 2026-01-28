@@ -1,6 +1,3 @@
-cp .env.example .env
-echo "Please edit .env file with your credentials"
-nano .env
 mkdir -p ssl
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout ssl/private.key \

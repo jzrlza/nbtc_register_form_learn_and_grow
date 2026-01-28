@@ -3,7 +3,7 @@ version: '3.8'
 services:
   database:
     image: mysql:8.0
-    container_name: learngrow_mysql
+    container_name: register_form_learn_and_grow_database_production
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -19,7 +19,7 @@ services:
       - learngrow-network
 
   backend:
-    build: ./learngrow_backend
+    build: ./register_form_learn_and_grow_backend
     ports:
       - "5000:5000"
     environment:
@@ -36,7 +36,7 @@ services:
       - learngrow-network
 
   frontend:
-    build: ./learngrow_frontend
+    build: ./register_form_learn_and_grow_frontend
     ports:
       - "3000:4173"
     environment:
