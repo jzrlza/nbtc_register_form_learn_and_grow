@@ -21,7 +21,7 @@ services:
   backend:
     build: ./register_form_learn_and_grow_backend
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       DB_HOST: database
       DB_PORT: 3306
@@ -38,7 +38,7 @@ services:
   frontend:
     build: ./register_form_learn_and_grow_frontend
     ports:
-      - "0.0.0.0:3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       VITE_API_URL: ${VITE_API_URL}
     depends_on:

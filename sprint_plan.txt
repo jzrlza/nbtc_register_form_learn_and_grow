@@ -29,9 +29,8 @@ Today
 - put deploy test server (this week)
 
 Tomorrow
-- Make sure use simple nginx and front end setup from deepseek
-- set up simple certbot for https nginx native service (ref: ChatGPT)
-
+- in NGINX chat in ChatGPT, do the certbot and nginx simple steps in real environment (ref: ChatGPT)
+  - be sure to renew .env file in front-end and *project-root folder
 
 
 maybe
