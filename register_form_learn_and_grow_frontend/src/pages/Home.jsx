@@ -6,6 +6,7 @@ import Modal from '../components/Modal';
 import bannerImage from '../res/banner.jpg';
 
 const Home = ({ user, onLogout }) => {
+  const API_URL = import.meta.env.VITE_API_URL || '';
   const { id } = useParams();
   const [backendHealth, setBackendHealth] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ const Home = ({ user, onLogout }) => {
   // Fetch divisions on component mount
   const fetchDivisions = async () => {
     try {
-      const response = await axios.get('/api/registers/divisions');
+      const response = await axios.get(`${API_URL}/api/registers/divisions`);
       setDivisions(response.data);
     } catch (error) {
       console.error('Error fetching divisions:', error);
@@ -61,7 +62,7 @@ const Home = ({ user, onLogout }) => {
   // Fetch departments based on selected division
   const fetchDepartments = async (divId) => {
     try {
-      const response = await axios.get(`/api/registers/departments?div_id=${divId}`);
+      const response = await axios.get(`${API_URL}/api/registers/departments?div_id=${divId}`);
       setDepartments(response.data);
       setSelectedDepartment('');
       setEmployees([]);
@@ -75,7 +76,7 @@ const Home = ({ user, onLogout }) => {
   // Fetch employees based on selected department
   const fetchEmployees = async (deptId) => {
     try {
-      const response = await axios.get(`/api/registers/employees?dept_id=${deptId}`);
+      const response = await axios.get(`${API_URL}/api/registers/employees?dept_id=${deptId}`);
       setEmployees(response.data);
       setSelectedEmployee('');
     } catch (error) {
@@ -86,7 +87,7 @@ const Home = ({ user, onLogout }) => {
 
   const fetchRegisterData = async () => {
     try {
-      const response = await axios.get(`/api/registers/single/${id}`);
+      const response = await axios.get(`${API_URL}/api/registers/single/${id}`);
       const register = response.data;
       
       setFormData({
@@ -98,7 +99,7 @@ const Home = ({ user, onLogout }) => {
       // If editing, we need to fetch the employee's division and department
       if (register.emp_id) {
         try {
-          const employeeInfo = await axios.get(`/api/registers/employee-info/${register.emp_id}`);
+          const employeeInfo = await axios.get(`${API_URL}/api/registers/employee-info/${register.emp_id}`);
           const { division_id, department_id } = employeeInfo.data;
           
           setSelectedDivision(division_id?.toString() || '');
@@ -202,10 +203,10 @@ const Home = ({ user, onLogout }) => {
       };
       
       if (isEditMode) {
-        await axios.put(`/api/registers/${id}`, submitData);
+        await axios.put(`${API_URL}/api/registers/${id}`, submitData);
         showModal('success', 'อัพเดทการลงทะเบียนเรียบร้อยแล้ว');
       } else {
-        await axios.post('/api/registers', submitData);
+        await axios.post(`${API_URL}/api/registers`, submitData);
         showModal('success', 'Thank You! ลงทะเบียนสำเร็จ');
       }
     } catch (error) {
@@ -227,7 +228,7 @@ const Home = ({ user, onLogout }) => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await axios.get('/api/health');
+      const response = await axios.get(`${API_URL}/api/health`);
       setBackendHealth(response.data);
     } catch (error) {
       setBackendHealth({ status: 'ERROR', error: error.message });

@@ -23,3 +23,8 @@ setup
 run (Development)
 
 - npm run dev
+
+run (Production)
+
+- npm run build
+- npx serve --single dist --listen 3000

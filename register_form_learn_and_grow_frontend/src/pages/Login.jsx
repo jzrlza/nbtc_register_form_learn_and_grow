@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Modal from '../components/Modal';
 
 const Login = ({ onLogin }) => {
+  const API_URL = import.meta.env.VITE_API_URL || '';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -12,14 +14,23 @@ const Login = ({ onLogin }) => {
   const [qrCode, setQrCode] = useState('');
   const [secret, setSecret] = useState('');
   const [showSetup2FA, setShowSetup2FA] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
   const navigate = useNavigate();
+
+  const showModal = (type, message) => {
+    setModal({ isOpen: true, type, message });
+  };
+
+  const closeModal = () => {
+    setModal({ isOpen: false, type: '', message: '' });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const response = await axios.post('/api/auth/login', {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         username,
         password
       });
@@ -32,7 +43,7 @@ const Login = ({ onLogin }) => {
         navigate('/');
       }
     } catch (error) {
-      alert('Login failed: ' + (error.response?.data?.error || error.message));
+      showModal('error', 'Login failed: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
     }
@@ -43,7 +54,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     
     try {
-      const response = await axios.post('/api/auth/verify-2fa', {
+      const response = await axios.post(`${API_URL}/api/auth/verify-2fa`, {
         userId,
         code
       });
@@ -51,7 +62,7 @@ const Login = ({ onLogin }) => {
       onLogin(response.data.user);
       navigate('/');
     } catch (error) {
-      alert('2FA verification failed: ' + (error.response?.data?.error || error.message));
+      showModal('error','2FA verification failed: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
     }
@@ -60,7 +71,7 @@ const Login = ({ onLogin }) => {
   const setup2FA = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/setup-2fa', {
+      const response = await axios.post(`${API_URL}/api/auth/setup-2fa`, {
         userId
       });
       
@@ -68,7 +79,7 @@ const Login = ({ onLogin }) => {
       setSecret(response.data.secret);
       setShowSetup2FA(true);
     } catch (error) {
-      alert('2FA setup failed: ' + (error.response?.data?.error || error.message));
+      showModal('error','2FA setup failed: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
     }
@@ -76,7 +87,11 @@ const Login = ({ onLogin }) => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(secret);
-    alert('Secret key copied to clipboard!');
+    showModal('success', 'Secret key copied to clipboard!');
+  };
+
+  const handleModalClose = () => {
+    closeModal();
   };
 
   // 2FA Setup Screen
@@ -191,6 +206,17 @@ const Login = ({ onLogin }) => {
           {loading ? 'กำลังดำเนินการ...' : 'ลงชื่อเข้าใช้'}
         </button>
       </form>
+
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={handleModalClose}
+        title={modal.type === 'success' ? 'สำเร็จ' : 'ข้อผิดพลาด'}
+      >
+        <p>{modal.message}</p>
+        <div className="modal-actions">
+          <button onClick={handleModalClose} className="modal-btn primary">ปิด</button>
+        </div>
+      </Modal>
     </div>
   );
 };
