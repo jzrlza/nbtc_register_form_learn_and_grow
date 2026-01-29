@@ -3,6 +3,7 @@
 # Remove old images
 docker-compose stop frontend
 docker-compose rm frontend
+# clear cache ghosts
 docker rmi -f nbtc_register_form_learn_and_grow_frontend 2>/dev/null || true
 
 # Build with fresh tag
