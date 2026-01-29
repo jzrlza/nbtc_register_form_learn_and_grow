@@ -16,6 +16,7 @@ const EmployeeList = ({ user, onLogout }) => {
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '', employeeId: null });
   const [importModal, setImportModal] = useState({ isOpen: false, results: null, mode: 'test' });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, excelData: null });
+  const [excelLoadModal, setExcelLoadModal] = useState({ isOpen: false });
   const navigate = useNavigate();
 
   // Add useRef at the top with other useState
@@ -145,6 +146,7 @@ const EmployeeList = ({ user, onLogout }) => {
     if (!confirmModal.excelData) return;
     
     setLoading(true);
+    setExcelLoadModal({ isOpen: true });
     
     try {
       let response;
@@ -157,6 +159,7 @@ const EmployeeList = ({ user, onLogout }) => {
       }
       
       if (response.data.success) {
+        setExcelLoadModal({ isOpen: false });
         setImportModal({
           isOpen: true,
           results: response.data,
@@ -174,8 +177,10 @@ const EmployeeList = ({ user, onLogout }) => {
       }
     } catch (error) {
       console.error('Frontend: Import error:', error);
+      setExcelLoadModal({ isOpen: false });
       showModal('error', 'ไม่สามารถประมวลผลไฟล์ Excel ได้: ' + error.message);
     } finally {
+      setExcelLoadModal({ isOpen: false });
       setLoading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -344,6 +349,14 @@ const EmployeeList = ({ user, onLogout }) => {
         <div className="modal-actions">
           <button onClick={closeModal} className="modal-btn primary">ตกลง</button>
         </div>
+      </Modal>
+
+      {/* Modal for import loading */}
+      <Modal 
+        isOpen={excelLoadModal.isOpen} 
+        title={'Loading...'}
+      >
+        <p>กำลังประมวลผล...</p>
       </Modal>
 
       {/* Modal for confirmation */}
