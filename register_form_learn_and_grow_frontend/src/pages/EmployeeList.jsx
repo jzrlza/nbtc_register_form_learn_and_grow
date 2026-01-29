@@ -411,10 +411,16 @@ const EmployeeList = ({ user, onLogout }) => {
             <div className="import-summary">
               <p><strong>จำนวนแถวทั้งหมด:</strong> {importModal.results.totalRows}</p>
               <p className={importModal.mode === 'import' ? 'success-text' : 'info-text'}>
-                <strong>{importModal.mode === 'import' ? 'บันทึกสำเร็จ:' : 'แถวที่ถูกต้อง:'}</strong> {importModal.mode === 'import' ? importModal.results.savedCount : importModal.results.validRows}
+                <strong>{importModal.mode === 'import' ? 'เพิ่มสำเร็จ:' : 'แถวที่น่าเพิ่ม:'}</strong> {importModal.mode === 'import' ? importModal.results.createdCount : importModal.results.createdCount}
+              </p>
+              <p className={importModal.mode === 'import' ? 'success-text' : 'info-text'}>
+                <strong>{importModal.mode === 'import' ? 'แก้ไขสำเร็จ:' : 'แถวที่น่าแก้ไข:'}</strong> {importModal.mode === 'import' ? importModal.results.updatedCount : importModal.results.updatedCount}
               </p>
               <p className="error-text">
-                <strong>ข้อผิดพลาด:</strong> {importModal.mode === 'import' ? importModal.results.errorCount : importModal.results.errorRows}
+                <strong>ไม่มีการเปลี่ยนแปลง:</strong> {importModal.mode === 'import' ? importModal.results.unchangedCount : importModal.results.unchangedCount}
+              </p>
+              <p className="error-text">
+                <strong>ข้อผิดพลาด:</strong> {importModal.mode === 'import' ? importModal.results.errorCount : importModal.results.errorCount}
               </p>
             </div>
             

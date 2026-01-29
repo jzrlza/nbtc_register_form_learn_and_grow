@@ -383,7 +383,7 @@ const parseExcelRow = async (row, rowNumber, divisions, departments, positions, 
     }
   }
   
-  // Find or add position
+  // Find or add position - escape table name with backticks
   let position = positions.find(pos => 
     pos.position_name.toLowerCase() === positionStr.toLowerCase()
   );
@@ -421,23 +421,30 @@ const parseExcelRow = async (row, rowNumber, divisions, departments, positions, 
 };
 
 /**
- * Process Excel data rows with auto-add missing data
+ * Check if employee details need to be updated
+ */
+const needsUpdate = (existingEmployee, newData) => {
+  return (
+    existingEmployee.position_id != newData.position_id ||
+    existingEmployee.dept_id != newData.dept_id ||
+    existingEmployee.div_id != newData.div_id
+  );
+};
+
+/**
+ * Process Excel data rows with auto-add missing data and update existing employees
  */
 const processExcelImport = async (excelData, connection, testing = false) => {
   // Load existing data
   const [divisions, departments, positions] = await Promise.all([
     connection.execute('SELECT * FROM division').then(([rows]) => rows),
     connection.execute('SELECT * FROM dept').then(([rows]) => rows),
-    connection.execute('SELECT * FROM position').then(([rows]) => rows)
+    connection.execute('SELECT * FROM `position`').then(([rows]) => rows)
   ]);
   
   const savedEmployees = [];
+  const updatedEmployees = [];
   const errors = [];
-  const addedRecords = {
-    divisions: [],
-    departments: [],
-    positions: []
-  };
 
   try {
     // Detect column indices
@@ -471,39 +478,82 @@ const processExcelImport = async (excelData, connection, testing = false) => {
       
       try {
         // Check for existing employee
-        if (!testing) {
-          const [existingEmployees] = await connection.execute(
-            'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
-            [empName]
-          );
-          
-          if (existingEmployees.length > 0) {
-            errors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
-            continue;
-          }
-        }
+        const [existingEmployees] = await connection.execute(
+          'SELECT id, position_id, dept_id FROM employee WHERE emp_name = ? AND is_deleted = 0',
+          [empName]
+        );
         
-        // Insert employee if not testing
-        if (!testing) {
-          const [insertResult] = await connection.execute(
-            'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
-            [empName, position_id, dept_id]
-          );
+        if (existingEmployees.length > 0) {
+          const existingEmployee = existingEmployees[0];
           
-          const savedEmployee = {
-            ...validation.data,
-            id: insertResult.insertId,
-            status: 'SAVED'
-          };
+          // Check if employee needs update
+          if (needsUpdate(existingEmployee, validation.data)) {
+            if (!testing) {
+              // Update existing employee
+              await connection.execute(
+                'UPDATE employee SET position_id = ?, dept_id = ? WHERE id = ?',
+                [position_id, dept_id, existingEmployee.id]
+              );
+              
+              const updatedEmployee = {
+                ...validation.data,
+                id: existingEmployee.id,
+                previous_position_id: existingEmployee.position_id,
+                previous_dept_id: existingEmployee.dept_id,
+                status: 'UPDATED',
+                message: `Employee "${empName}" updated with new position/department`
+              };
+              
+              updatedEmployees.push(updatedEmployee);
+              console.log(`Row ${rowNumber}: Employee "${empName}" updated`);
+            } else {
+              // In testing mode, just show what would be updated
+              const testUpdate = {
+                ...validation.data,
+                id: existingEmployee.id,
+                previous_position_id: existingEmployee.position_id,
+                previous_dept_id: existingEmployee.dept_id,
+                status: 'WOULD_UPDATE',
+                message: `Employee "${empName}" would be updated with new position/department`
+              };
+              updatedEmployees.push(testUpdate);
+            }
+          } else {
+            // Employee exists but no changes needed
+            const unchangedEmployee = {
+              ...validation.data,
+              id: existingEmployee.id,
+              status: 'UNCHANGED',
+              message: `Employee "${empName}" already exists with same details`
+            };
+            savedEmployees.push(unchangedEmployee);
+            console.log(`Row ${rowNumber}: Employee "${empName}" already exists, no changes needed`);
+          }
           
-          savedEmployees.push(savedEmployee);
         } else {
-          // In testing mode, return validation result
-          const testEmployee = {
-            ...validation.data,
-            status: 'VALIDATED'
-          };
-          savedEmployees.push(testEmployee);
+          // Insert new employee if not testing
+          if (!testing) {
+            const [insertResult] = await connection.execute(
+              'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+              [empName, position_id, dept_id]
+            );
+            
+            const savedEmployee = {
+              ...validation.data,
+              id: insertResult.insertId,
+              status: 'CREATED'
+            };
+            
+            savedEmployees.push(savedEmployee);
+            console.log(`Row ${rowNumber}: New employee "${empName}" created`);
+          } else {
+            // In testing mode, return validation result
+            const testEmployee = {
+              ...validation.data,
+              status: 'WOULD_CREATE'
+            };
+            savedEmployees.push(testEmployee);
+          }
         }
         
       } catch (dbError) {
@@ -513,9 +563,12 @@ const processExcelImport = async (excelData, connection, testing = false) => {
     
     return {
       saved: savedEmployees,
+      updated: updatedEmployees,
       errors,
       totalRows: dataRows.length,
-      savedCount: savedEmployees.length,
+      createdCount: savedEmployees.filter(e => e.status === 'CREATED' || e.status === 'WOULD_CREATE').length,
+      updatedCount: updatedEmployees.filter(e => e.status === 'UPDATED' || e.status === 'WOULD_UPDATE').length,
+      unchangedCount: savedEmployees.filter(e => e.status === 'UNCHANGED').length,
       errorCount: errors.length,
       testingMode: testing
     };
@@ -524,9 +577,12 @@ const processExcelImport = async (excelData, connection, testing = false) => {
     console.log('Error:', detectionError.message);
     return {
       saved: [],
+      updated: [],
       errors: [detectionError.message],
       totalRows: 0,
-      savedCount: 0,
+      createdCount: 0,
+      updatedCount: 0,
+      unchangedCount: 0,
       errorCount: 1,
       testingMode: testing
     };
@@ -549,21 +605,21 @@ router.post('/test-import', async (req, res) => {
       return res.json({ success: false, error: 'Invalid Excel data format' });
     }
     
-    // In test mode (testing = true), it will show what would be added
+    // In test mode (testing = true), it will show what would be added/updated
     const result = await processExcelImport(excelData, connection, true);
     
     console.log('=== EXCEL IMPORT TEST SUMMARY ===');
     console.log('Total Rows Processed:', result.totalRows);
-    console.log('Validated Rows:', result.savedCount);
+    console.log('Would Create:', result.createdCount);
+    console.log('Would Update:', result.updatedCount);
+    console.log('Unchanged:', result.unchangedCount);
     console.log('Error Rows:', result.errorCount);
-    console.log('First 5 Results:', result.saved.slice(0, 5));
-    console.log('First 5 Errors:', result.errors.slice(0, 5));
     console.log('=== EXCEL IMPORT TEST END ===\n');
     
     res.json({
       success: true,
       ...result,
-      message: 'This is a test. No data was actually saved. Errors show what would fail without auto-add.'
+      message: 'This is a test. No data was actually saved. Shows what would be created/updated.'
     });
     
   } catch (error) {
@@ -597,14 +653,16 @@ router.post('/import', async (req, res) => {
     
     console.log('=== EXCEL IMPORT COMPLETE ===');
     console.log('Total Rows Processed:', result.totalRows);
-    console.log('Successfully Saved:', result.savedCount);
+    console.log('New Employees Created:', result.createdCount);
+    console.log('Employees Updated:', result.updatedCount);
+    console.log('Employees Unchanged:', result.unchangedCount);
     console.log('Errors:', result.errorCount);
     console.log('=== EXCEL IMPORT END ===\n');
     
     res.json({
       success: true,
       ...result,
-      message: 'Import completed. Missing divisions, departments, and positions were automatically added.'
+      message: 'Import completed. Existing employees were updated if their details differed.'
     });
     
   } catch (error) {
@@ -619,7 +677,7 @@ router.post('/import', async (req, res) => {
   }
 });
 
-// POST batch import with auto-add
+// POST batch import with auto-add and updates
 router.post('/import-batch', async (req, res) => {
   const { excelData, batchSize = 100 } = req.body;
   
@@ -632,13 +690,9 @@ router.post('/import-batch', async (req, res) => {
   const connection = await getConnection();
   const results = { 
     saved: [], 
+    updated: [],
     errors: [], 
-    batches: [],
-    addedRecords: {
-      divisions: [],
-      departments: [],
-      positions: []
-    }
+    batches: []
   };
   
   try {
@@ -655,7 +709,7 @@ router.post('/import-batch', async (req, res) => {
     const [divisions, departments, positions] = await Promise.all([
       connection.execute('SELECT * FROM division').then(([rows]) => rows),
       connection.execute('SELECT * FROM dept').then(([rows]) => rows),
-      connection.execute('SELECT * FROM position').then(([rows]) => rows)
+      connection.execute('SELECT * FROM `position`').then(([rows]) => rows)
     ]);
     
     for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
@@ -666,6 +720,7 @@ router.post('/import-batch', async (req, res) => {
       console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (rows ${start + 1} to ${Math.min(end, allDataRows.length)})`);
       
       const batchSaved = [];
+      const batchUpdated = [];
       const batchErrors = [];
       
       for (let rowIndex = 0; rowIndex < batchRows.length; rowIndex++) {
@@ -693,28 +748,57 @@ router.post('/import-batch', async (req, res) => {
           
           // Check for existing employee
           const [existingEmployees] = await connection.execute(
-            'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
+            'SELECT id, position_id, dept_id FROM employee WHERE emp_name = ? AND is_deleted = 0',
             [empName]
           );
           
           if (existingEmployees.length > 0) {
-            batchErrors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
-            continue;
+            const existingEmployee = existingEmployees[0];
+            
+            // Check if employee needs update
+            if (needsUpdate(existingEmployee, validation.data)) {
+              // Update existing employee
+              await connection.execute(
+                'UPDATE employee SET position_id = ?, dept_id = ? WHERE id = ?',
+                [position_id, dept_id, existingEmployee.id]
+              );
+              
+              const updatedEmployee = {
+                ...validation.data,
+                id: existingEmployee.id,
+                previous_position_id: existingEmployee.position_id,
+                previous_dept_id: existingEmployee.dept_id,
+                status: 'UPDATED',
+                message: `Employee "${empName}" updated with new position/department`
+              };
+              
+              batchUpdated.push(updatedEmployee);
+            } else {
+              // Employee exists but no changes needed
+              const unchangedEmployee = {
+                ...validation.data,
+                id: existingEmployee.id,
+                status: 'UNCHANGED',
+                message: `Employee "${empName}" already exists with same details`
+              };
+              batchSaved.push(unchangedEmployee);
+            }
+            
+          } else {
+            // Insert new employee
+            const [insertResult] = await connection.execute(
+              'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+              [empName, position_id, dept_id]
+            );
+            
+            const savedEmployee = {
+              ...validation.data,
+              id: insertResult.insertId,
+              status: 'CREATED'
+            };
+            
+            batchSaved.push(savedEmployee);
           }
-          
-          // Insert employee
-          const [insertResult] = await connection.execute(
-            'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
-            [empName, position_id, dept_id]
-          );
-          
-          const savedEmployee = {
-            ...validation.data,
-            id: insertResult.insertId,
-            status: 'SAVED'
-          };
-          
-          batchSaved.push(savedEmployee);
           
         } catch (dbError) {
           batchErrors.push(`Row ${rowNumber}: Database error - ${dbError.message}`);
@@ -722,18 +806,16 @@ router.post('/import-batch', async (req, res) => {
       }
       
       results.saved.push(...batchSaved);
+      results.updated.push(...batchUpdated);
       results.errors.push(...batchErrors);
       results.batches.push({
         batch: batchIndex + 1,
         startRow: start + 1,
         endRow: Math.min(end, allDataRows.length),
         saved: batchSaved.length,
+        updated: batchUpdated.length,
         errors: batchErrors.length
       });
-      
-      // Optional: Commit each batch individually for better memory management
-      // await connection.commit();
-      // await connection.beginTransaction();
     }
     
     await connection.commit();
@@ -741,6 +823,7 @@ router.post('/import-batch', async (req, res) => {
     console.log('=== BATCH IMPORT COMPLETE ===');
     console.log('Total Rows Processed:', allDataRows.length);
     console.log('Total Saved:', results.saved.length);
+    console.log('Total Updated:', results.updated.length);
     console.log('Total Errors:', results.errors.length);
     console.log('Number of Batches:', results.batches.length);
     
@@ -748,11 +831,13 @@ router.post('/import-batch', async (req, res) => {
       success: true,
       totalRows: allDataRows.length,
       totalSaved: results.saved.length,
+      totalUpdated: results.updated.length,
       totalErrors: results.errors.length,
       batches: results.batches,
       saved: results.saved,
+      updated: results.updated,
       errors: results.errors,
-      message: 'Batch import completed with auto-add functionality.'
+      message: 'Batch import completed with auto-add and update functionality.'
     });
     
   } catch (error) {
