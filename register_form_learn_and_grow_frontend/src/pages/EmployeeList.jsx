@@ -439,7 +439,7 @@ const EmployeeList = ({ user, onLogout }) => {
             
             {importModal.mode === 'import' && importModal.results.saved && importModal.results.saved.length > 0 && (
               <div className="import-success">
-                <h4>นำเข้าสำเร็จ ({importModal.results.saved.length}):</h4>
+                <h4>นำเข้าสำเร็จ ({importModal.results.saved.length + importModal.results.updated.length}):</h4>
                 <div className="success-list scroll-box">
                   {importModal.results.saved.slice(0, 10).map((item, index) => (
                     <div key={index} className="success-item">
