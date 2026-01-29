@@ -24,16 +24,18 @@ frontend มีหน้าลงทะเบียน หน้าจอเด�
 backend มีหน้าจอตามรายละเอียดข้างบนครับ
 
 
-
-Today
-- put deploy test server (this week)
-
-Tomorrow
+Hold (learn later)
 - in NGINX chat in ChatGPT, do the certbot and nginx simple steps in real environment (ref: ChatGPT)
   - be sure to renew .env file in front-end and *project-root folder
   - run nginx in ubuntu, not in docker
   - put files as for nginx per how in chatgpt
   - kill the old images and use new image with init.sql, also clear caches and ***volumes
+
+Today
+
+
+Tomorrow
+
 
 sudo certbot --nginx -d learnandgrow.nbtc.go.th
 
@@ -42,6 +44,7 @@ maybe
 
 
 [Done]
+- put deploy test server (this week)
 - export group by : order by : dept and div (for orderly read for users)
 - import excel large problem (maybe to csv)
 - duplicate register is allowed, but for same name, only allow recent entry for each employee name for excel export
