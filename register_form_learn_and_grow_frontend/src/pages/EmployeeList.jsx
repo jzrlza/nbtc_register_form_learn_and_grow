@@ -4,6 +4,7 @@ import axios from 'axios';
 import NavbarAdmin from '../components/NavbarAdmin';
 import Modal from '../components/Modal';
 import { parseExcelToArray } from '../utils/excelParser';
+import loadImage from '../res/loading.gif';
 
 const EmployeeList = ({ user, onLogout }) => {
   const API_URL = import.meta.env.VITE_API_URL || '';
@@ -356,6 +357,17 @@ const EmployeeList = ({ user, onLogout }) => {
         isOpen={excelLoadModal.isOpen} 
         title={'Loading...'}
       >
+      <h1><img src={loadImage} 
+            alt={
+              `กำลังโหลด`
+            } style={{
+              width: '40px',
+              height: '40px',
+              display: 'block',
+              marginLeft: 'auto',
+              marginRight: 'auto'
+            }}
+            /></h1>
         <p>กำลังประมวลผล...</p>
       </Modal>
 
