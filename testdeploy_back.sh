@@ -1,7 +1,9 @@
-# Start database + backend
+# Stop
 docker-compose stop backend
 docker-compose rm backend
+docker rmi -f nbtc_register_form_learn_and_grow_backend 2>/dev/null || true
 
+#start
 docker-compose up -d backend
 
 # Check logs
