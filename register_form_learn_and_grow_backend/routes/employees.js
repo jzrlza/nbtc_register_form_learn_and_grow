@@ -394,14 +394,14 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
 
   if (!division) {
     //const availableDivisions = divisions.map(d => d.div_name).join(', ');
-    errorMsg += `| ไม่พบสายงายชื่อ "${divisionStr}" |`
+    errorMsg += `| ไม่พบสายงานชื่อ "${divisionStr}" |`
   }
 
   if (!department) {
     //const availableDepts = departments
     //  .filter(d => d.div_id == division.id)
     //  .map(d => d.dept_name);
-    errorMsg += `| ไม่พบสังกัดชื่อ "${deptStr}" ในสายงาน "${divisionStr}". |`
+    errorMsg += `| ไม่พบสังกัดชื่อ "${deptStr}" ในสายงาน "${divisionStr}" |`
   }
   
   if (!position) {
