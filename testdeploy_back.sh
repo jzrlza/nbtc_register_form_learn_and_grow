@@ -1,5 +1,8 @@
 # Start database + backend
-docker-compose up -d database backend
+docker-compose stop backend
+docker-compose rm backend
+
+docker-compose up -d backend
 
 # Check logs
 docker-compose logs backend
