@@ -28,3 +28,8 @@ run (Production)
 
 - npm run build
 - npx serve --single dist --listen 3000
+
+
+remove old containers
+- sudo docker-compose down --volumes --remove-orphans
+- sudo docker-compose down --rmi all --volumes --remove-orphans
