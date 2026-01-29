@@ -210,25 +210,6 @@ router.delete('/:id/force', async (req, res) => {
 // ==================== REUSABLE IMPORT FUNCTIONS ====================
 
 /**
- * Find the first data row by detecting when the first column becomes numerical
- */
-const findDataStartIndex = (excelData) => {
-  // Start from row 1 (skip header row 0)
-  for (let i = 1; i < excelData.length; i++) {
-    const row = excelData[i];
-    if (!row || row.length === 0) continue;
-    
-    const firstCell = row[0]?.toString().trim();
-    
-    // Check if first cell is a number (row index)
-    if (firstCell && !isNaN(firstCell) && firstCell !== '') {
-      return i; // Found the first data row
-    }
-  }
-  return 2; // Default to row 2 if no numerical first column found
-};
-
-/**
  * Find the header row and map column indices based on content
  */
 const detectColumnIndices = (excelData) => {
@@ -252,7 +233,7 @@ const detectColumnIndices = (excelData) => {
     throw new Error('Header row with "ลำดับ" not found in Excel file');
   }
   
-  console.log(`Found header row at index: ${headerRowIndex}`, headerRow);
+  console.log(`Found header row at index: ${headerRowIndex}`);
   
   // Find column indices based on header content
   const columnMap = {
@@ -265,19 +246,20 @@ const detectColumnIndices = (excelData) => {
   
   // Scan through header row to find column positions
   for (let colIndex = 0; colIndex < headerRow.length; colIndex++) {
-    const cellValue = headerRow[colIndex]?.toString().trim().toLowerCase();
+    const cellValue = headerRow[colIndex]?.toString().trim();
     if (!cellValue) continue;
     
-    if (cellValue.startsWith("ชื่อ")) {
+    const lowerValue = cellValue.toLowerCase();
+    if (lowerValue.startsWith("ชื่อ")) {
       columnMap.empNameIndex = colIndex;
     }
-    if (cellValue.startsWith("ตำแหน่ง")) {
+    if (lowerValue.startsWith("ตำแหน่ง")) {
       columnMap.positionIndex = colIndex;
     }
-    if (cellValue.startsWith("สายงาน")) {
+    if (lowerValue.startsWith("สายงาน")) {
       columnMap.divisionIndex = colIndex;
     }
-    if (cellValue.startsWith("สำนัก") || cellValue.startsWith("สังกัด")) {
+    if (lowerValue.startsWith("สำนัก") || lowerValue.startsWith("สังกัด")) {
       columnMap.deptIndex = colIndex;
     }
   }
@@ -302,25 +284,23 @@ const detectColumnIndices = (excelData) => {
 };
 
 /**
- * Parse and validate Excel row data using dynamic column mapping
+ * Safely extract cell value
  */
-const parseExcelRow = (row, rowNumber, divisions, departments, positions, columnMap) => {
-  // Check if row is empty or all cells are null/undefined/empty
+const getCellValue = (cell) => {
+  if (cell == null || cell === '') {
+    return '';
+  }
+  return String(cell).trim();
+};
+
+/**
+ * Parse and validate Excel row data with auto-add missing data
+ */
+const parseExcelRow = async (row, rowNumber, divisions, departments, positions, columnMap, connection, testing = false) => {
+  // Check if row is empty
   if (!row || row.length === 0 || row.every(cell => cell == null || cell === '')) {
     return { skipped: true, reason: 'Empty row' };
   }
-
-  //console.log(row, rowNumber, divisions, departments, positions, columnMap)
-
-  // Helper function to safely extract cell values
-  const getCellValue = (cell) => {
-    // Handle null, undefined, or empty string
-    if (cell == null || cell === '') {
-      return '';
-    }
-    // Convert to string and trim whitespace
-    return String(cell).trim();
-  };
   
   // Safely get column indices
   const divisionIndex = columnMap?.divisionIndex ?? -1;
@@ -328,7 +308,7 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
   const empNameIndex = columnMap?.empNameIndex ?? -1;
   const positionIndex = columnMap?.positionIndex ?? -1;
   
-  // Extract values safely
+  // Extract values
   const divisionStr = divisionIndex >= 0 && row[divisionIndex] != null 
     ? getCellValue(row[divisionIndex]) 
     : '';
@@ -345,19 +325,6 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
     ? getCellValue(row[positionIndex]) 
     : '';
   
-  // Debug logging
-  /*console.log(`Row ${rowNumber} extracted values:`, {
-    divisionStr,
-    deptStr,
-    empName,
-    positionStr,
-    divisionIndex,
-    deptIndex,
-    empNameIndex,
-    positionIndex,
-    rowLength: row.length
-  });*/
-  
   // Validate required fields
   const missingFields = [];
   if (!empName) missingFields.push('Employee name');
@@ -371,49 +338,71 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
     };
   }
   
-  // Find division - case insensitive comparison
-  const division = divisions.find(div => 
+  // Find or add division
+  let division = divisions.find(div => 
     div.div_name.toLowerCase() === divisionStr.toLowerCase()
   );
   
-  // Find department - must belong to the found division
-  const department = departments.find(dept => 
+  // Auto-add missing division
+  if (!division) {
+    if (!testing) {
+      const [result] = await connection.execute(
+        'INSERT INTO division (div_name) VALUES (?)',
+        [divisionStr]
+      );
+      division = { id: result.insertId, div_name: divisionStr };
+      divisions.push(division);
+      console.log(`Row ${rowNumber}: Added new division: ${divisionStr}`);
+    } else {
+      return { 
+        error: `Row ${rowNumber}: | ไม่พบสายงานชื่อ "${divisionStr}" |` 
+      };
+    }
+  }
+  
+  // Find or add department
+  let department = departments.find(dept => 
     dept.dept_name.toLowerCase() === deptStr.toLowerCase() && 
     dept.div_id == division.id
   );
   
-  // Find position - case insensitive comparison
-  const position = positions.find(pos => 
-    pos.position_name.toLowerCase() === positionStr.toLowerCase()
-  );
-
-  /*
-  error messages logic
-  */
-  let errorMsg = `Row ${rowNumber}: `;
-
-  if (!division) {
-    //const availableDivisions = divisions.map(d => d.div_name).join(', ');
-    errorMsg += `| ไม่พบสายงานชื่อ "${divisionStr}" |`
-  }
-
+  // Auto-add missing department
   if (!department) {
-    //const availableDepts = departments
-    //  .filter(d => d.div_id == division.id)
-    //  .map(d => d.dept_name);
-    errorMsg += `| ไม่พบสังกัดชื่อ "${deptStr}" ในสายงาน "${divisionStr}" |`
+    if (!testing) {
+      const [result] = await connection.execute(
+        'INSERT INTO dept (dept_name, div_id) VALUES (?, ?)',
+        [deptStr, division.id]
+      );
+      department = { id: result.insertId, dept_name: deptStr, div_id: division.id };
+      departments.push(department);
+      console.log(`Row ${rowNumber}: Added new department: ${deptStr} in division: ${divisionStr}`);
+    } else {
+      return { 
+        error: `Row ${rowNumber}: | ไม่พบสังกัดชื่อ "${deptStr}" ในสายงาน "${divisionStr}" |` 
+      };
+    }
   }
   
+  // Find or add position
+  let position = positions.find(pos => 
+    pos.position_name.toLowerCase() === positionStr.toLowerCase()
+  );
+  
+  // Auto-add missing position
   if (!position) {
-    //const availablePositions = positions.map(p => p.position_name).join(', ');
-    errorMsg += `| ไม่พบตำแหน่งชื่อ "${positionStr}" |`
-  }
-
-  //throw error when at least 1 error occurs
-  if (!division || !department || !position) {
-    return { 
-      error: errorMsg// Available: ${availableDivisions}` 
-    };
+    if (!testing) {
+      const [result] = await connection.execute(
+        'INSERT INTO `position` (position_name) VALUES (?)',
+        [positionStr]
+      );
+      position = { id: result.insertId, position_name: positionStr };
+      positions.push(position);
+      console.log(`Row ${rowNumber}: Added new position: ${positionStr}`);
+    } else {
+      return { 
+        error: `Row ${rowNumber}: | ไม่พบตำแหน่งชื่อ "${positionStr}" |` 
+      };
+    }
   }
   
   return {
@@ -432,78 +421,10 @@ const parseExcelRow = (row, rowNumber, divisions, departments, positions, column
 };
 
 /**
- * Process Excel data rows (validation only)
- */
-const processExcelValidation = async (excelData, connection) => {
-  const [divisions, departments, positions] = await Promise.all([
-    connection.execute('SELECT * FROM division').then(([rows]) => rows),
-    connection.execute('SELECT * FROM dept').then(([rows]) => rows),
-    connection.execute('SELECT * FROM position').then(([rows]) => rows)
-  ]);
-  
-  const results = [];
-  const errors = [];
-  
-  try {
-    // Detect column indices from header row
-    const { headerRowIndex, columnMap, dataStartIndex } = detectColumnIndices(excelData);
-    
-    // Get data rows starting after the header
-    const dataRows = excelData.slice(dataStartIndex);
-    
-    //console.log(`Processing ${dataRows.length} data rows starting from row ${dataStartIndex + 1}`);
-    
-    dataRows.forEach((row, index) => {
-      //if (index == 0) console.log(columnMap)
-      const rowNumber = dataStartIndex + index + 1; // +1 for 1-based Excel row numbers
-      const result = parseExcelRow(row, rowNumber, divisions, departments, positions, columnMap);
-      
-      if (result.skipped) {
-        //console.log(`Row ${rowNumber}: ${result.reason}`);
-        return;
-      }
-      
-      if (result.error) {
-        //console.log(`Row ${rowNumber} ERROR: ${result.error}`);
-        errors.push(result.error);
-        return;
-      }
-      
-     // console.log(`Row ${rowNumber}: Validated successfully`, result.data);
-      results.push({
-        ...result.data,
-        status: 'VALID'
-      });
-    });
-    
-    return {
-      results,
-      errors,
-      totalRows: dataRows.length,
-      validRows: results.length,
-      errorRows: errors.length,
-      headerRowIndex,
-      columnMap
-    };
-    
-  } catch (detectionError) {
-    console.log('Column detection error:', detectionError.message);
-    return {
-      results: [],
-      errors: [detectionError.message],
-      totalRows: 0,
-      validRows: 0,
-      errorRows: 1,
-      headerRowIndex: -1,
-      columnMap: null
-    };
-  }
-};
-
-/**
- * Process Excel data rows with database saving
+ * Process Excel data rows with auto-add missing data
  */
 const processExcelImport = async (excelData, connection, testing = false) => {
+  // Load existing data
   const [divisions, departments, positions] = await Promise.all([
     connection.execute('SELECT * FROM division').then(([rows]) => rows),
     connection.execute('SELECT * FROM dept').then(([rows]) => rows),
@@ -512,28 +433,35 @@ const processExcelImport = async (excelData, connection, testing = false) => {
   
   const savedEmployees = [];
   const errors = [];
-  
+  const addedRecords = {
+    divisions: [],
+    departments: [],
+    positions: []
+  };
+
   try {
-    // Detect column indices from header row
+    // Detect column indices
     const { headerRowIndex, columnMap, dataStartIndex } = detectColumnIndices(excelData);
     
-    // Get data rows starting after the header
+    // Get data rows
     const dataRows = excelData.slice(dataStartIndex);
     
-    //console.log(`Processing ${dataRows.length} data rows starting from row ${dataStartIndex + 1}, Testing mode: ${testing}`);
+    console.log(`Processing ${dataRows.length} rows, Testing: ${testing}`);
     
     for (let index = 0; index < dataRows.length; index++) {
       const row = dataRows[index];
       const rowNumber = dataStartIndex + index + 1;
       
-      // Parse and validate row
-      const validation = parseExcelRow(row, rowNumber, divisions, departments, positions, columnMap);
+      // Parse and validate row with auto-add
+      const validation = await parseExcelRow(
+        row, rowNumber, divisions, departments, positions, 
+        columnMap, connection, testing
+      );
       
       if (validation.skipped) {
-        console.log(`Row ${rowNumber}: ${validation.reason}`);
         continue;
       }
-      
+
       if (validation.error) {
         errors.push(validation.error);
         continue;
@@ -542,7 +470,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
       const { emp_name: empName, dept_id, position_id } = validation.data;
       
       try {
-        // Check for existing employee (only in non-testing mode)
+        // Check for existing employee
         if (!testing) {
           const [existingEmployees] = await connection.execute(
             'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
@@ -555,7 +483,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
           }
         }
         
-        // Insert employee only in non-testing mode
+        // Insert employee if not testing
         if (!testing) {
           const [insertResult] = await connection.execute(
             'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
@@ -568,17 +496,14 @@ const processExcelImport = async (excelData, connection, testing = false) => {
             status: 'SAVED'
           };
           
-          //console.log(`Row ${rowNumber}: Employee saved successfully`, savedEmployee);
           savedEmployees.push(savedEmployee);
         } else {
-          // In testing mode, just validate
+          // In testing mode, return validation result
           const testEmployee = {
             ...validation.data,
             status: 'VALIDATED'
           };
-          
-          //console.log(`Row ${rowNumber}: Employee validated (testing mode)`, testEmployee);
-          savedEmployees.push(testEmployee); // Still add to results for reporting
+          savedEmployees.push(testEmployee);
         }
         
       } catch (dbError) {
@@ -592,56 +517,53 @@ const processExcelImport = async (excelData, connection, testing = false) => {
       totalRows: dataRows.length,
       savedCount: savedEmployees.length,
       errorCount: errors.length,
-      headerRowIndex,
-      columnMap,
       testingMode: testing
     };
     
   } catch (detectionError) {
-    console.log('Column detection error:', detectionError.message);
+    console.log('Error:', detectionError.message);
     return {
       saved: [],
       errors: [detectionError.message],
       totalRows: 0,
       savedCount: 0,
       errorCount: 1,
-      headerRowIndex: -1,
-      columnMap: null,
       testingMode: testing
     };
   }
 };
 
-// ==================== ROUTE HANDLERS ====================
+// ==================== EXCEL IMPORT ROUTES ====================
 
-// POST test Excel import (validation only)
+// POST test Excel import (with auto-add simulation)
 router.post('/test-import', async (req, res) => {
   console.log('=== EXCEL IMPORT TEST START ===');
+  
+  const connection = await getConnection();
   
   try {
     const { excelData } = req.body;
     console.log('Raw Excel Data Received (first 5 rows):', excelData?.slice(0, 5));
     
     if (!excelData || !Array.isArray(excelData)) {
-      console.log('ERROR: Invalid Excel data format');
       return res.json({ success: false, error: 'Invalid Excel data format' });
     }
     
-    const connection = await getConnection();
-    const result = await processExcelValidation(excelData, connection);
-    await connection.end();
+    // In test mode (testing = true), it will show what would be added
+    const result = await processExcelImport(excelData, connection, true);
     
     console.log('=== EXCEL IMPORT TEST SUMMARY ===');
     console.log('Total Rows Processed:', result.totalRows);
-    console.log('Successful Rows:', result.validRows);
-    console.log('Error Rows:', result.errorRows);
-    console.log('Results (first 5):', result.results.slice(0, 5));
-    console.log('Errors (first 5):', result.errors.slice(0, 5));
+    console.log('Validated Rows:', result.savedCount);
+    console.log('Error Rows:', result.errorCount);
+    console.log('First 5 Results:', result.saved.slice(0, 5));
+    console.log('First 5 Errors:', result.errors.slice(0, 5));
     console.log('=== EXCEL IMPORT TEST END ===\n');
     
     res.json({
       success: true,
-      ...result
+      ...result,
+      message: 'This is a test. No data was actually saved. Errors show what would fail without auto-add.'
     });
     
   } catch (error) {
@@ -650,12 +572,14 @@ router.post('/test-import', async (req, res) => {
       success: false, 
       error: error.message 
     });
+  } finally {
+    await connection.end();
   }
 });
 
-// POST real Excel import (save to database)
+// POST real Excel import (save to database with auto-add)
 router.post('/import', async (req, res) => {
-  console.log('=== EXCEL IMPORT START (SAVING TO DATABASE) ===');
+  console.log('=== EXCEL IMPORT START (SAVING TO DATABASE WITH AUTO-ADD) ===');
   
   const connection = await getConnection();
   
@@ -667,18 +591,20 @@ router.post('/import', async (req, res) => {
     }
     
     await connection.beginTransaction();
-    const result = await processExcelImport(excelData, connection);
+    const result = await processExcelImport(excelData, connection, false); // testing = false
+    
     await connection.commit();
     
     console.log('=== EXCEL IMPORT COMPLETE ===');
     console.log('Total Rows Processed:', result.totalRows);
     console.log('Successfully Saved:', result.savedCount);
     console.log('Errors:', result.errorCount);
-    console.log('First 5 Saved Employees:', result.saved.slice(0, 5));
+    console.log('=== EXCEL IMPORT END ===\n');
     
     res.json({
       success: true,
-      ...result
+      ...result,
+      message: 'Import completed. Missing divisions, departments, and positions were automatically added.'
     });
     
   } catch (error) {
@@ -693,7 +619,7 @@ router.post('/import', async (req, res) => {
   }
 });
 
-// Optional: Add batch processing for large files
+// POST batch import with auto-add
 router.post('/import-batch', async (req, res) => {
   const { excelData, batchSize = 100 } = req.body;
   
@@ -704,50 +630,129 @@ router.post('/import-batch', async (req, res) => {
   console.log(`Starting batch import with batch size: ${batchSize}`);
   
   const connection = await getConnection();
-  const results = { saved: [], errors: [], batches: [] };
+  const results = { 
+    saved: [], 
+    errors: [], 
+    batches: [],
+    addedRecords: {
+      divisions: [],
+      departments: [],
+      positions: []
+    }
+  };
   
   try {
     await connection.beginTransaction();
     
-    // Skip header row
-    const dataRows = excelData.slice(1);
-    const totalBatches = Math.ceil(dataRows.length / batchSize);
+    // Detect column indices once for the entire file
+    const { headerRowIndex, columnMap, dataStartIndex } = detectColumnIndices(excelData);
+    
+    // Get all data rows
+    const allDataRows = excelData.slice(dataStartIndex);
+    const totalBatches = Math.ceil(allDataRows.length / batchSize);
+    
+    // Load existing data once for the entire batch process
+    const [divisions, departments, positions] = await Promise.all([
+      connection.execute('SELECT * FROM division').then(([rows]) => rows),
+      connection.execute('SELECT * FROM dept').then(([rows]) => rows),
+      connection.execute('SELECT * FROM position').then(([rows]) => rows)
+    ]);
     
     for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
       const start = batchIndex * batchSize;
       const end = start + batchSize;
-      const batchRows = dataRows.slice(start, end);
+      const batchRows = allDataRows.slice(start, end);
       
-      console.log(`Processing batch ${batchIndex + 1}/${totalBatches}`);
+      console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (rows ${start + 1} to ${Math.min(end, allDataRows.length)})`);
       
-      const batchResult = await processExcelImport(
-        ['HEADER', ...batchRows], // Add header back for slice(1) to work
-        connection
-      );
+      const batchSaved = [];
+      const batchErrors = [];
       
-      results.saved.push(...batchResult.saved);
-      results.errors.push(...batchResult.errors);
+      for (let rowIndex = 0; rowIndex < batchRows.length; rowIndex++) {
+        const row = batchRows[rowIndex];
+        const globalRowIndex = start + rowIndex;
+        const rowNumber = dataStartIndex + globalRowIndex + 1;
+        
+        try {
+          // Parse and validate row with auto-add
+          const validation = await parseExcelRow(
+            row, rowNumber, divisions, departments, positions, 
+            columnMap, connection, false // testing = false for real import
+          );
+          
+          if (validation.skipped) {
+            continue;
+          }
+
+          if (validation.error) {
+            batchErrors.push(validation.error);
+            continue;
+          }
+          
+          const { emp_name: empName, dept_id, position_id } = validation.data;
+          
+          // Check for existing employee
+          const [existingEmployees] = await connection.execute(
+            'SELECT id FROM employee WHERE emp_name = ? AND is_deleted = 0',
+            [empName]
+          );
+          
+          if (existingEmployees.length > 0) {
+            batchErrors.push(`Row ${rowNumber}: Employee "${empName}" already exists`);
+            continue;
+          }
+          
+          // Insert employee
+          const [insertResult] = await connection.execute(
+            'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+            [empName, position_id, dept_id]
+          );
+          
+          const savedEmployee = {
+            ...validation.data,
+            id: insertResult.insertId,
+            status: 'SAVED'
+          };
+          
+          batchSaved.push(savedEmployee);
+          
+        } catch (dbError) {
+          batchErrors.push(`Row ${rowNumber}: Database error - ${dbError.message}`);
+        }
+      }
+      
+      results.saved.push(...batchSaved);
+      results.errors.push(...batchErrors);
       results.batches.push({
         batch: batchIndex + 1,
-        saved: batchResult.savedCount,
-        errors: batchResult.errorCount
+        startRow: start + 1,
+        endRow: Math.min(end, allDataRows.length),
+        saved: batchSaved.length,
+        errors: batchErrors.length
       });
       
-      // Optional: Commit each batch individually
+      // Optional: Commit each batch individually for better memory management
       // await connection.commit();
       // await connection.beginTransaction();
     }
     
     await connection.commit();
     
+    console.log('=== BATCH IMPORT COMPLETE ===');
+    console.log('Total Rows Processed:', allDataRows.length);
+    console.log('Total Saved:', results.saved.length);
+    console.log('Total Errors:', results.errors.length);
+    console.log('Number of Batches:', results.batches.length);
+    
     res.json({
       success: true,
-      totalRows: dataRows.length,
+      totalRows: allDataRows.length,
       totalSaved: results.saved.length,
       totalErrors: results.errors.length,
       batches: results.batches,
       saved: results.saved,
-      errors: results.errors
+      errors: results.errors,
+      message: 'Batch import completed with auto-add functionality.'
     });
     
   } catch (error) {

@@ -124,7 +124,7 @@ CREATE TABLE `employee`  (
   `is_register` tinyint(1) NULL DEFAULT 0 COMMENT '0=Not Reister , 1=Register',
   `is_deleted` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 337 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for position
@@ -134,7 +134,7 @@ CREATE TABLE `position`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `position_name` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 39 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 79 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of position
@@ -229,7 +229,7 @@ CREATE TABLE `register`  (
   `sys_datetime` datetime NULL DEFAULT current_timestamp(),
   `is_deleted` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 
 DROP TABLE IF EXISTS `users`;
@@ -243,7 +243,7 @@ CREATE TABLE `users`  (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 76 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 # password = nbtctest
 INSERT INTO `users` VALUES (1, 'one_admin', '$2a$12$2XXyaujvn6FBac/zLLib0OavSp8yGCtpxbNFcORzvzIm0UKYQq5o.', 1, NULL, 0, NOW(), 0);
