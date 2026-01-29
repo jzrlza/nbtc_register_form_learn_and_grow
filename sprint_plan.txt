@@ -35,6 +35,7 @@ Tomorrow
   - put files as for nginx per how in chatgpt
   - kill the old images and use new image with init.sql, also clear caches and ***volumes
 
+sudo certbot --nginx -d learnandgrow.nbtc.go.th
 
 maybe
 - do the add, edit, delete dept, div, and position pages (if needed)
