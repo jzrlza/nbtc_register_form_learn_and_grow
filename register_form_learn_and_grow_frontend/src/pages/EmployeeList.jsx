@@ -451,6 +451,17 @@ const EmployeeList = ({ user, onLogout }) => {
                       ... และอีก {importModal.results.saved.length - 10} พนักงาน
                     </div>
                   )}
+
+                  {importModal.results.updated.slice(0, 10).map((item, index) => (
+                    <div key={index} className="success-item">
+                      <strong>แถวที่ {item.rowNumber}:</strong> {item.emp_name} - {item.dept_name} - {item.position_name}
+                    </div>
+                  ))}
+                  {importModal.results.updated.length > 10 && (
+                    <div className="more-items">
+                      ... และอีก {importModal.results.updated.length - 10} พนักงาน
+                    </div>
+                  )}
                 </div>
               </div>
             )}
