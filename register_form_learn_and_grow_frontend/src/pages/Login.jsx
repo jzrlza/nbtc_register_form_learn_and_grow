@@ -6,6 +6,7 @@ import Modal from '../components/Modal';
 const Login = ({ onLogin }) => {
   const API_URL = import.meta.env.VITE_API_URL || '';
   const AD_API_URL = import.meta.env.AD_API_URL || '';
+  const AD_API_KEY = import.meta.env.AD_API_KEY || '';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,32 @@ const Login = ({ onLogin }) => {
 
   const closeModal = () => {
     setModal({ isOpen: false, type: '', message: '' });
+  };
+
+  const handleLoginRealAD = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const response = await axios.post(`${AD_API_URL}/token`, {
+        "api_key": AD_API_KEY
+      });
+
+      if (response.data.access_token) {
+        const response_ad = await axios.post(`${AD_API_URL}/user-info`, {
+          "username": username,
+          "password": password,
+          "token": response.data.access_token,
+          "api_key": AD_API_KEY
+        });
+        onLogin(response_ad.data);
+        navigate('/');
+      }
+    } catch (error) {
+      showModal('error', 'Login failed: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = async (e) => {
@@ -188,7 +215,7 @@ const Login = ({ onLogin }) => {
   return (
     <div className="login-container">
       <h2>ลงชื่อเข้าใช้งานสำหรับผู้ดูแลระบบ</h2>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLoginRealAD}>
         <input
           type="text"
           placeholder="Username"

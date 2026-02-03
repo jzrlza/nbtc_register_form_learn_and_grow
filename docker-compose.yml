@@ -38,6 +38,7 @@ services:
     environment:
       VITE_API_URL: ${VITE_API_URL}
       AD_API_URL: ${AD_API_URL}
+      AD_API_KEY: ${AD_API_KEY}
     networks:
       - learngrow-network
 

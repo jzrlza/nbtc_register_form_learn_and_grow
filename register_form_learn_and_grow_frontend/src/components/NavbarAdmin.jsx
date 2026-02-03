@@ -25,7 +25,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
         </div>
       </div>
       <div className="nav-user">
-        ยินดีต้อนรับ, {user?.username} 
+        ยินดีต้อนรับ, {user?.CN} 
         <button onClick={onLogout} className="logout-btn">ออกจากระบบ</button>
       </div>
     </nav>

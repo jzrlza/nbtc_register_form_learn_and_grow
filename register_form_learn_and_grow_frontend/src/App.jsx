@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // Check if user is logged in (from localStorage)
-    const savedUser = localStorage.getItem('user');
+    const savedUser = sessionStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -23,12 +23,12 @@ function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('user', JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
   };
 
   // Protected Route component (for admin-only pages)
