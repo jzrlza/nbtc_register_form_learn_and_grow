@@ -1,3 +1,12 @@
+git pull origin master
+
+#stop and delete
+docker-compose stop database
+docker-compose rm -f database
+
+cat onenbtc.sql | docker exec -i register_form_learn_and_grow_database_production mysql -u root -p
+
+#start
 docker-compose up -d database
 
 # Check if it's running
@@ -15,8 +24,3 @@ SHOW DATABASES;
 
 
 
-docker-compose stop database
-docker-compose rm -f database
-
-
-cat onenbtc.sql | docker exec -i register_form_learn_and_grow_database_production mysql -u root -p

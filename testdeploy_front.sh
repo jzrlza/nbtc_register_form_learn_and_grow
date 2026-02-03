@@ -1,4 +1,5 @@
 # Start all three
+git pull origin master
 
 # Remove old images
 docker-compose stop frontend

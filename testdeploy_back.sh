@@ -1,3 +1,5 @@
+git pull origin master
+
 # Stop
 docker-compose stop backend
 docker-compose rm backend
