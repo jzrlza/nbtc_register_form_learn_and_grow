@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 
 const Login = ({ onLogin }) => {
   const API_URL = import.meta.env.VITE_API_URL || '';
+  const AD_API_URL = import.meta.env.AD_API_URL || '';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
