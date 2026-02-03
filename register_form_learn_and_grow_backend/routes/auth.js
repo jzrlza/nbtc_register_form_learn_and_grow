@@ -3,12 +3,83 @@ const bcrypt = require('bcryptjs');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const { getConnection } = require('../config/database');
+const axios = require('axios');
 const router = express.Router();
 
 const SPEAKEASY_SECRET_STR = "ONE NBTC App"
 
-// Login
+// Login (real, proxy to avoid CORS)
 router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    const AD_API_URL = process.env.AD_API_URL;
+    const AD_API_KEY = process.env.AD_API_KEY;
+
+    if (!AD_API_URL || !AD_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'Server configuration error'
+      });
+    }
+
+    // Step 1: Get access token from AD API
+    const tokenResponse = await axios.post(`${AD_API_URL}/token`, {
+      api_key: AD_API_KEY
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!tokenResponse.data.access_token) {
+      return res.status(500).json({
+        success: false,
+        error: 'การเชื่อมระบบ AD api_key ผิดพลาดในหลังบ้าน'
+      });
+    }
+
+    // Step 2: Get user info from AD API
+    const userResponse = await axios.post(`${AD_API_URL}/user-info`, {
+      username: username,
+      password: password,
+      token: tokenResponse.data.access_token,
+      api_key: AD_API_KEY
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!userResponse.data) {
+      return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
+    }
+
+    const user = userResponse.data;
+    /*
+     looks like this
+      {
+      "code": 200,
+      "CN": "",
+      "email": ""
+      }
+    */
+
+    // Login successful without 2FA
+    res.json({
+      success: true,
+      user: user,
+      requires2FA: false
+    });
+
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Login (old)
+router.post('/login-legacy-test', async (req, res) => {
   try {
     const { username, password } = req.body;
     const connection = await getConnection();

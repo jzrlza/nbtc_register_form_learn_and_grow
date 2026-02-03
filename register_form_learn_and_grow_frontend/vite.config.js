@@ -21,9 +21,7 @@ export default defineConfig(({ mode }) => {
     },
     // Define environment variables for the client
     define: {
-      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL),
-      'import.meta.env.AD_API_URL': JSON.stringify(env.AD_API_URL),
-      'import.meta.env.AD_API_KEY': JSON.stringify(env.AD_API_KEY)
+      'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL)
     }
   }
 })
