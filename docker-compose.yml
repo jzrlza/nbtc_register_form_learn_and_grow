@@ -33,6 +33,8 @@ services:
 
   frontend:
     build: ./register_form_learn_and_grow_frontend
+    ports:
+      - "127.0.0.1:3000:3000"
     environment:
       VITE_API_URL: ${VITE_API_URL}
       AD_API_URL: ${AD_API_URL}
