@@ -32,7 +32,7 @@ Hold (learn later)
   - kill the old images and use new image with init.sql, also clear caches and ***volumes
 
 Today
-- deploy AD login into it
+
 
 Tomorrow
 
@@ -44,6 +44,8 @@ maybe
 
 
 [Done]
+- ssl https secure connection
+- deploy AD login into it
 - put deploy test server (this week)
 - export group by : order by : dept and div (for orderly read for users)
 - import excel large problem (maybe to csv)
