@@ -15,6 +15,7 @@ services:
       - ./register_form_learn_and_grow_database_production/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - learngrow-network
+    restart: always
 
   backend:
     build: ./register_form_learn_and_grow_backend
