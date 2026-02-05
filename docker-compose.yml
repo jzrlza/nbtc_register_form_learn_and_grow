@@ -67,3 +67,5 @@ volumes:
 networks:
   learngrow-network:
     driver: bridge
+
+#also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
