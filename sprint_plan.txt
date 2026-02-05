@@ -44,6 +44,7 @@ maybe
 
 
 [Done]
+- prevent 502 bad gateway memory leak overnight
 - ssl https secure connection
 - deploy AD login into it
 - put deploy test server (this week)
