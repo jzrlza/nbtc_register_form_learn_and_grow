@@ -30,8 +30,11 @@ services:
       NODE_ENV: production
       AD_API_URL: ${AD_API_URL}
       AD_API_KEY: ${AD_API_KEY}
+      NODE_OPTIONS: "--max-old-space-size=300"
     networks:
       - learngrow-network
+    mem_limit: 500M  # Add this line
+    restart: always  # Auto-restart if crashes
 
   frontend:
     build: ./register_form_learn_and_grow_frontend
@@ -41,6 +44,8 @@ services:
       VITE_API_URL: ${VITE_API_URL}
     networks:
       - learngrow-network
+    mem_limit: 300M  # Add this line
+    restart: always
 
   #nginx: (no need to, just run in native ubuntu, not here for cripe sake, no wonder yesterday it sucked)
   #  image: nginx:alpine
