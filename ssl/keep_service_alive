@@ -12,3 +12,7 @@ ExecStop=/usr/bin/docker-compose -f /var/www/nbtc_register_form_learn_and_growdo
 [Install]
 WantedBy=multi-user.target
 EOF'
+
+# Enable and start
+sudo systemctl enable keep-containers-alive
+sudo systemctl start keep-containers-alive
