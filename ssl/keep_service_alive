@@ -1,0 +1,14 @@
+sudo bash -c 'cat > /etc/systemd/system/keep-containers-alive.service << EOF
+[Unit]
+Description=Keep Docker containers alive
+After=docker.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/usr/bin/docker-compose -f /var/www/nbtc_register_form_learn_and_growdocker-compose.yml up
+ExecStop=/usr/bin/docker-compose -f /var/www/nbtc_register_form_learn_and_growdocker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target
+EOF'
