@@ -33,6 +33,7 @@ Hold (learn later)
 
 Today
 - set up database for permission
+- increase session security for sending to backend
 
 Tomorrow
 
