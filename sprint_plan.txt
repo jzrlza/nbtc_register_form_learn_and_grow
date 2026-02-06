@@ -32,7 +32,7 @@ Hold (learn later)
   - kill the old images and use new image with init.sql, also clear caches and ***volumes
 
 Today
-
+- set up database for permission
 
 Tomorrow
 
