@@ -72,7 +72,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     try {
       const response = await axios.post(`${API_URL}/api/auth/setup-2fa`, {
-        userId
+        userId, username
       });
       
       setQrCode(response.data.qrCode);
@@ -94,94 +94,116 @@ const Login = ({ onLogin }) => {
     closeModal();
   };
 
-  // 2FA Setup Screen
-  if (showSetup2FA) {
-    return (
-      <div className="login-container">
-        <h2>Setup Two-Factor Authentication</h2>
-        <div className="setup-2fa">
-          <p>Scan this QR code with your authenticator app:</p>
-          
-          {qrCode && (
-            <div className="qr-code-container">
-              <img src={qrCode} alt="QR Code" className="qr-code" />
-            </div>
-          )}
-          
-          <div className="secret-container">
-            <p>Or enter this secret key manually:</p>
-            <div className="secret-display">
-              <code>{secret}</code>
-              <button 
-                type="button" 
-                onClick={copyToClipboard}
-                className="copy-btn"
-              >
-                Copy
-              </button>
-            </div>
-          </div>
-          
-          <p className="instruction">
-            After setting up, enter the 6-digit code from your authenticator app:
-          </p>
-          
-          <form onSubmit={verify2FA}>
-            <input
-              type="text"
-              placeholder="Enter 6-digit code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-              maxLength={6}
-            />
-            <button type="submit" disabled={loading}>
-              {loading ? 'Verifying...' : 'Verify & Complete Setup'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // 2FA Verification Screen
-  if (requires2FA) {
-    return (
-      <div className="login-container">
-        <h2>Two-Factor Authentication</h2>
+  // หน้าตั้งค่า 2FA
+if (showSetup2FA) {
+  return (
+    <div className="login-container">
+      <h2>ตั้งค่าการยืนยันสองขั้นตอน</h2>
+      <div className="setup-2fa">
+        <p>สแกน QR Code นี้ด้วยแอปยืนยันตัวตนของคุณ:</p>
         
-        <div className="auth-options">
-          <p>Enter the 6-digit code from your authenticator app:</p>
-          
-          <form onSubmit={verify2FA}>
-            <input
-              type="text"
-              placeholder="Enter 6-digit code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-              maxLength={6}
-            />
-            <button type="submit" disabled={loading}>
-              {loading ? 'Verifying...' : 'Verify'}
-            </button>
-          </form>
-          
-          <div className="setup-prompt">
-            <p>Don't have 2FA setup yet?</p>
+        {qrCode && (
+          <div className="qr-code-container">
+            <img src={qrCode} alt="QR Code" className="qr-code" />
+          </div>
+        )}
+        
+        <div className="secret-container">
+          <p>หรือป้อนคีย์ลับนี้ด้วยตนเอง:</p>
+          <div className="secret-display">
+            <code>{secret}</code>
             <button 
               type="button" 
-              onClick={setup2FA}
-              disabled={loading}
-              className="setup-btn"
+              onClick={copyToClipboard}
+              className="copy-btn"
             >
-              Setup 2FA Now
+              คัดลอก
             </button>
           </div>
         </div>
+        
+        <p className="instruction">
+          หลังจากตั้งค่าแล้ว กรุณาป้อนรหัส 6 หลักจากแอปยืนยันตัวตน:
+        </p>
+        
+        <form onSubmit={verify2FA}>
+          <input
+            type="password"
+            placeholder="ป้อนรหัส 6 หลัก"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+            maxLength={6}
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? 'กำลังตรวจสอบ...' : 'ยืนยันและตั้งค่าให้เสร็จสิ้น'}
+          </button>
+        </form>
       </div>
-    );
-  }
+
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={handleModalClose}
+        title={modal.type === 'success' ? 'สำเร็จ' : 'ข้อผิดพลาด'}
+      >
+        <p>{modal.message}</p>
+        <div className="modal-actions">
+          <button onClick={handleModalClose} className="modal-btn primary">ปิด</button>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// หน้าตรวจสอบ 2FA
+if (requires2FA) {
+  return (
+    <div className="login-container">
+      <h2>การยืนยันสองขั้นตอน</h2>
+      
+      <div className="auth-options">
+        <p>ป้อนรหัส 6 หลักจากแอปยืนยันตัวตนของคุณ:</p>
+        
+        <form onSubmit={verify2FA}>
+          <input
+            type="password"
+            placeholder="ป้อนรหัส 6 หลัก"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+            maxLength={6}
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? 'กำลังตรวจสอบ...' : 'ยืนยัน'}
+          </button>
+        </form>
+        
+        <div className="setup-prompt">
+          <p>ยังไม่ได้ตั้งค่า 2FA?</p>
+          <button 
+            type="button" 
+            onClick={setup2FA}
+            disabled={loading}
+            className="setup-btn"
+          >
+            ตั้งค่า 2FA ทันที
+          </button>
+        </div>
+      </div>
+
+      <Modal 
+        isOpen={modal.isOpen} 
+        onClose={handleModalClose}
+        title={modal.type === 'success' ? 'สำเร็จ' : 'ข้อผิดพลาด'}
+      >
+        <p>{modal.message}</p>
+        <div className="modal-actions">
+          <button onClick={handleModalClose} className="modal-btn primary">ปิด</button>
+        </div>
+      </Modal>
+    </div>
+  );
+}
 
   // Initial Login Screen
   return (

@@ -6,13 +6,14 @@ const { getConnection } = require('../config/database');
 const axios = require('axios');
 const router = express.Router();
 
-const SPEAKEASY_SECRET_STR = "ONE NBTC App"
+const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
 
 // Login (real, proxy to avoid CORS)
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+    const connection = await getConnection();
+
     const AD_API_URL = process.env.AD_API_URL;
     const AD_API_KEY = process.env.AD_API_KEY;
 
@@ -55,7 +56,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
     }
 
-    const user = userResponse.data;
+    const userAD = userResponse.data;
     /*
      looks like this
       {
@@ -65,45 +66,28 @@ router.post('/login', async (req, res) => {
       }
     */
 
-    // Login successful without 2FA
-    res.json({
-      success: true,
-      user: user,
-      requires2FA: false
-    });
+    //check for employee table for id
+    const [existingEmployeeIDs] = await connection.execute(
+          'SELECT id FROM employee WHERE emp_name LIKE ? AND is_deleted = 0',
+          [userAD.CN ? `%${userAD.CN}` : null]
+        );
+    if (existingEmployeeIDs.length <= 0) {
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบพนักงานในฐานข้อมูลในปัจจุบัน' });
+    }
+    const existingEmployeeID = existingEmployeeIDs[0].id;
 
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Login (old)
-router.post('/login-legacy-test', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const connection = await getConnection();
-    
+    //now check user authen
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE username = ?', 
-      [username]
+      'SELECT * FROM users WHERE employee_id = ?', 
+      [parseInt(existingEmployeeID)]
     );
-    
-    await connection.end();
-
-    if (users.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (users.length <= 0) {
+      //create and 2fa
+      return res.status(401).json({ success: false, error: 'ขออภัย คุณไม่มีสิทธิ์เข้าถึงหลังบ้าน' });
     }
-
+      //simply login, if 2fa, setup or use
     const user = users[0];
-    
-    // In real app, verify password with bcrypt
-    const validPassword = await bcrypt.compare(password, user.password);
-    
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-    
+
     if (user.is_2fa_enabled) {
       // 2FA is enabled, require code
       return res.json({ 
@@ -116,7 +100,7 @@ router.post('/login-legacy-test', async (req, res) => {
     // Login successful without 2FA
     res.json({
       success: true,
-      user: { id: user.id, username: user.username, type: user.type },
+      user: { id: user.id, CN: userAD.CN, employee_id: existingEmployeeID, type: user.type },
       requires2FA: false
     });
 
@@ -136,17 +120,27 @@ router.post('/verify-2fa', async (req, res) => {
       'SELECT * FROM users WHERE id = ?', 
       [userId]
     );
-    
-    await connection.end();
-
-    if (users.length === 0) {
-      return res.status(401).json({ error: 'User not found' });
+    if (users.length <= 0) {
+      //create and 2fa
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ User ในฐานข้อมูลในปัจจุบัน' });
     }
-
     const user = users[0];
+
+    const existingEmployeeID = user.employee_id;
+    const [employees] = await connection.execute(
+      'SELECT * FROM employee WHERE id = ?', 
+      [parseInt(existingEmployeeID)]
+    );
+    if (employees.length <= 0) {
+      //create and 2fa
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบชื่อหนักงานในฐานข้อมูลในปัจจุบัน' });
+    }
+    const employee = employees[0];
+
+    await connection.end();
     
     if (!user.two_factor_secret) {
-      return res.status(400).json({ error: '2FA not setup for user' });
+      return res.status(400).json({ error: '2FA ยังไม่ได้ตั้งค่า' });
     }
 
     const verified = speakeasy.totp.verify({
@@ -159,10 +153,10 @@ router.post('/verify-2fa', async (req, res) => {
     if (verified) {
       res.json({
         success: true,
-        user: { id: user.id, username: user.username, type: user.type }
+        user: { id: user.id, CN: employee.emp_name, employee_id: employee.id, type: user.type }
       });
     } else {
-      res.status(401).json({ error: 'Invalid 2FA code' });
+      res.status(401).json({ error: 'รหัส 2FA code ผิด' });
     }
 
   } catch (error) {
@@ -171,14 +165,14 @@ router.post('/verify-2fa', async (req, res) => {
   }
 });
 
-// Setup 2FA (for demo)
+// Setup 2FA
 router.post('/setup-2fa', async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId, username } = req.body;
     const connection = await getConnection();
     
     const secret = speakeasy.generateSecret({
-      name: SPEAKEASY_SECRET_STR
+      name: `${SPEAKEASY_SECRET_STR} : ${username}`
     });
 
     // Update user with 2FA secret
