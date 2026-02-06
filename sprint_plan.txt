@@ -39,11 +39,6 @@ Tomorrow
  -*- except for creating register, the only POST method that should be spared of security lock
 - add excel import button that specifically delete non-existing name employees (set is_delete to 1) in case they quit or retire
 
-sudo certbot --nginx -d learnandgrow.nbtc.go.th
-
-maybe
-- do the add, edit, delete dept, div, and position pages (if needed)
-
 
 [Done]
 - set up database for permission
