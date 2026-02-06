@@ -255,7 +255,7 @@ router.put('/:id', async (req, res) => {
     
     const [result] = await connection.execute(
       'UPDATE register SET emp_id = ?, table_number = ? WHERE id = ? AND is_deleted = 0',
-      [emp_id, table_number]
+      [emp_id, table_number, id]
     );
     
     await connection.end();
