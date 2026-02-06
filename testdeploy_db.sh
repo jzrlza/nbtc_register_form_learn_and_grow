@@ -22,5 +22,7 @@ docker exec -it register_form_learn_and_grow_database_production mysql -u root -
 # Check databases
 SHOW DATABASES;
 
+USE learngrow_db;
+
 
 
