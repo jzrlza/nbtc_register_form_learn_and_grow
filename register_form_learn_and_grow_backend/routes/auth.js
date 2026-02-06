@@ -78,7 +78,7 @@ router.post('/login', async (req, res) => {
 
     //now check user authen
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE employee_id = ?', 
+      'SELECT * FROM users WHERE employee_id = ? AND is_deleted = 0', 
       [parseInt(existingEmployeeID)]
     );
     if (users.length <= 0) {
@@ -117,7 +117,7 @@ router.post('/verify-2fa', async (req, res) => {
     const connection = await getConnection();
     
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE id = ?', 
+      'SELECT * FROM users WHERE id = ? AND is_deleted = 0', 
       [userId]
     );
     if (users.length <= 0) {
@@ -128,7 +128,7 @@ router.post('/verify-2fa', async (req, res) => {
 
     const existingEmployeeID = user.employee_id;
     const [employees] = await connection.execute(
-      'SELECT * FROM employee WHERE id = ?', 
+      'SELECT * FROM employee WHERE id = ? AND is_deleted = 0', 
       [parseInt(existingEmployeeID)]
     );
     if (employees.length <= 0) {
