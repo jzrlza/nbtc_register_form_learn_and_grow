@@ -1103,7 +1103,7 @@ input:focus, select:focus, textarea:focus {
   cursor: not-allowed;
 }
 
-.refresh-btn {
+.refresh-btn-emp {
   padding: 8px 16px;
   background: #2196f3;
   color: white;
@@ -1113,11 +1113,11 @@ input:focus, select:focus, textarea:focus {
   font-size: 1rem;
 }
 
-.refresh-btn:hover:not(:disabled) {
+.refresh-btn-emp:hover:not(:disabled) {
   background: #1976d2;
 }
 
-.refresh-btn:disabled {
+.refresh-btn-emp:disabled {
   background: #bbdefb;
   cursor: not-allowed;
 }

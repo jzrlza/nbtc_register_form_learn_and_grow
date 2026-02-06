@@ -375,7 +375,7 @@ const EmployeeList = ({ user, onLogout }) => {
                   <button 
                     onClick={() => fetchEmployees(currentPage, search, selectedDivision, selectedDept)} 
                     disabled={loading} 
-                    className="refresh-btn"
+                    className="refresh-btn-emp"
                   >
                     {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
                   </button>
