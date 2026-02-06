@@ -269,6 +269,8 @@ const EmployeeList = ({ user, onLogout }) => {
         // Refresh employee list if it was a real import
         if (shouldImport && response.data.savedCount > 0) {
           fetchEmployees(currentPage, search, selectedDivision, selectedDept);
+          fetchDivisions();
+          fetchAllDepartments();
         }
         
         console.log('Frontend: Operation completed successfully');
