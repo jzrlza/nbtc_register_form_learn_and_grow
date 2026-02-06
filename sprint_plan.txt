@@ -35,7 +35,7 @@ Today
 
 
 Tomorrow
-- increase session security for sending to backend
+- increase session security for sending to backend (use a fulyl manually coded jwt-like token that I should invent my own gibberish)
  -*- except for creating register, the only POST method that should be spared of security lock
 - add excel import button that specifically delete non-existing name employees (set is_delete to 1) in case they quit or retire
 
