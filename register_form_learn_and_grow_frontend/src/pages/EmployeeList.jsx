@@ -9,7 +9,13 @@ import loadImage from '../res/loading.gif';
 const EmployeeList = ({ user, onLogout }) => {
   const API_URL = import.meta.env.VITE_API_URL || '';
   const [employees, setEmployees] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [selectedDivision, setSelectedDivision] = useState('');
+  const [selectedDept, setSelectedDept] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingDivisions, setLoadingDivisions] = useState(false);
+  const [loadingDepts, setLoadingDepts] = useState(false);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -20,15 +26,63 @@ const EmployeeList = ({ user, onLogout }) => {
   const [excelLoadModal, setExcelLoadModal] = useState({ isOpen: false });
   const navigate = useNavigate();
 
-  // Add useRef at the top with other useState
   const fileInputRef = useRef();
 
-  // Add the handleImportClick function
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
 
-  const fetchEmployees = async (page = 1, searchTerm = '') => {
+  // Fetch divisions
+  const fetchDivisions = async () => {
+    setLoadingDivisions(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/employees/divisions`);
+      setDivisions(response.data);
+    } catch (error) {
+      console.error('Error fetching divisions:', error);
+      showModal('error', 'ไม่สามารถดึงข้อมูลสายงานได้');
+    } finally {
+      setLoadingDivisions(false);
+    }
+  };
+
+  // Fetch departments based on selected division
+  const fetchDepartmentsByDivision = async (divisionId) => {
+    if (!divisionId) {
+      setDepartments([]);
+      setSelectedDept('');
+      return;
+    }
+    
+    setLoadingDepts(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/employees/departments/by-division/${divisionId}`);
+      setDepartments(response.data);
+      // Reset department selection when division changes
+      setSelectedDept('');
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      setDepartments([]);
+    } finally {
+      setLoadingDepts(false);
+    }
+  };
+
+  // Fetch all departments (for when no division is selected)
+  const fetchAllDepartments = async () => {
+    setLoadingDepts(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/employees/departments`);
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Error fetching all departments:', error);
+      setDepartments([]);
+    } finally {
+      setLoadingDepts(false);
+    }
+  };
+
+  const fetchEmployees = async (page = 1, searchTerm = '', divisionId = '', departmentId = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -38,6 +92,14 @@ const EmployeeList = ({ user, onLogout }) => {
       
       if (searchTerm) {
         params.append('search', searchTerm);
+      }
+      
+      if (divisionId) {
+        params.append('division_id', divisionId);
+      }
+      
+      if (departmentId) {
+        params.append('dept_id', departmentId);
       }
       
       const response = await axios.get(`${API_URL}/api/employees?${params}`);
@@ -69,12 +131,12 @@ const EmployeeList = ({ user, onLogout }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchEmployees(1, search);
+    fetchEmployees(1, search, selectedDivision, selectedDept);
   };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    fetchEmployees(newPage, search);
+    fetchEmployees(newPage, search, selectedDivision, selectedDept);
   };
 
   const handleEdit = (employeeId) => {
@@ -90,7 +152,7 @@ const EmployeeList = ({ user, onLogout }) => {
     
     try {
       await axios.delete(`${API_URL}/api/employees/${modal.employeeId}`);
-      fetchEmployees(currentPage, search);
+      fetchEmployees(currentPage, search, selectedDivision, selectedDept);
       showModal('success', 'ลบพนักงานเรียบร้อยแล้ว');
     } catch (error) {
       console.error('Error deleting employee:', error);
@@ -105,6 +167,44 @@ const EmployeeList = ({ user, onLogout }) => {
   const handleLogout = () => {
     onLogout();
     navigate('/login');
+  };
+
+  // Handle division change
+  const handleDivisionChange = (e) => {
+    const divisionId = e.target.value;
+    setSelectedDivision(divisionId);
+    
+    if (divisionId) {
+      fetchDepartmentsByDivision(divisionId);
+    } else {
+      fetchAllDepartments();
+    }
+    
+    // Reset department selection
+    setSelectedDept('');
+    setCurrentPage(1);
+    
+    // Refetch employees with new filters
+    fetchEmployees(1, search, divisionId, '');
+  };
+
+  // Handle department change
+  const handleDepartmentChange = (e) => {
+    const deptId = e.target.value;
+    setSelectedDept(deptId);
+    setCurrentPage(1);
+    fetchEmployees(1, search, selectedDivision, deptId);
+  };
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSearch('');
+    setSelectedDivision('');
+    setSelectedDept('');
+    setDepartments([]);
+    setCurrentPage(1);
+    fetchEmployees(1);
+    fetchAllDepartments();
   };
 
   const handleImportExcel = async (event) => {
@@ -140,7 +240,6 @@ const EmployeeList = ({ user, onLogout }) => {
     }
   };
 
-    // Add function to handle import confirmation
   const handleImportConfirm = async (shouldImport) => {
     setConfirmModal({ isOpen: false, excelData: null });
     
@@ -169,7 +268,7 @@ const EmployeeList = ({ user, onLogout }) => {
         
         // Refresh employee list if it was a real import
         if (shouldImport && response.data.savedCount > 0) {
-          fetchEmployees(currentPage, search);
+          fetchEmployees(currentPage, search, selectedDivision, selectedDept);
         }
         
         console.log('Frontend: Operation completed successfully');
@@ -191,6 +290,8 @@ const EmployeeList = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchEmployees(1);
+    fetchDivisions();
+    fetchAllDepartments();
   }, []);
 
   return (
@@ -198,13 +299,13 @@ const EmployeeList = ({ user, onLogout }) => {
       <NavbarAdmin user={user} onLogout={handleLogout} />
 
       {/* Hidden file input */}
-    <input
-      type="file"
-      ref={fileInputRef}
-      onChange={handleImportExcel}
-      accept=".xlsx,.xls"
-      style={{ display: 'none' }}
-    />
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImportExcel}
+        accept=".xlsx,.xls"
+        style={{ display: 'none' }}
+      />
       
       <main className="app-main">
         <section className="employees-section">
@@ -218,57 +319,116 @@ const EmployeeList = ({ user, onLogout }) => {
             </button>
           </div>
           
-          {employees.length > 0 ? <div className="controls">
-            <form onSubmit={handleSearch} className="search-form">
-              <input
-                type="text"
-                placeholder="ค้นหาพนักงานด้วยชื่อ..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="search-input"
-              />
-              <button type="submit" disabled={loading} className="search-btn">
-                ค้นหา
-              </button>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setSearch('');
-                  setCurrentPage(1);
-                  fetchEmployees(1);
-                }}
-                className="clear-btn"
-              >
-                ล้าง
-              </button>
-            </form>
-            
-            <button onClick={() => fetchEmployees(currentPage, search)} disabled={loading} className="refresh-btn">
-              {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
-            </button>
-          </div> : ""}
+            <div className="filters-container">
+              <div className="filters-row">
+                <form onSubmit={handleSearch} className="search-form">
+                  <input
+                    type="text"
+                    placeholder="ค้นหาพนักงานด้วยชื่อ..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="search-input"
+                  />
+                  <button type="submit" disabled={loading} className="search-btn">
+                    ค้นหา
+                  </button>
+                </form>
+                
+                <div className="filter-controls">
+                  <select 
+                    value={selectedDivision} 
+                    onChange={handleDivisionChange}
+                    className="filter-select"
+                    disabled={loadingDivisions}
+                  >
+                    <option value="">-- เลือกสายงาน --</option>
+                    {divisions.map(division => (
+                      <option key={division.id} value={division.id}>
+                        {division.div_name}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  <select 
+                    value={selectedDept} 
+                    onChange={handleDepartmentChange}
+                    className="filter-select"
+                    disabled={loadingDepts || !departments.length}
+                  >
+                    <option value="">-- เลือกสำนัก/สังกัด --</option>
+                    {departments.map(dept => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.dept_name}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  <button 
+                    type="button" 
+                    onClick={handleClearFilters}
+                    className="clear-btn"
+                    disabled={loading}
+                  >
+                    ล้างตัวกรองทั้งหมด
+                  </button>
+                  
+                  <button 
+                    onClick={() => fetchEmployees(currentPage, search, selectedDivision, selectedDept)} 
+                    disabled={loading} 
+                    className="refresh-btn"
+                  >
+                    {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="active-filters">
+                {(selectedDivision || selectedDept || search) && (
+                  <div className="filters-info">
+                    <span>ตัวกรองที่ใช้งานอยู่: </span>
+                    {selectedDivision && (
+                      <span className="filter-tag">
+                        สายงาน: {divisions.find(d => d.id == selectedDivision)?.div_name+" "}
+                      </span>
+                    )}
+                    {selectedDept && (
+                      <span className="filter-tag">
+                        สำนัก: {departments.find(d => d.id == selectedDept)?.dept_name}
+                      </span>
+                    )}
+                    {search && (
+                      <span className="filter-tag">
+                        ค้นหา: {search}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
-          {employees.length > 0 ? <div className="pagination">
-                <button 
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1 || currentPage === 0}
-                  className="page-btn"
-                >
-                  ก่อนหน้า
-                </button>
-                
-                <span className="page-info">
-                  หน้า {currentPage} จาก {totalPages}
-                </span>
-                
-                <button 
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="page-btn"
-                >
-                  ถัดไป
-                </button>
-              </div> : ""}
+          {employees.length > 0 ? (
+            <div className="pagination">
+              <button 
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || currentPage === 0}
+                className="page-btn"
+              >
+                ก่อนหน้า
+              </button>
+              
+              <span className="page-info">
+                หน้า {currentPage} จาก {totalPages}
+              </span>
+              
+              <button 
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="page-btn"
+              >
+                ถัดไป
+              </button>
+            </div>
+          ) : ""}
           
           {employees.length > 0 ? (
             <>
@@ -335,7 +495,14 @@ const EmployeeList = ({ user, onLogout }) => {
               </div>
             </>
           ) : (
-            <p>ไม่พบพนักงาน</p>
+            <div className="no-data">
+              <p>ไม่พบพนักงาน</p>
+              {selectedDivision || selectedDept || search ? (
+                <button onClick={handleClearFilters} className="clear-btn">
+                  ล้างตัวกรองทั้งหมด
+                </button>
+              ) : null}
+            </div>
           )}
         </section>
       </main>
@@ -357,17 +524,19 @@ const EmployeeList = ({ user, onLogout }) => {
         isOpen={excelLoadModal.isOpen} 
         title={'Loading...'}
       >
-      <h1><img src={loadImage} 
-            alt={
-              `กำลังโหลด`
-            } style={{
+        <h1>
+          <img 
+            src={loadImage} 
+            alt={`กำลังโหลด`} 
+            style={{
               width: '40px',
               height: '40px',
               display: 'block',
               marginLeft: 'auto',
               marginRight: 'auto'
             }}
-            /></h1>
+          />
+        </h1>
         <p>กำลังประมวลผล...</p>
       </Modal>
 

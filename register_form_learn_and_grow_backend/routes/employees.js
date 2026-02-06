@@ -5,15 +5,33 @@ const router = express.Router();
 // GET all employees with position and department names
 router.get('/', async (req, res) => {
   try {
-    const { search, page = 1, limit = 20 } = req.query;
+    const { search, page = 1, limit = 20, division_id, dept_id } = req.query;
     const connection = await getConnection();
     
-    let whereClause = 'WHERE e.is_deleted = 0 \n';
+    let whereClause = 'WHERE e.is_deleted = 0';
     let queryParams = [];
     
+    // Build conditions array
+    const conditions = [];
+    
     if (search) {
-      whereClause += `AND e.emp_name LIKE ?`;
+      conditions.push(`e.emp_name LIKE ?`);
       queryParams.push(`%${search}%`);
+    }
+    
+    if (division_id) {
+      conditions.push(`d.div_id = ?`);
+      queryParams.push(division_id);
+    }
+    
+    if (dept_id) {
+      conditions.push(`e.dept_id = ?`);
+      queryParams.push(dept_id);
+    }
+    
+    // Add conditions to WHERE clause if any exist
+    if (conditions.length > 0) {
+      whereClause = `WHERE e.is_deleted = 0 AND ${conditions.join(' AND ')}`;
     }
     
     const offset = (page - 1) * limit;
@@ -36,6 +54,9 @@ router.get('/', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
     
+    console.log('SQL Query:', employeeQuery);
+    console.log('Query Params:', [...queryParams, parseInt(limit).toString(), parseInt(offset).toString()]);
+    
     // Add limit and offset to params
     const employeeParams = [...queryParams, parseInt(limit).toString(), parseInt(offset).toString()];
     
@@ -50,6 +71,9 @@ router.get('/', async (req, res) => {
       LEFT JOIN division ON d.div_id = division.id
       ${whereClause}
     `;
+    
+    console.log('Count Query:', countQuery);
+    console.log('Count Params:', queryParams);
     
     const [countResult] = await connection.execute(countQuery, queryParams);
     
@@ -66,6 +90,23 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.log('Database error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET departments by division
+router.get('/departments/by-division/:divisionId', async (req, res) => {
+  try {
+    const { divisionId } = req.params;
+    const connection = await getConnection();
+    const [rows] = await connection.execute(
+      'SELECT * FROM dept WHERE div_id = ? ORDER BY dept_name',
+      [divisionId]
+    );
+    await connection.end();
+    res.json(rows);
+  } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 });
