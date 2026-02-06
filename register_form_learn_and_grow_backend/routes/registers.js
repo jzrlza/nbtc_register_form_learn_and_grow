@@ -195,7 +195,7 @@ router.post('/', async (req, res) => {
     // Check if employee exists and is not deleted
     const [empRows] = await connection.execute(
       'SELECT emp_name FROM employee WHERE id = ? AND is_deleted = 0',
-      [emp_id]
+      [emp_id ? emp_id : null]
     );
     
     if (empRows.length === 0) {
