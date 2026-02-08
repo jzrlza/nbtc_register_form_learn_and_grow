@@ -201,7 +201,11 @@ const AttendeeInput = ({ user, onLogout }) => {
       };
       
       if (isEditMode) {
-        await axios.put(`${API_URL}/api/registers/${id}`, submitData);
+        await axios.put(`${API_URL}/api/registers/${id}`, submitData,{
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
         showModal('success', 'อัพเดทการลงทะเบียนเรียบร้อยแล้ว');
       } else {
         await axios.post(`${API_URL}/api/registers`, submitData);

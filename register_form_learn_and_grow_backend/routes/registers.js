@@ -1,6 +1,25 @@
 const express = require('express');
 const { getConnection } = require('../config/database');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET_STR = process.env.JWT_SECRET_STR;
+
+const verifyJWTToken = (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1].replace(/"/g, '');
+
+  if (!token) {
+    return null;
+  }
+  
+  try {
+    // Verify token - if valid, get user info back!
+    const user = jwt.verify(token, JWT_SECRET_STR);
+    return user;
+  } catch (err) {
+    return null;
+  }
+}
 
 // GET all registers with employee names
 // GET all registers with employee names (alternative approach)
@@ -185,6 +204,7 @@ router.get('/employees/search', async (req, res) => {
   }
 });
 
+// --PUBLIC-- ****this is used in home public page where no login needed****
 // POST create new register
 router.post('/', async (req, res) => {
   try {
@@ -223,8 +243,14 @@ router.post('/', async (req, res) => {
   }
 });
 
+// **PROTECTED**
 // PUT update register
 router.put('/:id', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   try {
     const { id } = req.params;
     const { emp_id, table_number } = req.body;
@@ -297,9 +323,15 @@ router.get('/single/:id', async (req, res) => {
   }
 });
 
+// **PROTECTED**
 // DELETE register
 // Soft delete register
 router.delete('/:id', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   try {
     const { id } = req.params;
     
@@ -323,8 +355,14 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// **PROTECTED**
 // GET export data for Excel (most efficient)
 router.get('/export-data', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   let connection;
   try {
     connection = await getConnection();

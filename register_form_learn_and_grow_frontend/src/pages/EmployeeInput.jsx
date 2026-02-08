@@ -121,10 +121,18 @@ const EmployeeInput = ({ user, onLogout }) => {
       };
       
       if (isEditMode) {
-        await axios.put(`${API_URL}/api/employees/${id}`, submitData);
+        await axios.put(`${API_URL}/api/employees/${id}`, submitData, {
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
         showModal('success', 'บันทึกข้อมูลพนักงานเรียบร้อยแล้ว');
       } else {
-        await axios.post(`${API_URL}/api/employees`, submitData);
+        await axios.post(`${API_URL}/api/employees`, submitData, {
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
         showModal('success', 'เพิ่มพนักงานเรียบร้อยแล้ว');
       }
     } catch (error) {

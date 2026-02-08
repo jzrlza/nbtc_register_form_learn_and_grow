@@ -39,7 +39,7 @@ const Login = ({ onLogin }) => {
         setRequires2FA(true);
         setUserId(response.data.userId);
       } else {
-        onLogin(response.data.user);
+        onLogin(response.data.user, response.data.token);
         navigate('/');
       }
     } catch (error) {
@@ -59,7 +59,7 @@ const Login = ({ onLogin }) => {
         code
       });
       
-      onLogin(response.data.user);
+      onLogin(response.data.user, response.data.token);
       navigate('/');
     } catch (error) {
       showModal('error','2FA verification failed: ' + (error.response?.data?.error || error.message));

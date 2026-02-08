@@ -21,14 +21,16 @@ function App() {
     setLoading(false);
   }, []);
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData, tokenData) => {
     setUser(userData);
     sessionStorage.setItem('user', JSON.stringify(userData));
+    sessionStorage.setItem('token', JSON.stringify(tokenData));
   };
 
   const handleLogout = () => {
     setUser(null);
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
   };
 
   // Protected Route component (for admin-only pages)

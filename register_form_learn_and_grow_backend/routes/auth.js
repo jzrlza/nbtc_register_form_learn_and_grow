@@ -4,9 +4,22 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const { getConnection } = require('../config/database');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
+const JWT_SECRET_STR = process.env.JWT_SECRET_STR;
+
+const generateJWTToken = (user) => {
+  if (!JWT_SECRET_STR) {
+    return null;
+  }
+  return jwt.sign(
+      user, // Store user info here
+      JWT_SECRET_STR,
+      { expiresIn: '1h' } // Token expires in 1 hour
+    );
+}
 
 // Login (real, proxy to avoid CORS)
 router.post('/login', async (req, res) => {
@@ -97,11 +110,17 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    const token = generateJWTToken(user);
+    if (!token) {
+      return res.status(500).json({ error: 'JWT Secret ยังไม่ได้ตั้งค่า' });
+    }
+
     // Login successful without 2FA
     res.json({
       success: true,
       user: { id: user.id, CN: userAD.CN, employee_id: existingEmployeeID, type: user.type },
-      requires2FA: false
+      requires2FA: false,
+      token: token
     });
 
   } catch (error) {
@@ -150,10 +169,16 @@ router.post('/verify-2fa', async (req, res) => {
       window: 2
     });
 
+    const token = generateJWTToken(user);
+    if (!token) {
+      return res.status(500).json({ error: 'JWT Secret ยังไม่ได้ตั้งค่า' });
+    }
+
     if (verified) {
       res.json({
         success: true,
-        user: { id: user.id, CN: employee.emp_name, employee_id: employee.id, type: user.type }
+        user: { id: user.id, CN: employee.emp_name, employee_id: employee.id, type: user.type },
+        token: token
       });
     } else {
       res.status(401).json({ error: 'รหัส 2FA code ผิด' });

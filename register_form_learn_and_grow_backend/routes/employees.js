@@ -1,6 +1,25 @@
 const express = require('express');
 const { getConnection } = require('../config/database');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET_STR = process.env.JWT_SECRET_STR;
+
+const verifyJWTToken = (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1].replace(/"/g, '');
+
+  if (!token) {
+    return null;
+  }
+  
+  try {
+    // Verify token - if valid, get user info back!
+    const user = jwt.verify(token, JWT_SECRET_STR);
+    return user;
+  } catch (err) {
+    return null;
+  }
+}
 
 // GET all employees with position and department names
 router.get('/', async (req, res) => {
@@ -149,8 +168,14 @@ router.get('/divisions', async (req, res) => {
   }
 });
 
+//**PROTECTED**
 // POST create new employee
 router.post('/', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   try {
     const { emp_name, position_id, dept_id } = req.body;
     const connection = await getConnection();
@@ -168,8 +193,14 @@ router.post('/', async (req, res) => {
   }
 });
 
+//**PROTECTED**
 // PUT update employee
 router.put('/:id', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   try {
     const { id } = req.params;
     const { emp_name, position_id, dept_id } = req.body;
@@ -212,9 +243,16 @@ router.get('/single/:id', async (req, res) => {
   }
 });
 
+//**PROTECTED**
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
     const connection = await getConnection();
     
     await connection.execute(
@@ -230,9 +268,16 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+//**PROTECTED**
 router.delete('/:id/force', async (req, res) => {
   try {
     const { id } = req.params;
+
+    const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
     const connection = await getConnection();
     
     await connection.execute(
@@ -632,8 +677,14 @@ const processExcelImport = async (excelData, connection, testing = false) => {
 
 // ==================== EXCEL IMPORT ROUTES ====================
 
+//**PROTECTED**
 // POST test Excel import (with auto-add simulation)
 router.post('/test-import', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   console.log('=== EXCEL IMPORT TEST START ===');
   
   const connection = await getConnection();
@@ -674,8 +725,14 @@ router.post('/test-import', async (req, res) => {
   }
 });
 
+//**PROTECTED**
 // POST real Excel import (save to database with auto-add)
 router.post('/import', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
   console.log('=== EXCEL IMPORT START (SAVING TO DATABASE WITH AUTO-ADD) ===');
   
   const connection = await getConnection();
@@ -718,9 +775,15 @@ router.post('/import', async (req, res) => {
   }
 });
 
+//**PROTECTED**
 // POST batch import with auto-add and updates
 router.post('/import-batch', async (req, res) => {
   const { excelData, batchSize = 100 } = req.body;
+
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
   
   if (!excelData || !Array.isArray(excelData)) {
     return res.status(400).json({ success: false, error: 'Invalid Excel data format' });

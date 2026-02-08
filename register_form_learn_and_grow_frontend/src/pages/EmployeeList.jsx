@@ -151,7 +151,11 @@ const EmployeeList = ({ user, onLogout }) => {
     if (!modal.employeeId) return;
     
     try {
-      await axios.delete(`${API_URL}/api/employees/${modal.employeeId}`);
+      await axios.delete(`${API_URL}/api/employees/${modal.employeeId}`,{
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
       fetchEmployees(currentPage, search, selectedDivision, selectedDept);
       showModal('success', 'ลบพนักงานเรียบร้อยแล้ว');
     } catch (error) {
@@ -252,10 +256,18 @@ const EmployeeList = ({ user, onLogout }) => {
       let response;
       if (shouldImport) {
         console.log('Frontend: Starting REAL import...');
-        response = await axios.post(`${API_URL}/api/employees/import`, { excelData: confirmModal.excelData });
+        response = await axios.post(`${API_URL}/api/employees/import`, { excelData: confirmModal.excelData },{
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
       } else {
         console.log('Frontend: Starting TEST import...');
-        response = await axios.post(`${API_URL}/api/employees/test-import`, { excelData: confirmModal.excelData });
+        response = await axios.post(`${API_URL}/api/employees/test-import`, { excelData: confirmModal.excelData },{
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
       }
       
       if (response.data.success) {

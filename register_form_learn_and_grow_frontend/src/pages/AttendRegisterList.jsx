@@ -69,7 +69,11 @@ const AttendRegisterList = ({ user, onLogout }) => {
     if (!modal.registerId) return;
     
     try {
-      await axios.delete(`${API_URL}/api/registers/${modal.registerId}`);
+      await axios.delete(`${API_URL}/api/registers/${modal.registerId}`, {
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
       fetchRegisters(currentPage);
       showModal('success', 'ลบการลงทะเบียนเรียบร้อยแล้ว');
     } catch (error) {
@@ -86,7 +90,11 @@ const AttendRegisterList = ({ user, onLogout }) => {
   const handleExportExcel = async () => {
     setExportLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/api/registers/export-data`);
+      const response = await axios.get(`${API_URL}/api/registers/export-data`, {
+        headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+        }
+      });
       
       if (response.data.success) {
         exportToExcel(response.data.registers, response.data.unregisteredEmployees);
