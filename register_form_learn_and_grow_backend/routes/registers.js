@@ -3,7 +3,7 @@ const { getConnection } = require('../config/database');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET_STR = process.env.JWT_SECRET_STR;
+const JWT_SECRET_STR = process.env.JWT_SECRET;
 
 const verifyJWTToken = (req, res) => {
   const token = req.headers.authorization?.split(' ')[1].replace(/"/g, '');

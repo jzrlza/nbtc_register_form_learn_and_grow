@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
-const JWT_SECRET_STR = process.env.JWT_SECRET_STR;
+const JWT_SECRET_STR = process.env.JWT_SECRET;
 
 const generateJWTToken = (user) => {
   if (!JWT_SECRET_STR) {
