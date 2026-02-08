@@ -138,6 +138,9 @@ const EmployeeInput = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error saving employee:', error);
       showModal('error', 'ไม่สามารถบันทึกพนักงานได้: ' + (error.response?.data?.error || error.message));
+      if (error.response?.status == 403) {
+        handleLogout();
+      }
     } finally {
       setLoading(false);
     }

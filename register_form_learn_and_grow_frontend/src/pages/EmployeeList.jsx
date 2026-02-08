@@ -161,6 +161,9 @@ const EmployeeList = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error deleting employee:', error);
       showModal('error', 'ไม่สามารถลบพนักงานได้');
+      if (error.response?.status == 403) {
+        handleLogout();
+      }
     }
   };
 
@@ -293,6 +296,9 @@ const EmployeeList = ({ user, onLogout }) => {
       console.error('Frontend: Import error:', error);
       setExcelLoadModal({ isOpen: false });
       showModal('error', 'ไม่สามารถประมวลผลไฟล์ Excel ได้: ' + error.message);
+      if (error.response?.status == 403) {
+        handleLogout();
+      }
     } finally {
       setExcelLoadModal({ isOpen: false });
       setLoading(false);

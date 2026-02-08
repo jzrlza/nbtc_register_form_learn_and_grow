@@ -214,6 +214,9 @@ const AttendeeInput = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error saving registration:', error);
       showModal('error', 'ไม่สามารถบันทึกการลงทะเบียนได้: ' + (error.response?.data?.error || error.message));
+      if (error.response?.status == 403) {
+        handleLogout();
+      }
     } finally {
       setLoading(false);
     }

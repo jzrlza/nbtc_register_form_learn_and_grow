@@ -79,6 +79,9 @@ const AttendRegisterList = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Error deleting register:', error);
       showModal('error', 'ไม่สามารถลบการลงทะเบียนได้');
+      if (error.response?.status == 403) {
+        handleLogout();
+      }
     }
   };
 
@@ -105,6 +108,9 @@ const AttendRegisterList = ({ user, onLogout }) => {
     } catch (error) {
       console.error('Export error:', error);
       showModal('error', 'ไม่สามารถส่งออกไฟล์ Excel ได้: ' + error.message);
+      if (error.response?.status == 403) {
+        handleLogout();
+      }
     } finally {
       setExportLoading(false);
     }
