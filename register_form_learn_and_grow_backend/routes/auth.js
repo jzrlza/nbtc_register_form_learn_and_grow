@@ -134,7 +134,7 @@ router.post('/verify-2fa', async (req, res) => {
     const connection = await getConnection();
     
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE (employee_id = ? OR username = ?) AND is_deleted = 0', 
+      'SELECT * FROM users WHERE (username = ? OR employee_id = ?) AND is_deleted = 0', 
       [employee_id, username]
     );
     if (users.length <= 0) {
