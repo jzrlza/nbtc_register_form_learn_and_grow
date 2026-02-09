@@ -116,7 +116,7 @@ router.post('/login', async (req, res) => {
     // Login successful without 2FA
     res.json({
       success: true,
-      user: { id: user.id, CN: userAD.CN, employee_id: existingEmployeeID, type: user.type },
+      user: user,
       requires2FA: false,
       token: token
     });
@@ -164,7 +164,7 @@ router.post('/verify-2fa', async (req, res) => {
     if (verified) {
       res.json({
         success: true,
-        user: { id: user.id, CN: employee.emp_name, employee_id: employee.id, type: user.type },
+        user: user,
         token: token
       });
     } else {
