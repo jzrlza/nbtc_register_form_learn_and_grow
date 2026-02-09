@@ -84,19 +84,16 @@ router.post('/login', async (req, res) => {
           'SELECT id FROM employee WHERE emp_name LIKE ? AND is_deleted = 0',
           [userAD.CN ? `%${userAD.CN}` : null]
         );
-    if (existingEmployeeIDs.length <= 0) {
-      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบพนักงานในฐานข้อมูลในปัจจุบัน' });
-    }
     const existingEmployeeID = existingEmployeeIDs[0].id;
 
     //now check user authen
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE employee_id = ? AND is_deleted = 0', 
-      [parseInt(existingEmployeeID)]
+      'SELECT * FROM users WHERE (username = ? OR employee_id = ?) AND is_deleted = 0', 
+      [username, parseInt(existingEmployeeID)]
     );
     if (users.length <= 0) {
       //create and 2fa
-      return res.status(401).json({ success: false, error: 'ขออภัย คุณไม่มีสิทธิ์เข้าถึงหลังบ้าน' });
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username หรือพนักงาน' });
     }
       //simply login, if 2fa, setup or use
     const user = users[0];
@@ -106,7 +103,8 @@ router.post('/login', async (req, res) => {
       return res.json({ 
         requires2FA: true, 
         message: '2FA code required',
-        userId: user.id 
+        userId: user.id,
+        employeeId: employee_id
       });
     }
 
@@ -132,29 +130,18 @@ router.post('/login', async (req, res) => {
 // Verify 2FA Code
 router.post('/verify-2fa', async (req, res) => {
   try {
-    const { userId, code } = req.body;
+    const { userId, username, employee_id, code } = req.body;
     const connection = await getConnection();
     
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE id = ? AND is_deleted = 0', 
-      [userId]
+      'SELECT * FROM users WHERE (employee_id = ? OR username = ?) AND is_deleted = 0', 
+      [employee_id, username]
     );
     if (users.length <= 0) {
       //create and 2fa
-      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ User ในฐานข้อมูลในปัจจุบัน' });
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username หรือพนักงาน' });
     }
     const user = users[0];
-
-    const existingEmployeeID = user.employee_id;
-    const [employees] = await connection.execute(
-      'SELECT * FROM employee WHERE id = ? AND is_deleted = 0', 
-      [parseInt(existingEmployeeID)]
-    );
-    if (employees.length <= 0) {
-      //create and 2fa
-      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบชื่อหนักงานในฐานข้อมูลในปัจจุบัน' });
-    }
-    const employee = employees[0];
 
     await connection.end();
     

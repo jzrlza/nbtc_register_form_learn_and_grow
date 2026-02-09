@@ -10,6 +10,7 @@ const Login = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [employeeId, setEmployeeId] = useState(null);
   const [code, setCode] = useState('');
   const [qrCode, setQrCode] = useState('');
   const [secret, setSecret] = useState('');
@@ -37,7 +38,8 @@ const Login = ({ onLogin }) => {
 
       if (response.data.requires2FA) {
         setRequires2FA(true);
-        setUserId(response.data.userId);
+        setUserId(response.data.userId || null);
+        setEmployeeId(response.data.employeeId || null);
       } else {
         onLogin(response.data.user, response.data.token);
         navigate('/');
@@ -56,6 +58,8 @@ const Login = ({ onLogin }) => {
     try {
       const response = await axios.post(`${API_URL}/api/auth/verify-2fa`, {
         userId,
+        username,
+        employeeId,
         code
       });
       
