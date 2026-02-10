@@ -327,7 +327,7 @@ router.put('/:id', async (req, res) => {
     await connection.end();
     
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Register not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
     
     res.json({ message: 'แก้ไขผู้ใช้งานเรียบร้อย' });
@@ -346,6 +346,8 @@ router.delete('/:id', async (req, res) => {
       return res.status(403).json({ error: "Unauthorized Access" });
     }
 
+    const self_delete = int(user.id) === int(id)
+
   try {
     const { id } = req.params;
     
@@ -362,7 +364,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    res.json({ message: 'User ถูกลบเรียบร้อย' });
+    res.json({ message: 'User ถูกลบเรียบร้อย', self_delete: self_delete });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });

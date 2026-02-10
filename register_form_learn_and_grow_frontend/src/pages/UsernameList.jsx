@@ -60,7 +60,7 @@ const UsernameList = ({ user, onLogout }) => {
   };
 
   const handleDelete = (userId) => {
-    showModal('confirm', 'คุณแน่ใจหรือไม่ที่จะลบผู้ใข้งานนี้?', userId);
+    showModal('confirm', userId == user.id ? '*** คุณแน่ใจหรือไม่ที่จะลบตัวเอง!? ***' : 'คุณแน่ใจหรือไม่ที่จะลบผู้ใข้งานนี้?', userId);
   };
 
   const handle2FADelete = (userId) => {
@@ -89,13 +89,18 @@ const UsernameList = ({ user, onLogout }) => {
     }
     else {
       try {
-        await axios.delete(`${API_URL}/api/users/${modal.userId}`, {
+        const response = await axios.delete(`${API_URL}/api/users/${modal.userId}`, {
           headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
           }
         });
-        fetchUsers(currentPage);
-        showModal('success', 'ลบผู้ใข้งานแล้ว');
+        if (response.self_delete) {
+          handleLogout();
+        } else {
+          fetchUsers(currentPage);
+          showModal('success', 'ลบผู้ใข้งานแล้ว');
+        }
+        
       } catch (error) {
         console.error('Error deleting user:', error);
         showModal('error', 'ไม่สามารถผู้ใข้งานได้');
