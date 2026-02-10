@@ -60,7 +60,7 @@ const UsernameList = ({ user, onLogout }) => {
   };
 
   const handleDelete = (userId) => {
-    showModal('confirm', userId == user.id ? '*** คุณแน่ใจหรือไม่ที่จะลบตัวเอง!? ***' : 'คุณแน่ใจหรือไม่ที่จะลบผู้ใข้งานนี้?', userId);
+    showModal('confirm', parseInt(userId) === parseInt(user?.id) ? '*** คุณแน่ใจหรือไม่ที่จะลบตัวเอง!? ***' : 'คุณแน่ใจหรือไม่ที่จะลบผู้ใข้งานนี้?', userId);
   };
 
   const handle2FADelete = (userId) => {
