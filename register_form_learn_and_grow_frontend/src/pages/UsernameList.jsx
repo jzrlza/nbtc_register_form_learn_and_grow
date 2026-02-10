@@ -151,7 +151,7 @@ const UsernameList = ({ user, onLogout }) => {
                       <tr key={user.id}>
                         <td>{user.id}</td>
                         <td>{user.username}</td>
-                        <td>{user.emp_name}</td>
+                        <td>{user.emp_name ? user.emp_name : "-"}</td>
                         <td>{user.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
                         <td>{user.is_2fa_enabled ? (user.has_two_password ? "ใช่" : "ไม่ใช่") : "-"}</td>
                         <td className="actions">
