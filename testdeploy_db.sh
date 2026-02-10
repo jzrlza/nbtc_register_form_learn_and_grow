@@ -20,6 +20,7 @@ mysql -h 127.0.0.1 -P 3306 -u root -p
 docker exec -it register_form_learn_and_grow_database_production mysql -u root -p
 #nbtc2026_lng
 # Check databases
+# USE db_name;
 SHOW DATABASES;
 
 USE learngrow_db;
