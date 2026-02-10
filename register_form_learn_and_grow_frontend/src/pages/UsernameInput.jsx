@@ -87,19 +87,19 @@ const UsernameInput = ({ user, onLogout }) => {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/users/${id}`);
-      const user = response.data;
+      const userobj = response.data;
       
       setFormData({
         //emp_name: user.emp_name || '',
-        emp_id: user.employee_id || '',
-        username: user.username || '',
-        is_2fa_enabled: user.is_2fa_enabled === 1 || user.is_2fa_enabled === true
+        emp_id: userobj.employee_id || '',
+        username: userobj.username || '',
+        is_2fa_enabled: userobj.is_2fa_enabled === 1 || userobj.is_2fa_enabled === true
       });
 
       // If editing, we need to fetch the employee's division and department
-      if (user.employee_id) {
+      if (userobj.employee_id) {
         try {
-          const employeeInfo = await axios.get(`${API_URL}/api/users/employee-info/${user.employee_id}`);
+          const employeeInfo = await axios.get(`${API_URL}/api/users/employee-info/${userobj.employee_id}`);
           const { division_id, department_id } = employeeInfo.data;
           
           setSelectedDivision(division_id?.toString() || '');
@@ -110,7 +110,7 @@ const UsernameInput = ({ user, onLogout }) => {
               await fetchEmployees(department_id);
             }
           }
-          setSelectedEmployee(user.employee_id.toString());
+          setSelectedEmployee(userobj.employee_id.toString());
         } catch (error) {
           console.error('Error fetching employee info:', error);
         }
