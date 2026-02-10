@@ -14,7 +14,8 @@ const UsernameInput = ({ user, onLogout }) => {
   const [formData, setFormData] = useState({
     //emp_name: '',
     emp_id: '',
-    username: ''
+    username: '',
+    is_2fa_enabled: false
   });
   
   // New state for hierarchical selection
@@ -91,7 +92,8 @@ const UsernameInput = ({ user, onLogout }) => {
       setFormData({
         //emp_name: user.emp_name || '',
         emp_id: user.employee_id || '',
-        username: user.username || ''
+        username: user.username || '',
+        is_2fa_enabled: user.is_2fa_enabled === 1 || user.is_2fa_enabled === true
       });
 
       // If editing, we need to fetch the employee's division and department
@@ -170,14 +172,14 @@ const UsernameInput = ({ user, onLogout }) => {
       if (employee) {
         setFormData(prev => ({
           ...prev,
-          emp_name: employee.emp_name,
+          //emp_name: employee.emp_name,
           emp_id: employee.id.toString()
         }));
       }
     } else {
       setFormData(prev => ({
         ...prev,
-        emp_name: '',
+        //emp_name: '',
         emp_id: ''
       }));
     }
@@ -197,7 +199,8 @@ const UsernameInput = ({ user, onLogout }) => {
     try {
       const submitData = {
         employee_id: formData.emp_id,
-        username: formData.username
+        username: formData.username,
+        is_2fa_enabled: formData.is_2fa_enabled
       };
       
       if (isEditMode) {
@@ -227,11 +230,11 @@ const UsernameInput = ({ user, onLogout }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -272,6 +275,24 @@ const UsernameInput = ({ user, onLogout }) => {
                 placeholder="ป้อน username"
               />
             </div>
+
+          <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              name="is_2fa_enabled"
+              checked={formData.is_2fa_enabled}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                is_2fa_enabled: e.target.checked
+              }))}
+            />
+            &nbsp;เปิดใช้งาน Two-Factor Authentication (2FA)
+          </label>
+          <small className="form-hint">
+            เมื่อเปิดใช้งานนี้ ผู้ใช้งานจะต้องตั้งค่า 2FA ผ่านแอป Google Authenticator
+          </small>
+        </div>
           
           <form onSubmit={handleSubmit} className="employee-form">
             {/* Division Selection */}

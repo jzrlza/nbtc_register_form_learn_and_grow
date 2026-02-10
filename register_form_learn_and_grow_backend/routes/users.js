@@ -234,7 +234,7 @@ router.post('/', async (req, res) => {
     }
 
   try {
-    const { employee_id, username } = req.body;
+    const { employee_id, username, is_2fa_enabled } = req.body;
     
     const connection = await getConnection();
     
@@ -260,8 +260,8 @@ router.post('/', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'INSERT INTO users (username, employee_id, is_2fa_enabled, is_deleted) VALUES (?, ?, 1, 0)',
-      [username, employee_id]
+      'INSERT INTO users (username, employee_id, is_2fa_enabled, is_deleted) VALUES (?, ?, ?, 0)',
+      [username, employee_id, (is_2fa_enabled ? 1 : 0)]
     );
     
     await connection.end();
@@ -283,7 +283,7 @@ router.put('/:id', async (req, res) => {
 
   try {
     const { id } = req.params;
-    const { employee_id, username } = req.body;
+    const { employee_id, username, is_2fa_enabled } = req.body;
     
     const connection = await getConnection();
     
@@ -311,8 +311,8 @@ router.put('/:id', async (req, res) => {
 
     // Check if username is duplicated
     const [users_duplicated] = await connection.execute(
-      'SELECT 1 FROM users WHERE username = ? AND is_deleted = 0',
-      [username ? username : null]
+      'SELECT 1 FROM users WHERE username = ? AND is_deleted = 0 AND NOT (id = ?)',
+      [username ? username : null, id]
     );
     if (users_duplicated.length > 0) {
       await connection.end();
@@ -320,8 +320,8 @@ router.put('/:id', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'UPDATE users SET username = ?, employee_id = ? WHERE id = ? AND is_deleted = 0',
-      [username, employee_id, id]
+      'UPDATE users SET username = ?, employee_id = ?, is_2fa_enabled = ? WHERE id = ? AND is_deleted = 0',
+      [username, employee_id, (is_2fa_enabled ? 1 : 0), id]
     );
     
     await connection.end();
@@ -363,6 +363,37 @@ router.delete('/:id', async (req, res) => {
     }
     
     res.json({ message: 'User ถูกลบเรียบร้อย' });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// **PROTECTED**
+// DELETE 2fa
+router.delete('/2fa/:id', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
+  try {
+    const { id } = req.params;
+    
+    const connection = await getConnection();
+    
+    const [result] = await connection.execute(
+      'UPDATE user SET two_factor_secret = NULL WHERE id = ?',
+      [id]
+    );
+    
+    await connection.end();
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ message: '2FA ถูกลบเรียบร้อย' });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });

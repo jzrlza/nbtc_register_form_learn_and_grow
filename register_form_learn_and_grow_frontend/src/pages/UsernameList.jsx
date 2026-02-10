@@ -63,24 +63,48 @@ const UsernameList = ({ user, onLogout }) => {
     showModal('confirm', 'คุณแน่ใจหรือไม่ที่จะลบผู้ใข้งานนี้?', userId);
   };
 
+  const handle2FADelete = (userId) => {
+    showModal('confirm-2fa', 'คุณแน่ใจหรือไม่ที่จะลบ 2FA ของผู้ใช้งานนี้?', userId);
+  }
+
   const confirmDelete = async () => {
     if (!modal.userId) return;
-    
-    try {
-      await axios.delete(`${API_URL}/api/users/${modal.userId}`, {
-        headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+
+    if (modal.type === "confirm-2fa") {
+      try {
+        await axios.delete(`${API_URL}/api/users/2fa/${modal.userId}`, {
+          headers: {
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+          }
+        });
+        fetchUsers(currentPage);
+        showModal('success', 'ลบ 2FA ของผู้ใข้งานแล้ว');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showModal('error', 'ไม่สามารถ 2FA ของผู้ใข้งานได้');
+        if (error.response?.status == 403) {
+          handleLogout();
         }
-      });
-      fetchUsers(currentPage);
-      showModal('success', 'ลบผู้ใข้งานแล้ว');
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      showModal('error', 'ไม่สามารถผู้ใข้งานได้');
-      if (error.response?.status == 403) {
-        handleLogout();
       }
     }
+    else {
+      try {
+        await axios.delete(`${API_URL}/api/users/${modal.userId}`, {
+          headers: {
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+          }
+        });
+        fetchUsers(currentPage);
+        showModal('success', 'ลบผู้ใข้งานแล้ว');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        showModal('error', 'ไม่สามารถผู้ใข้งานได้');
+        if (error.response?.status == 403) {
+          handleLogout();
+        }
+      }
+    }
+    
   };
 
   const handleLogout = () => {
@@ -153,8 +177,15 @@ const UsernameList = ({ user, onLogout }) => {
                         <td>{user.username}</td>
                         <td>{user.emp_name ? user.emp_name : "-"}</td>
                         <td>{user.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
-                        <td>{user.is_2fa_enabled ? (user.has_two_password ? "ใช่" : "ไม่ใช่") : "-"}</td>
+                        <td>{user.has_two_password ? "ใช่" : "ไม่ใช่"}</td>
                         <td className="actions">
+                          <button 
+                            onClick={() => handle2FADelete(user.id)}
+                            className="delete-btn"
+                            disabled={!user.has_two_password}
+                          >
+                            เอา 2FA ออก
+                          </button>
                           <button 
                             onClick={() => handleEdit(user.id)}
                             className="edit-btn"
@@ -216,7 +247,7 @@ const UsernameList = ({ user, onLogout }) => {
 
       {/* Modal for confirmation */}
       <Modal 
-        isOpen={modal.isOpen && modal.type === 'confirm'} 
+        isOpen={modal.isOpen && (modal.type === 'confirm' || modal.type === 'confirm-2fa')} 
         onClose={closeModal}
         title="ยืนยันการลบ"
       >
