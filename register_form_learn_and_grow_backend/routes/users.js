@@ -24,8 +24,23 @@ const verifyJWTToken = (req, res) => {
 // GET all users
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { search, page = 1, limit = 10 } = req.query;
+
     const connection = await getConnection();
+
+    let whereClause = '';
+    
+    // Build conditions array
+    const conditions = [];
+    
+    if (search) {
+      conditions.push(`u.username LIKE '%${search}%'`);
+    }
+
+    // Add conditions to WHERE clause if any exist
+    if (conditions.length > 0) {
+      whereClause = `AND ${conditions.join(' AND ')}`;
+    }
 
     // Validate and parse parameters
     const pageNum = Math.max(1, parseInt(page));
@@ -44,7 +59,7 @@ router.get('/', async (req, res) => {
         e.emp_name
       FROM users u
       LEFT JOIN employee e ON u.employee_id = e.id
-      WHERE u.is_deleted = 0 AND (u.employee_id IS NULL OR e.is_deleted = 0)
+      WHERE u.is_deleted = 0 AND (u.employee_id IS NULL OR e.is_deleted = 0) ${whereClause}
       ORDER BY u.id DESC
       LIMIT ${limitNum} OFFSET ${offset}
     `; //LEFT JOIN employee e ON u.emp_id = e.id     AND e.is_deleted = 0

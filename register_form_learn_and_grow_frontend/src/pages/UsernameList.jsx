@@ -10,19 +10,24 @@ const UsernameList = ({ user, onLogout }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '', userId: null });
   const navigate = useNavigate();
 
-  const fetchUsers = async (page = 1) => {
+  const fetchUsers = async (page = 1, searchTerm = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: page,
         limit: 10
       });
+
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
       
       const response = await axios.get(`${API_URL}/api/users?${params}`);
       setUsers(response.data.users || []);
@@ -46,9 +51,15 @@ const UsernameList = ({ user, onLogout }) => {
     setModal({ isOpen: false, type: '', message: '', userId: null });
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchUsers(1, search);
+  };
+
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    fetchUsers(newPage);
+    fetchUsers(newPage, search);
   };
 
   const handleEdit = (userId) => {
@@ -118,7 +129,7 @@ const UsernameList = ({ user, onLogout }) => {
   };
 
   useEffect(() => {
-    fetchUsers(1);
+    fetchUsers(1, '');
   }, []);
 
   return (
@@ -130,14 +141,44 @@ const UsernameList = ({ user, onLogout }) => {
           <div className="section-header">
             <h2>ผู้ใช้งาน ({totalUsers})</h2>
             <button onClick={() => fetchUsers(currentPage)} disabled={loading} className="refresh-btn">
-            {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
-          </button>
+                    {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
+                  </button>
             <button onClick={handleAddUser} className="add-btn">
               เพิ่มผู้ใข้งาน
             </button>
           </div>
           
-          
+          <div className="filters-container">
+              <div className="filters-row">
+                <form onSubmit={handleSearch} className="search-form">
+                  <input
+                    type="text"
+                    placeholder="ค้นหาผู้ใช้งานด้วยชื่อ Username..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="search-input"
+                  />
+
+                  <button type="submit" disabled={loading} className="search-btn">
+                    ค้นหา
+                  </button>
+                  
+                </form>
+              </div>
+              
+              <div className="active-filters">
+                {(search) && (
+                  <div className="filters-info">
+                    <span>ตัวกรองที่ใช้งานอยู่: </span>
+                    {search && (
+                      <span className="filter-tag">
+                        ค้นหา: {search}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
           {users.length > 0 ? <div className="pagination">
                 <button 
