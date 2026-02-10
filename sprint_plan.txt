@@ -32,10 +32,7 @@ Hold (learn later)
   - kill the old images and use new image with init.sql, also clear caches and ***volumes
 
 Today
-- increase session security for sending to backend (use a fulyl manually coded jwt-like token that I should invent my own gibberish)
- -*- except for creating register, the only POST method that should be spared of security lock
- -*- add sesssion timeout logic when inactive for 1 hour
-- add username field back again in users table and use it as primary option of logging in
+- Make new backend admin page to manage users, without relying on command lines
 
 Tomorrow
 - add excel import button that specifically list the non-existing name employees (set is_delete to 1) in case they quit or retire
@@ -43,6 +40,10 @@ Tomorrow
 
 
 [Done]
+- increase session security for sending to backend (use a fulyl manually coded jwt-like token that I should invent my own gibberish)
+ -*- except for creating register, the only POST method that should be spared of security lock
+ -*- add sesssion timeout logic when inactive for 1 hour
+- add username field back again in users table and use it as primary option of logging in
 - set up database for permission
 - prevent 502 bad gateway memory leak overnight
 - ssl https secure connection
