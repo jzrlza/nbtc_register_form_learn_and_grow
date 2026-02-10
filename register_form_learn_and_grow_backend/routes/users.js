@@ -346,7 +346,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(403).json({ error: "Unauthorized Access" });
     }
 
-    const self_delete = int(user.id) === int(id)
+    const self_delete = parseInt(user.id) === parseInt(id);
 
   try {
     const { id } = req.params;
