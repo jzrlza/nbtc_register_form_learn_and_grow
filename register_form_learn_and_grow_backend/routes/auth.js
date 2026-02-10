@@ -96,7 +96,8 @@ router.post('/login', async (req, res) => {
       return res.json({ 
         requires2FA: true, 
         message: '2FA code required',
-        userId: user.id
+        userId: user.id,
+        userAD: userAD
       });
     }
 
@@ -108,7 +109,7 @@ router.post('/login', async (req, res) => {
     // Login successful without 2FA
     res.json({
       success: true,
-      user: user,
+      user: {...user, ...userAD},
       requires2FA: false,
       token: token
     });
@@ -122,7 +123,7 @@ router.post('/login', async (req, res) => {
 // Verify 2FA Code
 router.post('/verify-2fa', async (req, res) => {
   try {
-    const { userId, username, code } = req.body;
+    const { userId, username, userAD, code } = req.body;
     const connection = await getConnection();
     
     const [users] = await connection.execute(
@@ -156,7 +157,7 @@ router.post('/verify-2fa', async (req, res) => {
     if (verified) {
       res.json({
         success: true,
-        user: user,
+        user: {...user, ...userAD},
         token: token
       });
     } else {
