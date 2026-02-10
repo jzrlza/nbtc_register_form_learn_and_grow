@@ -6,6 +6,8 @@ import EmployeeList from './pages/EmployeeList';
 import EmployeeInput from './pages/EmployeeInput';
 import AttendRegisterList from './pages/AttendRegisterList';
 import AttendeeInput from './pages/AttendeeInput';
+import UsernameList from './pages/UsernameList';
+import UsernameInput from './pages/UsernameInput';
 import './App.css';
 
 function App() {
@@ -109,6 +111,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <AttendeeInput user={user} onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/username" 
+            element={
+              <ProtectedRoute>
+                <UsernameList user={user} onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/username/edit/:id?" 
+            element={
+              <ProtectedRoute>
+                <UsernameInput user={user} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />

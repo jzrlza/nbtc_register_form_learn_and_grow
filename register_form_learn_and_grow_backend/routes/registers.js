@@ -236,7 +236,7 @@ router.post('/', async (req, res) => {
     
     await connection.end();
     
-    res.json({ id: result.insertId, message: 'Registration created successfully' });
+    res.json({ id: result.insertId, message: 'เพิ่มการลงทะเบียนเรียบร้อย' });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });
@@ -265,7 +265,7 @@ router.put('/:id', async (req, res) => {
     
     if (registerRows.length === 0) {
       await connection.end();
-      return res.status(404).json({ error: 'Register not found' });
+      return res.status(404).json({ error: 'ไม่พบการลงทะเบียน' });
     }
     
     // Check if employee exists and is not deleted
@@ -290,7 +290,7 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Register not found' });
     }
     
-    res.json({ message: 'Registration updated successfully' });
+    res.json({ message: 'แก้ไขการลงทะเบียนเรียบร้อย' });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });
@@ -313,7 +313,7 @@ router.get('/single/:id', async (req, res) => {
     await connection.end();
     
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'Registration not found' });
+      return res.status(404).json({ error: 'ไม่พบการลงทะเบียน' });
     }
     
     res.json(rows[0]);
@@ -348,7 +348,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Register not found' });
     }
     
-    res.json({ message: 'Registration deleted successfully' });
+    res.json({ message: 'ลบการลงทะเบียนเรียบร้อย' });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });
