@@ -352,7 +352,7 @@ router.delete('/:id', async (req, res) => {
     const connection = await getConnection();
     
     const [result] = await connection.execute(
-      'UPDATE user SET is_deleted = 1 WHERE id = ?',
+      'UPDATE users SET is_deleted = 1 WHERE id = ?',
       [id]
     );
     
@@ -383,7 +383,7 @@ router.delete('/2fa/:id', async (req, res) => {
     const connection = await getConnection();
     
     const [result] = await connection.execute(
-      'UPDATE user SET two_factor_secret = NULL WHERE id = ?',
+      'UPDATE users SET two_factor_secret = NULL WHERE id = ?',
       [id]
     );
     
