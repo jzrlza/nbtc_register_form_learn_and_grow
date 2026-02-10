@@ -180,7 +180,7 @@ const UsernameList = ({ user, onLogout }) => {
                       <tr key={userobj.id} className={parseInt(userobj.id) === parseInt(user?.id) ? "self-row" : ""}>
                         <td>{userobj.id}</td>
                         <td>{userobj.username}</td>
-                        <td>{userobj.emp_name ? user.emp_name : "-"}</td>
+                        <td>{userobj.emp_name ? userobj.emp_name : "-"}</td>
                         <td>{userobj.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
                         <td>{userobj.has_two_password ? "ใช่" : "ไม่ใช่"}</td>
                         <td className="actions">
