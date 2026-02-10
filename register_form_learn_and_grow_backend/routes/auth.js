@@ -79,21 +79,14 @@ router.post('/login', async (req, res) => {
       }
     */
 
-    //check for employee table for id
-    const [existingEmployeeIDs] = await connection.execute(
-          'SELECT id FROM employee WHERE emp_name LIKE ? AND is_deleted = 0',
-          [userAD.CN ? `%${userAD.CN}` : null]
-        );
-    const existingEmployeeID = existingEmployeeIDs[0].id;
-
     //now check user authen
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE (username = ? OR employee_id = ?) AND is_deleted = 0', 
-      [username, parseInt(existingEmployeeID)]
+      'SELECT * FROM users WHERE username = ? AND is_deleted = 0', 
+      [username]
     );
     if (users.length <= 0) {
       //create and 2fa
-      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username หรือพนักงาน' });
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username ในฐานข้อมูล' });
     }
       //simply login, if 2fa, setup or use
     const user = users[0];
@@ -103,8 +96,7 @@ router.post('/login', async (req, res) => {
       return res.json({ 
         requires2FA: true, 
         message: '2FA code required',
-        userId: user.id,
-        employeeId: employee_id
+        userId: user.id
       });
     }
 
@@ -130,16 +122,16 @@ router.post('/login', async (req, res) => {
 // Verify 2FA Code
 router.post('/verify-2fa', async (req, res) => {
   try {
-    const { userId, username, employee_id, code } = req.body;
+    const { userId, username, code } = req.body;
     const connection = await getConnection();
     
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE (username = ? OR employee_id = ?) AND is_deleted = 0', 
-      [employee_id, username]
+      'SELECT * FROM users WHERE username = ? AND is_deleted = 0', 
+      [username]
     );
     if (users.length <= 0) {
       //create and 2fa
-      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username หรือพนักงาน' });
+      return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username ในฐานข้อมูล' });
     }
     const user = users[0];
 
