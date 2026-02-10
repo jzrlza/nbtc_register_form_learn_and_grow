@@ -1150,3 +1150,7 @@ input:focus, select:focus, textarea:focus {
     min-width: 100%;
   }
 }
+
+.self-row {
+    background-color: #441166;
+}

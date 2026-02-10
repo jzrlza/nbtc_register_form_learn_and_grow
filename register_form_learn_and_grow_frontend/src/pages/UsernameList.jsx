@@ -176,29 +176,29 @@ const UsernameList = ({ user, onLogout }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td>{user.id}</td>
-                        <td>{user.username}</td>
-                        <td>{user.emp_name ? user.emp_name : "-"}</td>
-                        <td>{user.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
-                        <td>{user.has_two_password ? "ใช่" : "ไม่ใช่"}</td>
+                    {users.map((userobj) => (
+                      <tr key={userobj.id} className={parseInt(userobj.id) === parseInt(user?.id) ? "self-row" : ""}>
+                        <td>{userobj.id}</td>
+                        <td>{userobj.username}</td>
+                        <td>{userobj.emp_name ? user.emp_name : "-"}</td>
+                        <td>{userobj.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
+                        <td>{userobj.has_two_password ? "ใช่" : "ไม่ใช่"}</td>
                         <td className="actions">
                           <button 
-                            onClick={() => handle2FADelete(user.id)}
+                            onClick={() => handle2FADelete(userobj.id)}
                             className="delete-btn"
-                            disabled={!user.has_two_password}
+                            disabled={!userobj.has_two_password}
                           >
                             เอา 2FA ออก
                           </button>
                           <button 
-                            onClick={() => handleEdit(user.id)}
+                            onClick={() => handleEdit(userobj.id)}
                             className="edit-btn"
                           >
                             แก้ไข
                           </button>
                           <button 
-                            onClick={() => handleDelete(user.id)}
+                            onClick={() => handleDelete(userobj.id)}
                             className="delete-btn"
                           >
                             ลบ
