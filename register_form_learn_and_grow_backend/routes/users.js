@@ -40,9 +40,11 @@ router.get('/', async (req, res) => {
         u.employee_id,
         u.type,
         u.is_2fa_enabled,
-        (u.two_factor_secret IS NOT NULL) as has_two_password
+        (u.two_factor_secret IS NOT NULL) as has_two_password,
+        e.emp_name
       FROM users u
-      WHERE u.is_deleted = 0
+      LEFT JOIN employee e ON u.employee_id = e.id
+      WHERE u.is_deleted = 0 AND e.is_deleted = 0
       ORDER BY u.id DESC
       LIMIT ${limitNum} OFFSET ${offset}
     `; //LEFT JOIN employee e ON u.emp_id = e.id     AND e.is_deleted = 0

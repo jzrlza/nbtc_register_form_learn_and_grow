@@ -139,10 +139,10 @@ const UsernameList = ({ user, onLogout }) => {
                   <thead>
                     <tr>
                       <th>รหัส</th>
-                      <th>username</th>
-                      <th>employee_id</th>
-                      <th>is_2fa_enabled</th>
-                      <th>two_factor_secret??</th>
+                      <th>ชื่อ Username</th>
+                      <th>ชื่อพนักงาน</th>
+                      <th>เปิดใช้งาน 2FA</th>
+                      <th>ทำ 2FA ไว้แล้ว</th>
                       <th>การดำเนินการ</th>
                     </tr>
                   </thead>
@@ -151,9 +151,9 @@ const UsernameList = ({ user, onLogout }) => {
                       <tr key={user.id}>
                         <td>{user.id}</td>
                         <td>{user.username}</td>
-                        <td>{user.employee_id}</td>
-                        <td>{user.is_2fa_enabled ? "true" : "false"}</td>
-                        <td>{user.is_2fa_enabled ? (user.has_two_password ? "set" : "not set") : "-"}</td>
+                        <td>{user.emp_name}</td>
+                        <td>{user.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
+                        <td>{user.is_2fa_enabled ? (user.has_two_password ? "ใช่" : "ไม่ใช่") : "-"}</td>
                         <td className="actions">
                           <button 
                             onClick={() => handleEdit(user.id)}
