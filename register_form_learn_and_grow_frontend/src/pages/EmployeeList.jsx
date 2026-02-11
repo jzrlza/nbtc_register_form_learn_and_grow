@@ -167,6 +167,7 @@ const EmployeeList = ({ user, onLogout }) => {
           'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
           }
         });
+        setExcelLoadModal({ isOpen: true });
       } else {
         await axios.delete(`${API_URL}/api/employees/${modal.employeeId}`,{
           headers: {
@@ -179,6 +180,7 @@ const EmployeeList = ({ user, onLogout }) => {
       showModal('success', 'ลบพนักงานเรียบร้อยแล้ว');
       cancelImport();
       closeResignModal();
+      setExcelLoadModal({ isOpen: false });
     } catch (error) {
       console.error('Error deleting employee:', error);
       showModal('error', 'ไม่สามารถลบพนักงานได้');
@@ -565,29 +567,6 @@ const EmployeeList = ({ user, onLogout }) => {
         </section>
       </main>
 
-
-
-      {/* Modal for import loading */}
-      <Modal 
-        isOpen={excelLoadModal.isOpen} 
-        title={'Loading...'}
-      >
-        <h1>
-          <img 
-            src={loadImage} 
-            alt={`กำลังโหลด`} 
-            style={{
-              width: '40px',
-              height: '40px',
-              display: 'block',
-              marginLeft: 'auto',
-              marginRight: 'auto'
-            }}
-          />
-        </h1>
-        <p>กำลังประมวลผล...</p>
-      </Modal>
-
       {/* Confirm Import Modal */}
       <Modal 
         isOpen={confirmModal.isOpen} 
@@ -778,6 +757,27 @@ const EmployeeList = ({ user, onLogout }) => {
         <div className="modal-actions">
           <button onClick={closeModal} className="modal-btn primary">ตกลง</button>
         </div>
+      </Modal>
+
+      {/* Modal for import loading */}
+      <Modal 
+        isOpen={excelLoadModal.isOpen} 
+        title={'Loading...'}
+      >
+        <h1>
+          <img 
+            src={loadImage} 
+            alt={`กำลังโหลด`} 
+            style={{
+              width: '40px',
+              height: '40px',
+              display: 'block',
+              marginLeft: 'auto',
+              marginRight: 'auto'
+            }}
+          />
+        </h1>
+        <p>กำลังประมวลผล...</p>
       </Modal>
     </div>
   );
