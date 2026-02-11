@@ -721,12 +721,12 @@ const EmployeeList = ({ user, onLogout }) => {
       <Modal 
         isOpen={resignModal.isOpen} 
         onClose={closeResignModal}
-        title={'ผลการทดสอบ Excel'}
+        title={'ผลจากการหาพนักงานที่ออกแล้ว เทียบจากฐานข้อมูลสู่ Excel'}
       >
         {resignModal.results && (
           <div className="import-results">
             
-            {resignModal.results.missingEmployees && resignModal.results.missingEmployees.length > 0 && (
+            {resignModal.results.missingEmployees && resignModal.results.missingEmployees.length > 0 ? (
               <div className="import-errors">
                 <h4>รายชื่อพนักงานในฐานข้อมูลที่ไม่พบใน Excel ({resignModal.results.missingEmployees.length}):</h4>
                 <div className="error-list scroll-box">
@@ -737,10 +737,14 @@ const EmployeeList = ({ user, onLogout }) => {
                   ))}
                 </div>
               </div>
-            )}
+            ) : (<div>
+              <h4>ไม่พบพนักงานในฐานข้อมูลที่ไม่ปรากฎใน Excel ขณะนี้</h4>
+            </div>)}
             
             <div className="modal-actions">
-            <button onClick={() => handleMassDelete(resignModal.results.missingEmployeeIds)} className="modal-btn danger">
+            <button 
+            disabled={!resignModal.results.missingEmployees || resignModal.results.missingEmployees.length <= 0}
+            onClick={() => handleMassDelete(resignModal.results.missingEmployeeIds)} className="modal-btn danger">
                 ลบออกทั้งหมด
               </button>
               <button onClick={closeResignModal} className="modal-btn primary">
