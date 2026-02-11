@@ -497,8 +497,8 @@ const EmployeeList = ({ user, onLogout }) => {
                   <thead>
                     <tr>
                       <th>รหัส</th>
-                      <th>ชื่อ-นามสกุล</th>
-                      <th>ตำแหน่ง</th>
+                      <th className="name-in-table">ชื่อ-นามสกุล</th>
+                      <th className="subname-in-table">ตำแหน่ง</th>
                       <th>สำนัก</th>
                       <th>สายงาน</th>
                       <th>การดำเนินการ</th>
@@ -508,8 +508,8 @@ const EmployeeList = ({ user, onLogout }) => {
                     {employees.map((employee) => (
                       <tr key={employee.id}>
                         <td>{employee.id}</td>
-                        <td>{employee.emp_name}</td>
-                        <td>{employee.position_name}</td>
+                        <td className="name-in-table">{employee.emp_name}</td>
+                        <td className="subname-in-table">{employee.position_name}</td>
                         <td>{employee.dept_name}</td>
                         <td>{employee.div_name}</td>
                         <td className="actions">

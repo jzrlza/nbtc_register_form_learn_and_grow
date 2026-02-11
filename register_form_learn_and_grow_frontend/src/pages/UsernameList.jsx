@@ -209,8 +209,8 @@ const UsernameList = ({ user, onLogout }) => {
                   <thead>
                     <tr>
                       <th>รหัส</th>
-                      <th>ชื่อ Username</th>
-                      <th>ชื่อพนักงาน</th>
+                      <th className="subname-in-table">ชื่อ Username</th>
+                      <th className="name-in-table">ชื่อพนักงาน</th>
                       <th>เปิดใช้งาน 2FA</th>
                       <th>ทำ 2FA ไว้แล้ว</th>
                       <th>การดำเนินการ</th>
@@ -220,8 +220,8 @@ const UsernameList = ({ user, onLogout }) => {
                     {users.map((userobj) => (
                       <tr key={userobj.id} className={parseInt(userobj.id) === parseInt(user?.id) ? "self-row" : ""}>
                         <td>{userobj.id}</td>
-                        <td>{userobj.username}</td>
-                        <td>{userobj.emp_name ? userobj.emp_name : "-"}</td>
+                        <td className="subname-in-table">{userobj.username}</td>
+                        <td className="name-in-table">{userobj.emp_name ? userobj.emp_name : "-"}</td>
                         <td>{userobj.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
                         <td>{userobj.has_two_password ? "ใช่" : "ไม่ใช่"}</td>
                         <td className="actions">

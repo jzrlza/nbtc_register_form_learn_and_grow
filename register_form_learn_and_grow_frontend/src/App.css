@@ -154,6 +154,33 @@ button *,
     color: white; /* Buttons keep white text */
 }
 
+/* Responsive adjustments */
+@media (max-width: 818px) {
+.add-btn,
+.edit-btn,
+.delete-btn,
+.submit-btn,
+.cancel-btn,
+.search-btn,
+.clear-btn,
+.refresh-btn,
+.fetch-btn,
+.setup-btn,
+.export-btn,
+.copy-btn,
+.import-btn,
+.refresh-btn-emp {
+        width: 100%;
+    }
+}
+
+.name-in-table {
+    min-width: 250px;
+}
+.subname-in-table {
+    min-width: 200px;
+}
+
 .modal-btn.primary {
     background: rgba(30, 1, 46, 0.95);
 }
@@ -519,9 +546,15 @@ input:focus, select:focus, textarea:focus {
     color: #1f029e;
 }
 
+/*table actions*/
 .actions {
     display: flex;
     gap: 0.5rem;
+}
+@media (max-width: 1150px) {
+    .actions {
+        flex-direction: column;
+    }
 }
 
 /* Horizontal scroll for registers */
@@ -657,6 +690,11 @@ input:focus, select:focus, textarea:focus {
     color: #333;
     width: 100%;
 }
+@media (min-width: 400px) {
+    .search-input {
+        min-width: 300px;
+    }
+}
 
 /* Search Suggestions */
 .suggestions-dropdown {
@@ -696,6 +734,11 @@ input:focus, select:focus, textarea:focus {
     gap: 1rem;
     margin-top: 1rem;
     padding: 1rem;
+}
+@media (max-width: 500px) {
+    .pagination {
+        flex-direction: column;
+    }
 }
 
 /* =============================================
@@ -878,7 +921,7 @@ input:focus, select:focus, textarea:focus {
    RESPONSIVE DESIGN
    ============================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 818px) {
     .app-header h1 {
         font-size: 2rem;
     }
@@ -1065,7 +1108,6 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   gap: 10px;
   flex: 1;
-  min-width: 300px;
 }
 
 .search-input {
@@ -1171,7 +1213,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 818px) {
   .filters-row {
     flex-direction: column;
   }

@@ -174,7 +174,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
                   <thead>
                     <tr>
                       <th>รหัส</th>
-                      <th>ชื่อ-นามสกุล</th>
+                      <th className="name-in-table">ชื่อ-นามสกุล</th>
                       <th>เบอร์โต๊ะ</th>
                       <th>วันที่ลงทะเบียน</th>
                       <th>การดำเนินการ</th>
@@ -184,7 +184,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
                     {registers.map((register) => (
                       <tr key={register.id}>
                         <td>{register.id}</td>
-                        <td>{register.emp_name}</td>
+                        <td className="name-in-table">{register.emp_name}</td>
                         <td>{register.table_number}</td>
                         <td>{formatDateTime(register.sys_datetime)}</td>
                         <td className="actions">
