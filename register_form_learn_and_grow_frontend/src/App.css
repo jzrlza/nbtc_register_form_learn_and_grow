@@ -376,6 +376,12 @@ button:disabled {
     gap: 1rem;
     color: #1f029e;
 }
+/* Responsive adjustments */
+@media (max-width: 1000px) {
+  .nav-user {
+        flex-direction: column;
+    }
+}
 
 /* Navigation Tabs */
 .nav-left {
@@ -387,6 +393,13 @@ button:disabled {
 .nav-tabs {
     display: flex;
     gap: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1000px) {
+  .nav-tabs {
+        flex-direction: column;
+    }
 }
 
 .nav-tab {
