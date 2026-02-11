@@ -956,4 +956,259 @@ router.post('/import-batch', async (req, res) => {
   }
 });
 
+//**PROTECTED**
+// POST detect missing employees between database and Excel data
+router.post('/detect-missing', async (req, res) => {
+  const user = verifyJWTToken(req, res);
+  if (!user) {
+    return res.status(403).json({ error: "Unauthorized Access" });
+  }
+
+  try {
+    const { excelData } = req.body;
+    
+    if (!excelData || !Array.isArray(excelData)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Excel data is required for missing detection' 
+      });
+    }
+
+    const connection = await getConnection();
+
+    // Get all current employees from database
+    const getAllEmployeesQuery = `
+      SELECT 
+        e.id,
+        e.emp_name,
+        p.position_name,
+        d.dept_name,
+        division.div_name,
+        e.is_register
+      FROM employee e
+      LEFT JOIN position p ON e.position_id = p.id
+      LEFT JOIN dept d ON e.dept_id = d.id
+      LEFT JOIN division ON d.div_id = division.id
+      WHERE e.is_deleted = 0
+      ORDER BY e.emp_name
+    `;
+
+    const [allEmployees] = await connection.execute(getAllEmployeesQuery);
+    
+    if (allEmployees.length === 0) {
+      await connection.end();
+      return res.json({ 
+        success: true, 
+        totalInDatabase: 0,
+        totalInExcel: 0,
+        missingCount: 0,
+        missingEmployeeIds: [],
+        missingEmployees: [],
+        message: 'No employees in database to compare'
+      });
+    }
+
+    // Extract employee names from Excel data
+    const excelEmployeeNames = new Set();
+    const { headerRowIndex, columnMap, dataStartIndex } = detectColumnIndices(excelData);
+    const dataRows = excelData.slice(dataStartIndex);
+    
+    dataRows.forEach(row => {
+      const empNameIndex = columnMap?.empNameIndex ?? -1;
+      if (empNameIndex >= 0 && row[empNameIndex]) {
+        const empName = getCellValue(row[empNameIndex]);
+        if (empName) {
+          excelEmployeeNames.add(empName);
+        }
+      }
+    });
+
+    // Find employees in database but not in Excel
+    const missingFromExcel = allEmployees.filter(employee => 
+      !excelEmployeeNames.has(employee.emp_name)
+    );
+
+    // Also find employees in Excel but not in database (new additions)
+    const databaseEmployeeNames = new Set(allEmployees.map(emp => emp.emp_name));
+    const newInExcel = [];
+    
+    excelEmployeeNames.forEach(empName => {
+      if (!databaseEmployeeNames.has(empName)) {
+        newInExcel.push({
+          emp_name: empName,
+          status: 'New in Excel (not in database)'
+        });
+      }
+    });
+
+    // Store IDs of missing employees
+    const missingEmployeeIds = missingFromExcel.map(emp => emp.id);
+
+    await connection.end();
+
+    res.json({
+      success: true,
+      totalInDatabase: allEmployees.length,
+      totalInExcel: excelEmployeeNames.size,
+      missingCount: missingFromExcel.length,
+      newInExcelCount: newInExcel.length,
+      missingEmployeeIds: missingEmployeeIds,
+      missingEmployees: missingFromExcel.map(emp => ({
+        id: emp.id,
+        emp_name: emp.emp_name,
+        position_name: emp.position_name,
+        dept_name: emp.dept_name,
+        div_name: emp.div_name,
+        is_register: emp.is_register,
+        status: 'Missing from Excel'
+      })),
+      newInExcel: newInExcel,
+      comparisonSummary: {
+        onlyInDatabase: missingFromExcel.length,
+        onlyInExcel: newInExcel.length,
+        inBoth: allEmployees.length - missingFromExcel.length
+      },
+      message: `Comparison completed. ${missingFromExcel.length} employees in database are missing from Excel, ${newInExcel.length} employees in Excel are not in database.`
+    });
+
+  } catch (error) {
+    console.log('Missing detection error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+//**PROTECTED**
+// DELETE mass delete employees by IDs
+router.patch('/excel-mass-delete', async (req, res) => {
+  try {
+    const user = verifyJWTToken(req, res);
+    if (!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
+    // Get employee IDs from request body
+    const { employeeIds } = req.body;
+
+    // Validate input
+    if (!employeeIds || !Array.isArray(employeeIds) || employeeIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Employee IDs array is required'
+      });
+    }
+
+    const connection = await getConnection();
+    
+    // Convert all IDs to numbers
+    const ids = employeeIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+    
+    if (ids.length === 0) {
+      await connection.end();
+      return res.status(400).json({
+        success: false,
+        error: 'No valid employee IDs provided'
+      });
+    }
+
+    // First, get the employees that will be deleted (for response)
+    const placeholders = ids.map(() => '?').join(',');
+    const [employeesToDelete] = await connection.execute(
+      `SELECT id, emp_name FROM employee 
+       WHERE id IN (${placeholders}) AND is_deleted = 0`,
+      ids
+    );
+
+    if (employeesToDelete.length === 0) {
+      await connection.end();
+      return res.json({
+        success: true,
+        message: 'No active employees found with the provided IDs',
+        deletedCount: 0,
+        deletedEmployees: []
+      });
+    }
+
+    // Get just the IDs of employees that exist
+    const foundIds = employeesToDelete.map(emp => emp.id);
+
+    // Perform soft delete (mark as deleted)
+    const [result] = await connection.execute(
+      `UPDATE employee 
+       SET is_deleted = 1 
+       WHERE id IN (${foundIds.map(() => '?').join(',')})`,
+      foundIds
+    );
+
+    await connection.end();
+
+    res.json({
+      success: true,
+      message: `Successfully deleted ${result.affectedRows} employees`,
+      deletedCount: result.affectedRows,
+      deletedEmployees: employeesToDelete,
+      requestedCount: ids.length,
+      notFoundCount: ids.length - foundIds.length
+    });
+
+  } catch (error) {
+    console.log('Mass delete error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete employees',
+      details: error.message
+    });
+  }
+});
+
+//**PROTECTED**  
+// POST preview which employees would be deleted (optional)
+router.post('/excel-mass-delete/preview', async (req, res) => {
+  try {
+    const user = verifyJWTToken(req, res);
+    if (!user) {
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+
+    const { employeeIds } = req.body;
+
+    if (!employeeIds || !Array.isArray(employeeIds) || employeeIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Employee IDs array is required'
+      });
+    }
+
+    const connection = await getConnection();
+    
+    const ids = employeeIds.map(id => parseInt(id)).filter(id => !isNaN(id));
+    const placeholders = ids.map(() => '?').join(',');
+    
+    const [employees] = await connection.execute(
+      `SELECT id, emp_name, position_id, dept_id, is_register 
+       FROM employee 
+       WHERE id IN (${placeholders}) AND is_deleted = 0`,
+      ids
+    );
+
+    await connection.end();
+
+    res.json({
+      success: true,
+      totalFound: employees.length,
+      employees: employees,
+      missingIds: ids.filter(id => !employees.map(e => e.id).includes(id))
+    });
+
+  } catch (error) {
+    console.log('Preview error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to preview delete'
+    });
+  }
+});
+
 module.exports = router;

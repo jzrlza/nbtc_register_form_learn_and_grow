@@ -22,6 +22,7 @@ const EmployeeList = ({ user, onLogout }) => {
   const [totalEmployees, setTotalEmployees] = useState(0);
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '', employeeId: null });
   const [importModal, setImportModal] = useState({ isOpen: false, results: null, mode: 'test' });
+  const [resignModal, setResignModal] = useState({ isOpen: false, results: null });
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, excelData: null });
   const [excelLoadModal, setExcelLoadModal] = useState({ isOpen: false });
   const navigate = useNavigate();
@@ -128,6 +129,10 @@ const EmployeeList = ({ user, onLogout }) => {
     setImportModal({ isOpen: false, results: null, mode: 'test' });
   };
 
+  const closeResignModal = () => {
+    setResignModal({ isOpen: false, results: null });
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
@@ -147,17 +152,33 @@ const EmployeeList = ({ user, onLogout }) => {
     showModal('confirm', 'คุณแน่ใจหรือไม่ที่จะลบพนักงานคนนี้?', employeeId);
   };
 
+  const handleMassDelete = (employeeIds) => {
+    showModal('confirm-mass', 'คุณแน่ใจหรือไม่ที่จะลบพนักงานเหล่านี้?', employeeIds);
+  }
+
   const confirmDelete = async () => {
     if (!modal.employeeId) return;
     
     try {
-      await axios.delete(`${API_URL}/api/employees/${modal.employeeId}`,{
-        headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
-        }
-      });
+      if (modal.type === 'confirm-mass') {
+        await axios.patch(`${API_URL}/api/employees/excel-mass-delete`, 
+          {employeeIds: modal.employeeId}, {
+          headers: {
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+          }
+        });
+      } else {
+        await axios.delete(`${API_URL}/api/employees/${modal.employeeId}`,{
+          headers: {
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
+          }
+        });
+      }
+      
       fetchEmployees(currentPage, search, selectedDivision, selectedDept);
       showModal('success', 'ลบพนักงานเรียบร้อยแล้ว');
+      cancelImport();
+      closeResignModal();
     } catch (error) {
       console.error('Error deleting employee:', error);
       showModal('error', 'ไม่สามารถลบพนักงานได้');
@@ -247,6 +268,14 @@ const EmployeeList = ({ user, onLogout }) => {
     }
   };
 
+  const cancelImport = () => {
+    setConfirmModal({ isOpen: false, excelData: null });
+    setLoading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
   const handleImportConfirm = async (shouldImport) => {
     setConfirmModal({ isOpen: false, excelData: null });
     
@@ -264,9 +293,9 @@ const EmployeeList = ({ user, onLogout }) => {
         'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
         }
       });
-      } else {
-        console.log('Frontend: Starting TEST import...');
-        response = await axios.post(`${API_URL}/api/employees/test-import`, { excelData: confirmModal.excelData },{
+      } else { //detect resigned employees
+        console.log('Frontend: Starting DETECT MISSING upload...');
+        response = await axios.post(`${API_URL}/api/employees/detect-missing`, { excelData: confirmModal.excelData },{
         headers: {
         'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
         }
@@ -275,11 +304,20 @@ const EmployeeList = ({ user, onLogout }) => {
       
       if (response.data.success) {
         setExcelLoadModal({ isOpen: false });
-        setImportModal({
-          isOpen: true,
-          results: response.data,
-          mode: shouldImport ? 'import' : 'test'
-        });
+
+        if (shouldImport) {
+          setImportModal({
+            isOpen: true,
+            results: response.data,
+            mode: shouldImport ? 'import' : 'test'
+          });
+        } else {
+          setResignModal({
+            isOpen: true,
+            results: response.data
+          });
+        }
+        
         
         // Refresh employee list if it was a real import
         if (shouldImport && response.data.savedCount > 0) {
@@ -527,17 +565,7 @@ const EmployeeList = ({ user, onLogout }) => {
         </section>
       </main>
 
-      {/* Modal for messages */}
-      <Modal 
-        isOpen={modal.isOpen && ['success', 'error'].includes(modal.type)} 
-        onClose={closeModal}
-        title={modal.type === 'success' ? 'สำเร็จ' : 'ข้อผิดพลาด'}
-      >
-        <p>{modal.message}</p>
-        <div className="modal-actions">
-          <button onClick={closeModal} className="modal-btn primary">ตกลง</button>
-        </div>
-      </Modal>
+
 
       {/* Modal for import loading */}
       <Modal 
@@ -560,19 +588,6 @@ const EmployeeList = ({ user, onLogout }) => {
         <p>กำลังประมวลผล...</p>
       </Modal>
 
-      {/* Modal for confirmation */}
-      <Modal 
-        isOpen={modal.isOpen && modal.type === 'confirm'} 
-        onClose={closeModal}
-        title="ยืนยันการลบ"
-      >
-        <p>{modal.message}</p>
-        <div className="modal-actions">
-          <button onClick={confirmDelete} className="modal-btn danger">ลบ</button>
-          <button onClick={closeModal} className="modal-btn secondary">ยกเลิก</button>
-        </div>
-      </Modal>
-
       {/* Confirm Import Modal */}
       <Modal 
         isOpen={confirmModal.isOpen} 
@@ -587,25 +602,25 @@ const EmployeeList = ({ user, onLogout }) => {
               <p>บันทึกพนักงานลงฐานข้อมูล (ไม่สามารถย้อนกลับได้)</p>
             </div>
             <div className="option">
-              <h4>🔍 ทดสอบเท่านั้น</h4>
-              <p>ตรวจสอบความถูกต้องของข้อมูลและแสดงผลลัพธ์โดยไม่บันทึก</p>
+              <h4>🔍 ตรวจสอบรายชื่อที่หายจาก Excel</h4>
+              <p>ตรวจสอบพนักงานเก่าที่ออกจากงานแล้ว เพื่อลบออกภายหลัง</p>
             </div>
           </div>
           <div className="modal-actions">
             <button 
               onClick={() => handleImportConfirm(true)} 
-              className="modal-btn danger"
+              className="modal-btn secondary"
             >
               นำเข้าสู่ฐานข้อมูล
             </button>
             <button 
               onClick={() => handleImportConfirm(false)} 
-              className="modal-btn secondary"
+              className="modal-btn danger"
             >
-              ทดสอบเท่านั้น
+              ตรวจสอบรายชื่อที่หายจาก Excel
             </button>
             <button 
-              onClick={() => setConfirmModal({ isOpen: false, excelData: null })} 
+              onClick={() => cancelImport()} 
               className="modal-btn primary"
             >
               ยกเลิก
@@ -700,6 +715,65 @@ const EmployeeList = ({ user, onLogout }) => {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/*detect resigned employees modal*/}
+      <Modal 
+        isOpen={resignModal.isOpen} 
+        onClose={closeResignModal}
+        title={'ผลการทดสอบ Excel'}
+      >
+        {resignModal.results && (
+          <div className="import-results">
+            
+            {resignModal.results.missingEmployees && resignModal.results.missingEmployees.length > 0 && (
+              <div className="import-errors">
+                <h4>รายชื่อพนักงานในฐานข้อมูลที่ไม่พบใน Excel ({resignModal.results.missingEmployees.length}):</h4>
+                <div className="error-list scroll-box">
+                  {resignModal.results.missingEmployees.map((missingEmployee, index) => (
+                    <div key={index} className="error-item">
+                      ID={missingEmployee.id} || {missingEmployee.emp_name} || {missingEmployee.dept_name} || {missingEmployee.div_name} || {missingEmployee.position_name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="modal-actions">
+            <button onClick={() => handleMassDelete(resignModal.results.missingEmployeeIds)} className="modal-btn danger">
+                ลบออกทั้งหมด
+              </button>
+              <button onClick={closeResignModal} className="modal-btn primary">
+                ปิด
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal for confirmation */}
+      <Modal 
+        isOpen={modal.isOpen && (modal.type === 'confirm' || modal.type === 'confirm-mass')} 
+        onClose={closeModal}
+        title="ยืนยันการลบ"
+      >
+        <p>{modal.message}</p>
+        <div className="modal-actions">
+          <button onClick={confirmDelete} className="modal-btn danger">ลบ</button>
+          <button onClick={closeModal} className="modal-btn secondary">ยกเลิก</button>
+        </div>
+      </Modal>
+
+      {/* Modal for messages */}
+      <Modal 
+        isOpen={modal.isOpen && ['success', 'error'].includes(modal.type)} 
+        onClose={closeModal}
+        title={modal.type === 'success' ? 'สำเร็จ' : 'ข้อผิดพลาด'}
+      >
+        <p>{modal.message}</p>
+        <div className="modal-actions">
+          <button onClick={closeModal} className="modal-btn primary">ตกลง</button>
+        </div>
       </Modal>
     </div>
   );
