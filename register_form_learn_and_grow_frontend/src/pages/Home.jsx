@@ -297,7 +297,7 @@ const Home = ({ user, onLogout }) => {
           <form onSubmit={handleSubmit} className="employee-form">
             {/* Division Selection */}
             <div className="form-group">
-              <label>สายงาน:</label>
+              <label>สายงาน</label>
               <select
                 value={selectedDivision}
                 onChange={handleDivisionChange}
@@ -314,7 +314,7 @@ const Home = ({ user, onLogout }) => {
 
             {/* Department Selection */}
             <div className="form-group">
-              <label>สำนัก:</label>
+              <label>สำนัก</label>
               <select
                 value={selectedDepartment}
                 onChange={handleDepartmentChange}
@@ -332,7 +332,7 @@ const Home = ({ user, onLogout }) => {
 
             {/* Employee Selection */}
             <div className="form-group">
-              <label>ชื่อ-นามสกุล:</label>
+              <label>ชื่อ-นามสกุล</label>
               <select
                 value={selectedEmployee}
                 onChange={handleEmployeeChange}
@@ -346,13 +346,13 @@ const Home = ({ user, onLogout }) => {
                   </option>
                 ))}
               </select>
-              {formData.emp_id && (
+              {/*formData.emp_id && (
                 <small className="form-hint">เลือกพนักงานแล้ว: {formData.emp_name} (รหัส: {formData.emp_id})</small>
-              )}
+              )*/}
             </div>
 
             <div className="form-group">
-              <label>เบอร์โต๊ะ:</label>
+              <label>เบอร์โต๊ะ</label>
               <input
                 type="text"
                 name="table_number"

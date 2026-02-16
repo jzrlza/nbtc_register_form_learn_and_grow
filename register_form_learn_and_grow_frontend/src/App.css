@@ -3,32 +3,32 @@
    ============================================= */
 
 @font-face {
-    font-family: 'THSarabun';
-    src: url('./fonts/THSarabun.ttf') format('truetype');
+    font-family: 'Kanit';
+    src: url('./fonts/Kanit-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'THSarabun';
-    src: url('./fonts/THSarabun-Bold.ttf') format('truetype');
+    font-family: 'Kanit';
+    src: url('./fonts/Kanit-Bold.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'THSarabun';
-    src: url('./fonts/THSarabun-Italic.ttf') format('truetype');
+    font-family: 'Kanit';
+    src: url('./fonts/Kanit-Italic.ttf') format('truetype');
     font-weight: normal;
     font-style: italic;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'THSarabun';
-    src: url('./fonts/THSarabun-BoldItalic.ttf') format('truetype');
+    font-family: 'Kanit';
+    src: url('./fonts/Kanit-BoldItalic.ttf') format('truetype');
     font-weight: bold;
     font-style: italic;
     font-display: swap;
@@ -42,7 +42,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'THSarabun', 'Sarabun', 'Tahoma', 'Arial', sans-serif;
+    font-family: 'Kanit', 'Kanit-Regular', 'Tahoma', 'Arial', sans-serif;
     line-height: 1.5;
     font-size: 24px;
 }
