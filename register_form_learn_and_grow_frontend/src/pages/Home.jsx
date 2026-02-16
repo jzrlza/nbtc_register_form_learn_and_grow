@@ -294,7 +294,7 @@ const Home = ({ user, onLogout }) => {
         </section>
 
         <section className="home-form">
-        <h2>{isEditMode ? 'แก้ไขการลงทะเบียน' : 'ลงทะเบียน'}</h2>
+        <h2 className="home-form-title">{isEditMode ? 'แก้ไขการลงทะเบียน' : 'ลงทะเบียน'}</h2>
           
           <form onSubmit={handleSubmit} className="employee-form">
             {/* Division Selection */}

@@ -188,6 +188,9 @@ button *,
     color: #1f029e;
     margin-top: 1rem;
 }
+.home-form-title {
+    font-size: 1.5rem;
+}
 
 .select-form-item, .select-form-item:focus {
     background-color: rgb(250,250,250, 0.9);
