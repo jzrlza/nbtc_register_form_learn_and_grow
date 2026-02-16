@@ -293,7 +293,7 @@ const Home = ({ user, onLogout }) => {
 
         </section>
 
-        <section className="users-section">
+        <section className="home-form">
         <h2>{isEditMode ? 'แก้ไขการลงทะเบียน' : 'ลงทะเบียน'}</h2>
           
           <form onSubmit={handleSubmit} className="employee-form">
@@ -301,6 +301,7 @@ const Home = ({ user, onLogout }) => {
             <div className="form-group">
               <label>สายงาน</label>
               <select
+                className="select-form-item"
                 value={selectedDivision}
                 onChange={handleDivisionChange}
                 required
@@ -318,6 +319,7 @@ const Home = ({ user, onLogout }) => {
             <div className="form-group">
               <label>สำนัก</label>
               <select
+                className="select-form-item"
                 value={selectedDepartment}
                 onChange={handleDepartmentChange}
                 disabled={!selectedDivision}
@@ -336,6 +338,7 @@ const Home = ({ user, onLogout }) => {
             <div className="form-group">
               <label>ชื่อ-นามสกุล</label>
               <select
+                className="select-form-item"
                 value={selectedEmployee}
                 onChange={handleEmployeeChange}
                 disabled={!selectedDepartment}
@@ -356,6 +359,7 @@ const Home = ({ user, onLogout }) => {
             <div className="form-group">
               <label>เบอร์โต๊ะ</label>
               <input
+                className="select-form-item"
                 type="text"
                 name="table_number"
                 value={formData.table_number}
@@ -364,18 +368,19 @@ const Home = ({ user, onLogout }) => {
               />
             </div>
 
-            
-
             <br/>
 
             <div className="form-actions">
               <button type="submit" disabled={loading} 
-              className="submit-btn">
+              className="submit-btn submit-btn-home">
                 {loading ? 'กำลังบันทึก...' : (isEditMode ? 'อัพเดท' : 'บันทึก')}
               </button>
             </div>
+            <br/>
           </form>
+
         </section>
+        <br/>
       </main>
 
       <Modal 
