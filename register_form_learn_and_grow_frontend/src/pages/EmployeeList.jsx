@@ -445,7 +445,7 @@ const EmployeeList = ({ user, onLogout }) => {
               <div className="active-filters">
                 {(selectedDivision || selectedDept || search) && (
                   <div className="filters-info">
-                    <span>ตัวกรองที่ใช้งานอยู่: </span>
+                    <span className="filter-label">ตัวกรองที่ใช้งานอยู่: </span>
                     {selectedDivision && (
                       <span className="filter-tag">
                         สายงาน: {divisions.find(d => d.id == selectedDivision)?.div_name+" "}

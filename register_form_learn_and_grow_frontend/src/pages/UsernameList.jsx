@@ -169,7 +169,7 @@ const UsernameList = ({ user, onLogout }) => {
               <div className="active-filters">
                 {(search) && (
                   <div className="filters-info">
-                    <span>ตัวกรองที่ใช้งานอยู่: </span>
+                    <span className="filter-label">ตัวกรองที่ใช้งานอยู่: </span>
                     {search && (
                       <span className="filter-tag">
                         ค้นหา: {search}
