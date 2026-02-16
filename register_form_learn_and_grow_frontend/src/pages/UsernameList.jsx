@@ -139,13 +139,15 @@ const UsernameList = ({ user, onLogout }) => {
       <main className="app-main">
         <section className="registers-section">
           <div className="section-header">
-            <h2>ผู้ใช้งาน ({totalUsers})</h2>
+            <h2 className="section-header--header">ผู้ใช้งาน ({totalUsers})</h2>
+            <div className="section-header--btn-group">
             <button onClick={() => fetchUsers(currentPage)} disabled={loading} className="refresh-btn">
                     {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
                   </button>
             <button onClick={handleAddUser} className="add-btn">
               เพิ่มผู้ใข้งาน
             </button>
+            </div>
           </div>
           
           <div className="filters-container">

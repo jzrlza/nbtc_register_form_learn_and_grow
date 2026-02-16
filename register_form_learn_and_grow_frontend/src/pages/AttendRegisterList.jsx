@@ -127,7 +127,8 @@ const AttendRegisterList = ({ user, onLogout }) => {
       <main className="app-main">
         <section className="registers-section">
           <div className="section-header">
-            <h2>การลงทะเบียนเข้าร่วมงาน ({totalRegisters})</h2>
+            <h2 className="section-header--header">การลงทะเบียนเข้าร่วมงาน ({totalRegisters})</h2>
+            <div className="section-header--btn-group">
             <button onClick={() => fetchRegisters(currentPage)} disabled={loading} className="refresh-btn">
             {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
           </button>
@@ -141,6 +142,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
               >
                 {exportLoading ? 'กำลังส่งออก...' : 'ส่งออก Excel'}
               </button>
+              </div>
           </div>
           
           

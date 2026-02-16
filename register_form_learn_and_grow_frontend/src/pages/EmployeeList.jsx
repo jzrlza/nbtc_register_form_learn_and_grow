@@ -370,13 +370,18 @@ const EmployeeList = ({ user, onLogout }) => {
       <main className="app-main">
         <section className="employees-section">
           <div className="section-header">
-            <h2>พนักงาน ({totalEmployees})</h2>
+            <h2 className="section-header--header">พนักงาน ({totalEmployees})</h2>
+            <div className="section-header--btn-group">
+            <button onClick={() => fetchEmployees(currentPage, search, selectedDivision, selectedDept)} disabled={loading} className="refresh-btn">
+                    {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
+                  </button>
             <button onClick={handleAddEmployee} className="add-btn">
               เพิ่มพนักงาน
             </button>
             <button onClick={handleImportClick} disabled={loading} className="import-btn">
               {loading ? 'กำลังประมวลผล...' : 'นำเข้า Excel'}
             </button>
+            </div>
           </div>
           
             <div className="filters-container">
@@ -430,14 +435,6 @@ const EmployeeList = ({ user, onLogout }) => {
                     disabled={loading}
                   >
                     ล้างตัวกรองทั้งหมด
-                  </button>
-                  
-                  <button 
-                    onClick={() => fetchEmployees(currentPage, search, selectedDivision, selectedDept)} 
-                    disabled={loading} 
-                    className="refresh-btn-emp"
-                  >
-                    {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
                   </button>
                 </div>
               </div>
