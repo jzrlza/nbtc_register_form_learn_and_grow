@@ -266,7 +266,7 @@ const UsernameInput = ({ user, onLogout }) => {
           <h2>{isEditMode ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}</h2>
 
           <div className="form-group">
-              <label>Username:</label>
+              <label>Username</label>
               <input
                 type="text"
                 name="username"
@@ -297,7 +297,7 @@ const UsernameInput = ({ user, onLogout }) => {
           <form onSubmit={handleSubmit} className="employee-form">
             {/* Division Selection */}
             <div className="form-group">
-              <label>สายงาน:</label>
+              <label>สายงาน</label>
               <select
                 value={selectedDivision}
                 onChange={handleDivisionChange}
@@ -314,7 +314,7 @@ const UsernameInput = ({ user, onLogout }) => {
 
             {/* Department Selection */}
             <div className="form-group">
-              <label>สำนัก:</label>
+              <label>สำนัก</label>
               <select
                 value={selectedDepartment}
                 onChange={handleDepartmentChange}
@@ -332,7 +332,7 @@ const UsernameInput = ({ user, onLogout }) => {
 
             {/* Employee Selection */}
             <div className="form-group">
-              <label>ชื่อ-นามสกุล:</label>
+              <label>ชื่อ-นามสกุล</label>
               <select
                 value={selectedEmployee}
                 onChange={handleEmployeeChange}
@@ -347,7 +347,7 @@ const UsernameInput = ({ user, onLogout }) => {
                 ))}
               </select>
               {formData.emp_id && (
-                <small className="form-hint">เลือกพนักงานแล้ว: {formData.emp_name} (รหัส: {formData.emp_id})</small>
+                <small className="form-hint">เลือกพนักงานแล้ว: {formData.emp_name} (รหัส ID ในฐานข้อมูล: {formData.emp_id})</small>
               )}
             </div>
 

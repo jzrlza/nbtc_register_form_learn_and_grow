@@ -190,7 +190,7 @@ const EmployeeInput = ({ user, onLogout }) => {
           
           <form onSubmit={handleSubmit} className="employee-form">
             <div className="form-group">
-              <label>ชื่อ-นามสกุล:</label>
+              <label>ชื่อ-นามสกุล</label>
               <input
                 type="text"
                 name="emp_name"
@@ -201,7 +201,7 @@ const EmployeeInput = ({ user, onLogout }) => {
             </div>
 
             <div className="form-group">
-              <label>ตำแหน่ง:</label>
+              <label>ตำแหน่ง</label>
               <select
                 name="position_id"
                 value={formData.position_id}
@@ -218,7 +218,7 @@ const EmployeeInput = ({ user, onLogout }) => {
             </div>
 
             <div className="form-group">
-              <label>สายงาน:</label>
+              <label>สายงาน</label>
               <select
                 name="div_id"
                 value={formData.div_id}
@@ -235,7 +235,7 @@ const EmployeeInput = ({ user, onLogout }) => {
             </div>
 
             <div className="form-group">
-              <label>สำนัก:</label>
+              <label>สำนัก</label>
               <select
                 name="dept_id"
                 value={formData.dept_id}
