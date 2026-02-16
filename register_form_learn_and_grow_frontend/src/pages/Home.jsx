@@ -272,10 +272,10 @@ const Home = ({ user, onLogout }) => {
   }
 
   return (
-    <div className="app">
+    <div className="app app-home">
       <Navbar user={user} onLogout={handleLogout} />
       
-      <main className="app-main">
+      <main className="app-main app-home">
         <section className="health-section">
 
         <img src={bannerImage} 

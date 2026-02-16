@@ -166,7 +166,8 @@ if (requires2FA) {
       <h2>การยืนยันสองขั้นตอน</h2>
       
       <div className="auth-options">
-        <p>ป้อนรหัส 6 หลักจากแอปยืนยันตัวตนของคุณ:</p>
+        <p>ป้อนรหัส 6 หลักจากแอปยืนยันตัวตน</p>
+        <br/>
         
         <form onSubmit={verify2FA}>
           <input

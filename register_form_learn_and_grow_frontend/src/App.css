@@ -44,7 +44,11 @@
     box-sizing: border-box;
     font-family: 'Kanit', 'Kanit-Regular', 'Tahoma', 'Arial', sans-serif;
     line-height: 1.5;
-    font-size: 24px;
+    font-size: 20px;
+}
+
+.app-home {
+    font-size: 1.4rem;
 }
 
 body {
