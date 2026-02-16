@@ -47,10 +47,6 @@
     font-size: 20px;
 }
 
-.app-home {
-    font-size: 1.4rem;
-}
-
 body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
