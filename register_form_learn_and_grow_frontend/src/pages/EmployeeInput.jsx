@@ -185,7 +185,7 @@ const EmployeeInput = ({ user, onLogout }) => {
       <NavbarAdmin user={user} onLogout={handleLogout} />
       
       <main className="app-main">
-        <section className="form-section">
+        <section className="form-section app-main-form">
           <h2>{isEditMode ? 'แก้ไขพนักงาน' : 'เพิ่มพนักงานใหม่'}</h2>
           
           <form onSubmit={handleSubmit} className="employee-form">

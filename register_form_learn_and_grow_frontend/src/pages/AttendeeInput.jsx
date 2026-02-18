@@ -255,7 +255,7 @@ const AttendeeInput = ({ user, onLogout }) => {
       <NavbarAdmin user={user} onLogout={handleLogout} />
       
       <main className="app-main">
-        <section className="form-section">
+        <section className="form-section app-main-form">
           <h2>{isEditMode ? 'แก้ไขการลงทะเบียน' : 'เพิ่มการลงทะเบียนใหม่'}</h2>
           
           <form onSubmit={handleSubmit} className="employee-form">

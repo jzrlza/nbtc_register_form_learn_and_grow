@@ -179,18 +179,18 @@ button *,
     }
 }
 
-.home-form {
+.home-form, .app-main-form {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
     border-style: outset;
-    border-width: 3px; /* Adjust as needed */
+    border-width: 1px; /* Adjust as needed */
     border-color: lightgray; /* The effect depends on the color value */
     padding: 10px;
     padding: 0.4rem 2rem;
     border-radius: 15px;
-    margin-bottom: 0.1rem;
     color: #1f029e;
+    margin-bottom: 0.1rem;
     margin-top: 1rem;
 }
 .home-form-title {
@@ -208,6 +208,7 @@ button *,
 
 .select-form-item {
     border-radius: 20px;
+    border: 1px solid #aaa !important;
 }
 .select-form-item, .select-form-item:focus {
     background-color: rgb(250,250,250, 0.9);
@@ -1041,6 +1042,7 @@ input:focus, select:focus, textarea:focus {
 
 .form-input {
     border-radius: 20px;
+    border: 1px solid #ddd !important;
 }
 
 /* Search Suggestions */
@@ -1076,14 +1078,14 @@ input:focus, select:focus, textarea:focus {
 
 .pagination {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: 1rem;
     margin-top: 1rem;
     padding: 1rem;
 }
 .page-btn {
-    width: 30%;
+    min-width: 80px;
 }
 
 .page-btn {
@@ -1478,6 +1480,7 @@ input:focus, select:focus, textarea:focus {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+  justify-content: center;
 }
 
 .filter-select {

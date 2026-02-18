@@ -262,7 +262,7 @@ const UsernameInput = ({ user, onLogout }) => {
       <NavbarAdmin user={user} onLogout={handleLogout} />
       
       <main className="app-main">
-        <section className="form-section">
+        <section className="form-section app-main-form">
           <h2>{isEditMode ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}</h2>
 
           <div className="form-group">

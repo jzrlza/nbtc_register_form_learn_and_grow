@@ -73,7 +73,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
       {/* Vertical Mobile Menu - slides in when hamburger is clicked */}
       <div className={`mobile-menu ${isMenuOpen ? 'open' : 'mobile-menu-closed'}`}>
         <div className="mobile-menu-header">
-          <span className="mobile-user-greeting">{user?.CN}</span>
+          <span className="mobile-user-greeting">เลือกหน้า</span>
           <button className="mobile-close-btn" onClick={() => setIsMenuOpen(false)}>
             ✕
           </button>
@@ -99,6 +99,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
           </button>
         </div>
         <div className="mobile-menu-footer">
+        <span className="mobile-user-greeting">{user?.CN}</span><br/><br/>
           <button onClick={onLogout} className="logout-btn mobile-logout-btn">
             ออกจากระบบ
           </button>
