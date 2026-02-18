@@ -422,7 +422,10 @@ button:disabled {
     gap:1%;
     width: 50%;
 }
-@media (max-width: 818px) {
+@media (max-width: 1122px) {
+    .section-header {
+        flex-direction: column;
+    }
     .section-header--header {
         width: 100%;
     }
@@ -566,7 +569,7 @@ button:disabled {
 .mobile-menu {
     position: fixed;
     top: 0;
-    right: -300px;
+    right: -280px; /* Exactly the width of the menu */
     width: 280px;
     height: 100vh;
     background: white;
@@ -706,6 +709,29 @@ button:disabled {
 
     .mobile-menu {
         width: 250px;
+    }
+}
+
+/* Hide mobile menu on desktop completely */
+@media (min-width: 1245px) {
+    .mobile-menu {
+        display: none; /* Completely hide on desktop */
+    }
+    .menu-overlay {
+        display: none;
+    }
+}
+
+@media (max-width: 1244px) {
+    body {
+        overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+        width: 100%;
+        position: relative;
+    }
+    
+    html {
+        overflow-x: hidden;
+        width: 100%;
     }
 }
 
