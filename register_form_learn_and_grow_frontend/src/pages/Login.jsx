@@ -132,6 +132,7 @@ if (showSetup2FA) {
         
         <form onSubmit={verify2FA}>
           <input
+            className="login-input"
             type="password"
             placeholder="ป้อนรหัส 6 หลัก"
             value={code}
@@ -139,7 +140,7 @@ if (showSetup2FA) {
             required
             maxLength={6}
           />
-          <button type="submit" disabled={loading}>
+          <button className="login-btn" type="submit" disabled={loading}>
             {loading ? 'กำลังตรวจสอบ...' : 'ยืนยันและตั้งค่าให้เสร็จสิ้น'}
           </button>
         </form>
@@ -171,6 +172,7 @@ if (requires2FA) {
         
         <form onSubmit={verify2FA}>
           <input
+            className="login-input"
             type="password"
             placeholder="ป้อนรหัส 6 หลัก"
             value={code}
@@ -178,7 +180,7 @@ if (requires2FA) {
             required
             maxLength={6}
           />
-          <button type="submit" disabled={loading}>
+          <button className="login-btn" type="submit" disabled={loading}>
             {loading ? 'กำลังตรวจสอบ...' : 'ยืนยัน'}
           </button>
         </form>
@@ -216,6 +218,7 @@ if (requires2FA) {
       <h2>ลงชื่อเข้าใช้งานสำหรับผู้ดูแลระบบ</h2>
       <form onSubmit={handleLogin}>
         <input
+          className="login-input"
           type="text"
           placeholder="Username"
           value={username}
@@ -223,13 +226,14 @@ if (requires2FA) {
           required
         />
         <input
+          className="login-input"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit" disabled={loading}>
+        <button className="login-btn" type="submit" disabled={loading}>
           {loading ? 'กำลังดำเนินการ...' : 'ลงชื่อเข้าใช้'}
         </button>
       </form>

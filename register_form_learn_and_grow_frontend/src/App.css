@@ -931,6 +931,20 @@ input:focus, select:focus, textarea:focus {
     max-width: 400px;
 }
 
+.login-btn {
+    background-color: #004191;
+    width: 100%;
+}
+
+.setup-btn, .copy-btn {
+    background-color: #126b02;
+    width: 100%;
+}
+
+.login-input {
+    border-radius: 20px;
+}
+
 /* 2FA Styles */
 .setup-2fa {
     text-align: center;
