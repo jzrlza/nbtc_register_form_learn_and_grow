@@ -207,7 +207,7 @@ const UsernameList = ({ user, onLogout }) => {
           {users.length > 0 ? (
             <>
               <div className="table-container horizontal-scroll">
-                <table className="registers-table">
+                <table className="users-table">
                   <thead>
                     <tr>
                       <th>รหัส</th>

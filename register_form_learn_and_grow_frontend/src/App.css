@@ -100,7 +100,9 @@ p, h1, h2, h3, h4, h5, h6, div, span, label, td, th, li, a:not(button a) {
 .employees-table th,
 .employees-table td,
 .registers-table th,
-.registers-table td {
+.registers-table td,
+.users-table th,
+.users-table td {
     color: #fff !important;
 }
 
@@ -235,7 +237,7 @@ button *,
 
 button {
     background: rgba(5, 5, 5, 0.7);
-    border: 1px solid rgba(4, 4, 4, 0.7);
+    border: none;
     color: white;
     padding: 0.75rem 1.5rem;
     border-radius: 20px;
@@ -283,13 +285,13 @@ button:disabled {
 }
 
 .edit-btn {
-    background: #2196f3;
+    background: #006ff7;
     border: none;
     color: white !important;
 }
 
 .delete-btn {
-    background: #f44336;
+    background: #f20a44;
     border: none;
     color: white !important;
 }
@@ -453,6 +455,38 @@ button:disabled {
 /* =============================================
    NAVBAR
    ============================================= */
+
+.navbar-public {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: space-between;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    height: auto;
+    align-items: center;
+}
+@media (max-width: 818px) {
+    .navbar-public {
+        flex-direction: column;
+    }
+}
+.nav-brand-public {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f029e;
+}
+.nav-user-public {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #1f029e;
+}
 
 .navbar {
     position: sticky;
@@ -817,10 +851,11 @@ input:focus, select:focus, textarea:focus {
 }
 
 .employees-table,
-.registers-table {
+.registers-table,
+.users-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(31, 19, 92, 1);
     border-radius: 8px;
     overflow: hidden;
 }
@@ -828,7 +863,9 @@ input:focus, select:focus, textarea:focus {
 .employees-table th,
 .employees-table td,
 .registers-table th,
-.registers-table td {
+.registers-table td,
+.users-table th,
+.users-table td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -836,7 +873,8 @@ input:focus, select:focus, textarea:focus {
 }
 
 .employees-table th,
-.registers-table th {
+.registers-table th,
+.users-table th {
     background: rgba(0, 0, 0, 0.3);
     font-weight: bold;
     color: #1f029e;
@@ -1033,6 +1071,16 @@ input:focus, select:focus, textarea:focus {
 }
 .page-btn {
     width: 30%;
+}
+
+.page-btn {
+    background-color: #105294;
+    border: none;
+}
+
+.refresh-btn {
+    background-color: #590599;
+    border: none;
 }
 
 /* =============================================
@@ -1384,7 +1432,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Filters Container */
 .filters-container {
-  background: #656565;
+  background: rgba(31, 19, 92, 1);
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
