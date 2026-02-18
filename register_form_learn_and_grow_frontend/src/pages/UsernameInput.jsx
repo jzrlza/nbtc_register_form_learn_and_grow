@@ -269,6 +269,7 @@ const UsernameInput = ({ user, onLogout }) => {
               <label>Username</label>
               <input
                 type="text"
+                className="form-input"
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
@@ -300,6 +301,7 @@ const UsernameInput = ({ user, onLogout }) => {
               <label>สายงาน</label>
               <select
                 value={selectedDivision}
+                className="form-input"
                 onChange={handleDivisionChange}
                 required
               >
@@ -317,6 +319,7 @@ const UsernameInput = ({ user, onLogout }) => {
               <label>สำนัก</label>
               <select
                 value={selectedDepartment}
+                className="form-input"
                 onChange={handleDepartmentChange}
                 disabled={!selectedDivision}
                 required
@@ -335,6 +338,7 @@ const UsernameInput = ({ user, onLogout }) => {
               <label>ชื่อ-นามสกุล</label>
               <select
                 value={selectedEmployee}
+                className="form-input"
                 onChange={handleEmployeeChange}
                 disabled={!selectedDepartment}
                 required

@@ -264,6 +264,7 @@ const AttendeeInput = ({ user, onLogout }) => {
               <label>สายงาน</label>
               <select
                 value={selectedDivision}
+                className="form-input"
                 onChange={handleDivisionChange}
                 required
               >
@@ -281,6 +282,7 @@ const AttendeeInput = ({ user, onLogout }) => {
               <label>สำนัก</label>
               <select
                 value={selectedDepartment}
+                className="form-input"
                 onChange={handleDepartmentChange}
                 disabled={!selectedDivision}
                 required
@@ -299,6 +301,7 @@ const AttendeeInput = ({ user, onLogout }) => {
               <label>ชื่อ-นามสกุล</label>
               <select
                 value={selectedEmployee}
+                className="form-input"
                 onChange={handleEmployeeChange}
                 disabled={!selectedDepartment}
                 required
@@ -319,6 +322,7 @@ const AttendeeInput = ({ user, onLogout }) => {
               <label>เบอร์โต๊ะ</label>
               <input
                 type="text"
+                className="form-input"
                 name="table_number"
                 value={formData.table_number}
                 onChange={handleChange}

@@ -193,6 +193,7 @@ const EmployeeInput = ({ user, onLogout }) => {
               <label>ชื่อ-นามสกุล</label>
               <input
                 type="text"
+                className="form-input"
                 name="emp_name"
                 value={formData.emp_name}
                 onChange={handleChange}
@@ -204,6 +205,7 @@ const EmployeeInput = ({ user, onLogout }) => {
               <label>ตำแหน่ง</label>
               <select
                 name="position_id"
+                className="form-input"
                 value={formData.position_id}
                 onChange={handleChange}
                 required
@@ -221,6 +223,7 @@ const EmployeeInput = ({ user, onLogout }) => {
               <label>สายงาน</label>
               <select
                 name="div_id"
+                className="form-input"
                 value={formData.div_id}
                 onChange={handleChange}
                 required
@@ -238,6 +241,7 @@ const EmployeeInput = ({ user, onLogout }) => {
               <label>สำนัก</label>
               <select
                 name="dept_id"
+                className="form-input"
                 value={formData.dept_id}
                 onChange={handleChange}
                 required
