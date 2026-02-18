@@ -25,17 +25,6 @@ const NavbarAdmin = ({ user, onLogout }) => {
       <div className="nav-container">
         <div className="nav-header">
           <div className="nav-brand">สำหรับผู้ดูแลระบบ</div>
-          
-          {/* Hamburger menu button */}
-          <button 
-            className={`hamburger-btn ${isMenuOpen ? 'active' : ''}`}
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
         </div>
 
         {/* Desktop horizontal navigation (visible on large screens) */}
@@ -61,6 +50,17 @@ const NavbarAdmin = ({ user, onLogout }) => {
             </button>
           </div>
         </div>
+
+        {/* Hamburger menu button */}
+          <button 
+            className={`hamburger-btn ${isMenuOpen ? 'active' : ''}`}
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
         <div className="nav-user">
           <span className="user-greeting">{user?.CN}</span>

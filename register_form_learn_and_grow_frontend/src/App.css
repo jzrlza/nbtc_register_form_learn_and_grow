@@ -465,18 +465,19 @@ button:disabled {
 
 .nav-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
     padding: 1rem 2rem;
     max-width: 1400px;
-    margin: 0 auto;
+    margin: 0 0;
 }
 
 .nav-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: left;
+    justify-content: left;
     width: auto;
+    margin-right: 5%;
 }
 
 .nav-brand {
@@ -488,9 +489,10 @@ button:disabled {
 
 /* Desktop Navigation */
 .nav-tabs-container.desktop {
-    flex: 1;
+    flex: 0 1 auto; /* Change from flex:1 which was causing centering */
     display: flex;
-    justify-content: center;
+    /* Remove justify-content: center */
+    margin: 0; /* Remove any auto margins */
 }
 
 .nav-tabs {
@@ -528,6 +530,8 @@ button:disabled {
     align-items: center;
     gap: 1rem;
     color: #1f029e;
+    position: absolute;
+    right: 2rem;
 }
 
 .user-greeting {
