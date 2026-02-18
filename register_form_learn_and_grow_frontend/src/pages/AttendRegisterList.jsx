@@ -127,7 +127,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
       <main className="app-main">
         <section className="registers-section">
           <div className="section-header">
-            <h2 className="section-header--header">การลงทะเบียนเข้าร่วมงาน ({totalRegisters})</h2>
+            <h2 className="section-header--header">การลงทะเบียน ({totalRegisters})</h2>
             <div className="section-header--btn-group">
             <button onClick={() => fetchRegisters(currentPage)} disabled={loading} className="refresh-btn">
             {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
@@ -153,11 +153,11 @@ const AttendRegisterList = ({ user, onLogout }) => {
                   disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
-                  ก่อนหน้า
+                  {"<"}
                 </button>
                 
                 <span className="page-info">
-                  หน้า {currentPage} จาก {totalPages}
+                  หน้า {currentPage}/{totalPages}
                 </span>
                 
                 <button 
@@ -165,7 +165,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
                   disabled={currentPage === totalPages}
                   className="page-btn"
                 >
-                  ถัดไป
+                  {">"}
                 </button>
               </div> : ""}
           
@@ -215,11 +215,11 @@ const AttendRegisterList = ({ user, onLogout }) => {
                   disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
-                  ก่อนหน้า
+                  {"<"}
                 </button>
                 
                 <span className="page-info">
-                  หน้า {currentPage} จาก {totalPages}
+                  หน้า {currentPage}/{totalPages}
                 </span>
                 
                 <button 
@@ -227,7 +227,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
                   disabled={currentPage === totalPages}
                   className="page-btn"
                 >
-                  ถัดไป
+                  {">"}
                 </button>
               </div>
             </>

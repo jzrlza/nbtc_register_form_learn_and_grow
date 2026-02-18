@@ -188,11 +188,11 @@ const UsernameList = ({ user, onLogout }) => {
                   disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
-                  ก่อนหน้า
+                  {"<"}
                 </button>
                 
                 <span className="page-info">
-                  หน้า {currentPage} จาก {totalPages}
+                  หน้า {currentPage}/{totalPages}
                 </span>
                 
                 <button 
@@ -200,7 +200,7 @@ const UsernameList = ({ user, onLogout }) => {
                   disabled={currentPage === totalPages}
                   className="page-btn"
                 >
-                  ถัดไป
+                  {">"}
                 </button>
               </div> : ""}
           
@@ -259,11 +259,11 @@ const UsernameList = ({ user, onLogout }) => {
                   disabled={currentPage === 1 || currentPage === 0}
                   className="page-btn"
                 >
-                  ก่อนหน้า
+                  {"<"}
                 </button>
                 
                 <span className="page-info">
-                  หน้า {currentPage} จาก {totalPages}
+                  หน้า {currentPage}/{totalPages}
                 </span>
                 
                 <button 
@@ -271,7 +271,7 @@ const UsernameList = ({ user, onLogout }) => {
                   disabled={currentPage === totalPages}
                   className="page-btn"
                 >
-                  ถัดไป
+                  {">"}
                 </button>
               </div>
             </>
