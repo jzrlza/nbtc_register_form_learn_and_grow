@@ -71,7 +71,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
       </div>
 
       {/* Vertical Mobile Menu - slides in when hamburger is clicked */}
-      <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+      <div className={`mobile-menu ${isMenuOpen ? 'open' : 'mobile-menu-closed'}`}>
         <div className="mobile-menu-header">
           <span className="mobile-user-greeting">{user?.CN}</span>
           <button className="mobile-close-btn" onClick={() => setIsMenuOpen(false)}>
@@ -106,7 +106,7 @@ const NavbarAdmin = ({ user, onLogout }) => {
       </div>
 
       {/* Overlay when mobile menu is open */}
-      {isMenuOpen && <div className="menu-overlay" onClick={() => setIsMenuOpen(false)} />}
+      <div className={`menu-overlay ${isMenuOpen ? 'open' : 'mobile-menu-closed'}`} onClick={() => setIsMenuOpen(false)} />
     </nav>
   );
 };

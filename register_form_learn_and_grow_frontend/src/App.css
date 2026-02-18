@@ -66,6 +66,9 @@ body,
 .navbar,
 .nav-brand,
 .nav-user,
+.navbar-public,
+.nav-brand-public,
+.nav-user-public,
 .health-section,
 .users-section,
 .employees-section,
@@ -766,17 +769,8 @@ button:disabled {
     }
 }
 
-@media (max-width: 1244px) {
-    body {
-        overflow-x: hidden; /* Prevent horizontal scroll on mobile */
-        width: 100%;
-        position: relative;
-    }
-    
-    html {
-        overflow-x: hidden;
-        width: 100%;
-    }
+.mobile-menu-closed {
+    display: none;
 }
 
 /* =============================================
