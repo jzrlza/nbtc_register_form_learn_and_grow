@@ -222,7 +222,7 @@ const UsernameList = ({ user, onLogout }) => {
                     {users.map((userobj) => (
                       <tr key={userobj.id} className={parseInt(userobj.id) === parseInt(user?.id) ? "self-row" : ""}>
                         <td>{userobj.id}</td>
-                        <td className="subname-in-table">{userobj.username}</td>
+                        <td className="subname-in-table">{userobj.username} {parseInt(userobj.id) === parseInt(user?.id) ? "**" : ""}</td>
                         <td className="name-in-table">{userobj.emp_name ? userobj.emp_name : "-"}</td>
                         <td>{userobj.is_2fa_enabled ? "ใช่" : "ไม่ใช่"}</td>
                         <td>{userobj.has_two_password ? "ใช่" : "ไม่ใช่"}</td>

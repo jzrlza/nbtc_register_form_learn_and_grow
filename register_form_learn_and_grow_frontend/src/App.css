@@ -103,16 +103,6 @@ p, h1, h2, h3, h4, h5, h6, div, span, label, td, th, li, a:not(button a) {
     color: #1f029e !important;
 }
 
-/* Table text */
-.employees-table th,
-.employees-table td,
-.registers-table th,
-.registers-table td,
-.users-table th,
-.users-table td {
-    color: #fff !important;
-}
-
 /* Modal text */
 .modal-content,
 .modal-header,
@@ -870,7 +860,6 @@ input:focus, select:focus, textarea:focus {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: #1f029e;
 }
 
 .employees-table th,
@@ -878,7 +867,21 @@ input:focus, select:focus, textarea:focus {
 .users-table th {
     background: rgba(0, 0, 0, 0.3);
     font-weight: bold;
-    color: #1f029e;
+    color: #fff !important;
+}
+
+.employees-table tr:nth-child(odd) td,
+.registers-table tr:nth-child(odd) td,
+.users-table tr:nth-child(odd) td {
+    background-color: #fff;
+    color: #000;
+}
+
+.employees-table tr:nth-child(even) td,
+.registers-table tr:nth-child(even) td,
+.users-table tr:nth-child(even) td {
+    background-color: #efefef;
+    color: #000;
 }
 
 /*table actions*/
@@ -1595,10 +1598,6 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
-.self-row {
-    background-color: #441166;
-}
-
 /* Error state styles */
 .input-error {
   border-color: #dc3545 !important;
@@ -1899,4 +1898,8 @@ input:focus, select:focus, textarea:focus {
   .checkbox-group {
     padding: 12px;
   }
+}
+
+.self-row {
+    color: #15017a !important;
 }
