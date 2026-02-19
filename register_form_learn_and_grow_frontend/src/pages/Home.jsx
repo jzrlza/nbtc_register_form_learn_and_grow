@@ -561,7 +561,7 @@ const Home = ({ user, onLogout }) => {
                       </div>
                     ) : (
                       <div className="suggestions-header">
-                        <span>พิมพ์ชื่อเพื่อค้นหาพนักงาน ({employees.length} คน)</span>
+                        <span>พิมพ์ชื่อเพื่อค้นหาพนักงาน<br/>({employees.length} คน)</span>
                       </div>
                     )}
                   </div>
