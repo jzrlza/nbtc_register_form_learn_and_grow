@@ -25,13 +25,14 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-- name search type input public
+
 
 Tomorrow
 
 
 
 [Done]
+- name search type input public
 - add excel import button that specifically list the non-existing name employees (set is_delete to 1) in case they quit or retire
  -*- for easier finding later and safely manually delete
 - Make new backend admin page to manage users, without relying on command lines
