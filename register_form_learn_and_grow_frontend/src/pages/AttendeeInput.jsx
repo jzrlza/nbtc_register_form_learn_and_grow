@@ -227,6 +227,11 @@ const AttendeeInput = ({ user, onLogout }) => {
         emp_id: ''
       }));
     }
+
+    // When input becomes empty while focused, show all employees
+    if (value === '' && selectedDepartment) {
+      setFilteredEmployees(employees);
+    }
   };
 
   // Handle employee selection from suggestions
@@ -344,6 +349,10 @@ const AttendeeInput = ({ user, onLogout }) => {
   const handleInputFocus = () => {
     if (selectedDepartment && employees.length > 0) {
       setShowSuggestions(true);
+
+      if (searchTerm === '') {
+        setFilteredEmployees(employees);
+      }
     }
   };
 

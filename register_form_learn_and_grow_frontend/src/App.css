@@ -1860,12 +1860,9 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
-  .suggestions-dropdown {
-    max-height: 250px;
+.suggestions-dropdown {
+    max-height: 150px;
   }
-  
-}
 
 /* Checkbox group styling */
 .checkbox-group {

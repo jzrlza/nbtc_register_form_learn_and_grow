@@ -229,6 +229,11 @@ const UsernameInput = ({ user, onLogout }) => {
       }));
       setSelectedEmployeeName('');
     }
+
+    // When input becomes empty while focused, show all employees
+    if (value === '' && selectedDepartment) {
+      setFilteredEmployees(employees);
+    }
   };
 
   // Handle employee selection from suggestions
@@ -346,6 +351,10 @@ const UsernameInput = ({ user, onLogout }) => {
   const handleInputFocus = () => {
     if (selectedDepartment && employees.length > 0) {
       setShowSuggestions(true);
+
+      if (searchTerm === '') {
+        setFilteredEmployees(employees);
+      }
     }
   };
 
@@ -463,22 +472,6 @@ const UsernameInput = ({ user, onLogout }) => {
               />
             </div>
 
-            {/* 2FA Checkbox */}
-            <div className="form-group checkbox-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="is_2fa_enabled"
-                  checked={formData.is_2fa_enabled}
-                  onChange={handleChange}
-                />
-                <span>เปิดใช้งาน Two-Factor Authentication (2FA)</span>
-              </label>
-              <small className="form-hint">
-                เมื่อเปิดใช้งานนี้ ผู้ใช้งานจะต้องตั้งค่า 2FA ผ่านแอป Google Authenticator
-              </small>
-            </div>
-
             {/* Division Selection */}
             <div className="form-group">
               <label>สายงาน</label>
@@ -584,6 +577,22 @@ const UsernameInput = ({ user, onLogout }) => {
                   </span>
                 </div>
               )*/}
+            </div>
+
+            {/* 2FA Checkbox */}
+            <div className="form-group checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="is_2fa_enabled"
+                  checked={formData.is_2fa_enabled}
+                  onChange={handleChange}
+                />
+                <span>เปิดใช้งาน Two-Factor Authentication (2FA)</span>
+              </label>
+              <small className="form-hint">
+                เมื่อเปิดใช้งานนี้ ผู้ใช้งานจะต้องตั้งค่า 2FA ผ่านแอป Google Authenticator
+              </small>
             </div>
 
             <br/>
