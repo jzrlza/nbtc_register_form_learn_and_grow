@@ -1597,3 +1597,75 @@ input:focus, select:focus, textarea:focus {
 .self-row {
     background-color: #441166;
 }
+
+/* Error state styles */
+.input-error {
+  border-color: #dc3545 !important;
+  background-color: #fff8f8;
+}
+
+.input-error:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2) !important;
+}
+
+.input-error-message {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #fff8f8;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  color: #dc3545;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.error-icon {
+  font-size: 16px;
+}
+
+/* Success indicator enhancement */
+.selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #a5d6a7;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced suggestion item for better clickability */
+.suggestion-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  user-select: none; /* Prevents text selection on double click */
+}
+
+.suggestion-item:active {
+  background-color: #e3f2fd;
+  transform: scale(0.99);
+}
