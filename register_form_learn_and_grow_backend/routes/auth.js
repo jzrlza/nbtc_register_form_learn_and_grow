@@ -6,7 +6,7 @@ const { getConnection } = require('../config/database');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const SimpleRotatingLogger = require('./SimpleRotatingLogger');
+const SimpleRotatingLogger = require('../SimpleRotatingLogger');
 
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
 const JWT_SECRET_STR = process.env.JWT_SECRET;

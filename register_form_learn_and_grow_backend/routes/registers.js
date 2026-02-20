@@ -2,7 +2,7 @@ const express = require('express');
 const { getConnection } = require('../config/database');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const SimpleRotatingLogger = require('./SimpleRotatingLogger');
+const SimpleRotatingLogger = require('../SimpleRotatingLogger');
 
 const JWT_SECRET_STR = process.env.JWT_SECRET;
 
