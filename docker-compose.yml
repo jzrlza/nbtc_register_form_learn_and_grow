@@ -76,10 +76,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - DB_NAME=${DB_NAME}
       - MYSQL_HOST=database
-    entrypoint:
-      - sh
-      - -c
-      - |
+    entrypoint: |
+      sh -c "
         # Install MySQL client
         echo 'Installing MySQL client...'
         apk add --no-cache mysql-client
@@ -120,6 +118,7 @@ services:
           echo 'Sleeping for 30 days until next backup...'
           sleep 2592000
         done
+        "
     depends_on:
       - database
     networks:
