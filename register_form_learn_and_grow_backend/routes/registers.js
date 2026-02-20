@@ -30,7 +30,6 @@ const verifyJWTToken = (req, res) => {
 
 const logFile = (req, user=null) => {
   let date_now = new Date().toISOString();
-  console.log(user);
   let user_str = user ? ' - '+user.username : ''
   const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}${user_str}\n`;
   
