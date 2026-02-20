@@ -244,7 +244,7 @@ router.get('/employees/search', async (req, res) => {
 // POST create new register
 router.post('/', async (req, res) => {
   try {
-    logFile(req);
+    logFile(req); //ALWAYS PUBLIC
     const { emp_id, table_number } = req.body;
     
     const connection = await getConnection();
