@@ -67,7 +67,7 @@ services:
   # Database Backup service
   backup:
     image: alpine:latest
-    container_name: register_form_backup
+    container_name: register_learn_and_grow_backup
     restart: unless-stopped
     volumes:
       - mysql_data:/var/lib/mysql:ro
