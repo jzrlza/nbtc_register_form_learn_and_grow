@@ -114,14 +114,30 @@ const AttendeeInput = ({ user, onLogout }) => {
   const fetchEmployees = async (deptId) => {
     try {
       const response = await axios.get(`${API_URL}/api/registers/employees?dept_id=${deptId}`);
-      setEmployees(response.data);
+      const employeesData = response.data;
+      setEmployees(employeesData);
       setFilteredEmployees([]);
-      setFormData(prev => ({
-        ...prev,
-        emp_name: '',
-        emp_id: ''
-      }));
-      setSearchTerm('');
+      
+      // If we're in edit mode and have an emp_id, verify the employee exists in this department
+      if (isEditMode && formData.emp_id) {
+        const selectedEmployee = employeesData.find(emp => emp.id.toString() === formData.emp_id.toString());
+        if (selectedEmployee) {
+          setFormData(prev => ({
+            ...prev,
+            emp_name: selectedEmployee.emp_name,
+            emp_id: selectedEmployee.id.toString()
+          }));
+          setSearchTerm(selectedEmployee.emp_name);
+          setInputError('');
+        }
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          emp_name: '',
+          emp_id: ''
+        }));
+        setSearchTerm('');
+      }
       setInputError('');
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -154,6 +170,14 @@ const AttendeeInput = ({ user, onLogout }) => {
               await fetchEmployees(department_id);
               // Set the search term to the employee name
               setSearchTerm(register.emp_name);
+              
+              // Important: Set the form data again after employees are loaded
+              // This ensures the employee is properly selected
+              setFormData(prev => ({
+                ...prev,
+                emp_name: register.emp_name,
+                emp_id: register.emp_id
+              }));
             }
           }
         } catch (error) {

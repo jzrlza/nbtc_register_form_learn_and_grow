@@ -115,14 +115,30 @@ const UsernameInput = ({ user, onLogout }) => {
   const fetchEmployees = async (deptId) => {
     try {
       const response = await axios.get(`${API_URL}/api/users/employees?dept_id=${deptId}`);
-      setEmployees(response.data);
+      const employeesData = response.data;
+      setEmployees(employeesData);
       setFilteredEmployees([]);
-      setFormData(prev => ({
-        ...prev,
-        emp_id: ''
-      }));
-      setSearchTerm('');
-      setSelectedEmployeeName('');
+      
+      // If we're in edit mode and have an emp_id, verify the employee exists in this department
+      if (isEditMode && formData.emp_id) {
+        const selectedEmployee = employeesData.find(emp => emp.id.toString() === formData.emp_id.toString());
+        if (selectedEmployee) {
+          setFormData(prev => ({
+            ...prev,
+            emp_id: selectedEmployee.id.toString()
+          }));
+          setSearchTerm(selectedEmployee.emp_name);
+          setSelectedEmployeeName(selectedEmployee.emp_name);
+          setInputError('');
+        }
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          emp_id: ''
+        }));
+        setSearchTerm('');
+        setSelectedEmployeeName('');
+      }
       setInputError('');
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -153,9 +169,18 @@ const UsernameInput = ({ user, onLogout }) => {
             setSelectedDepartment(department_id?.toString() || '');
             if (department_id) {
               await fetchEmployees(department_id);
-              // Set the search term to the employee name
+              // Set the search term and selected name to the employee name
               setSearchTerm(emp_name || '');
               setSelectedEmployeeName(emp_name || '');
+              
+              // Important: Set the form data again after employees are loaded
+              // This ensures the employee is properly selected
+              setFormData(prev => ({
+                ...prev,
+                emp_id: userobj.employee_id?.toString() || '',
+                username: userobj.username || '',
+                is_2fa_enabled: userobj.is_2fa_enabled === 1 || userobj.is_2fa_enabled === true
+              }));
             }
           }
         } catch (error) {
