@@ -75,6 +75,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - MYSQL_HOST=database
     entrypoint: |
       sh -c "
       # Install MySQL client
@@ -91,7 +92,7 @@ services:
         echo \"Starting backup: \$$BACKUP_FILE\"
         
         # Perform the backup
-        if mysqldump -h database -u root -p\$${MYSQL_ROOT_PASSWORD} \$${DB_NAME} > \$$BACKUP_FILE; then
+        if mysqldump -h database -u root -p${MYSQL_ROOT_PASSWORD} \ --ssl=0 \ --ssl-verify-server-cert=0 \ ${DB_NAME} > $BACKUP_FILE; then
           echo \"Backup completed successfully: \$$BACKUP_FILE\"
           
           # Compress the backup (optional)
