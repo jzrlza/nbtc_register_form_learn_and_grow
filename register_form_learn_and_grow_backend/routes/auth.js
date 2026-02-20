@@ -10,6 +10,13 @@ const router = express.Router();
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
 const JWT_SECRET_STR = process.env.JWT_SECRET;
 
+const fs = require('fs');
+const path = require('path');
+const logDir = process.env.LOG_PATH || path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
 const generateJWTToken = (user) => {
   if (!JWT_SECRET_STR) {
     return null;
@@ -21,9 +28,24 @@ const generateJWTToken = (user) => {
     );
 }
 
+const logFile = (req) => {
+  let date_now = new Date().toISOString();
+  const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}\n`;
+  
+  // Append to log file
+  fs.appendFile(
+    path.join(logDir, `backend-auth.js-access.log`),
+    logEntry,
+    (err) => {
+      if (err) console.error('Failed to write log:', err);
+    }
+  );
+}
+
 // Login (real, proxy to avoid CORS)
 router.post('/login', async (req, res) => {
   try {
+    logFile(req);
     const { username, password } = req.body;
     const connection = await getConnection();
 
@@ -81,7 +103,7 @@ router.post('/login', async (req, res) => {
 
     //now check user authen
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE username = ? AND is_deleted = 0', 
+      'SELECT id, username, employee_id, is_2fa_enabled, is_deleted, created_at, type FROM users WHERE username = ? AND is_deleted = 0', 
       [username]
     );
     if (users.length <= 0) {
@@ -123,11 +145,12 @@ router.post('/login', async (req, res) => {
 // Verify 2FA Code
 router.post('/verify-2fa', async (req, res) => {
   try {
+    logFile(req);
     const { userId, username, userAD, code } = req.body;
     const connection = await getConnection();
     
     const [users] = await connection.execute(
-      'SELECT * FROM users WHERE username = ? AND is_deleted = 0', 
+      'SELECT id, username, employee_id, is_2fa_enabled, is_deleted, created_at, two_factor_secret, type FROM users WHERE username = ? AND is_deleted = 0', 
       [username]
     );
     if (users.length <= 0) {
@@ -149,6 +172,7 @@ router.post('/verify-2fa', async (req, res) => {
       window: 2
     });
 
+    delete user['two_factor_secret']
     const token = generateJWTToken(user);
     if (!token) {
       return res.status(500).json({ error: 'JWT Secret ยังไม่ได้ตั้งค่า' });
@@ -173,6 +197,7 @@ router.post('/verify-2fa', async (req, res) => {
 // Setup 2FA
 router.post('/setup-2fa', async (req, res) => {
   try {
+    logFile(req);
     const { userId, username } = req.body;
     const connection = await getConnection();
     

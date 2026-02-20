@@ -1,9 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const logDir = process.env.LOG_PATH || path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
 
 // ========== SIMPLE CORS CONFIG ==========
 const allowedOrigins = [];

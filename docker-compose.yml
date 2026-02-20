@@ -31,10 +31,13 @@ services:
       AD_API_URL: ${AD_API_URL}
       AD_API_KEY: ${AD_API_KEY}
       NODE_OPTIONS: "--max-old-space-size=300"
+      LOG_PATH: ${LOG_PATH}
     networks:
       - learngrow-network
     mem_limit: 500M  # Add this line
     restart: always  # Auto-restart if crashes
+    volumes:
+      - ./backend-logs:/app/logs
 
   frontend:
     build: ./register_form_learn_and_grow_frontend

@@ -5,6 +5,13 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET_STR = process.env.JWT_SECRET;
 
+const fs = require('fs');
+const path = require('path');
+const logDir = process.env.LOG_PATH || path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
 const verifyJWTToken = (req, res) => {
   const token = req.headers.authorization?.split(' ')[1].replace(/"/g, '');
 
@@ -21,9 +28,25 @@ const verifyJWTToken = (req, res) => {
   }
 }
 
+const logFile = (req, user=null) => {
+  let date_now = new Date().toISOString();
+  let user_str = user ? ' - '+user.username : ''
+  const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}${user_str}\n`;
+  
+  // Append to log file
+  fs.appendFile(
+    path.join(logDir, `backend-employees.js-access.log`),
+    logEntry,
+    (err) => {
+      if (err) console.error('Failed to write log:', err);
+    }
+  );
+}
+
 // GET all employees with position and department names
 router.get('/', async (req, res) => {
   try {
+    logFile(req);
     const { search, page = 1, limit = 20, division_id, dept_id } = req.query;
     const connection = await getConnection();
     
@@ -116,6 +139,7 @@ router.get('/', async (req, res) => {
 // GET departments by division
 router.get('/departments/by-division/:divisionId', async (req, res) => {
   try {
+    logFile(req);
     const { divisionId } = req.params;
     const connection = await getConnection();
     const [rows] = await connection.execute(
@@ -133,6 +157,7 @@ router.get('/departments/by-division/:divisionId', async (req, res) => {
 // GET positions for dropdown
 router.get('/positions', async (req, res) => {
   try {
+    logFile(req);
     const connection = await getConnection();
     const [rows] = await connection.execute('SELECT * FROM position ORDER BY position_name');
     await connection.end();
@@ -146,6 +171,7 @@ router.get('/positions', async (req, res) => {
 // GET departments for dropdown
 router.get('/departments', async (req, res) => {
   try {
+    logFile(req);
     const connection = await getConnection();
     const [rows] = await connection.execute('SELECT * FROM dept ORDER BY dept_name');
     await connection.end();
@@ -158,6 +184,7 @@ router.get('/departments', async (req, res) => {
 
 router.get('/divisions', async (req, res) => {
   try {
+    logFile(req);
     const connection = await getConnection();
     const [rows] = await connection.execute('SELECT * FROM division ORDER BY div_name');
     await connection.end();
@@ -173,8 +200,10 @@ router.get('/divisions', async (req, res) => {
 router.post('/', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   try {
     const { emp_name, position_id, dept_id } = req.body;
@@ -198,8 +227,10 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   try {
     const { id } = req.params;
@@ -222,6 +253,7 @@ router.put('/:id', async (req, res) => {
 // GET single employee for edit
 router.get('/single/:id', async (req, res) => {
   try {
+    logFile(req);
     const { id } = req.params;
     const connection = await getConnection();
     
@@ -250,8 +282,10 @@ router.delete('/:id', async (req, res) => {
 
     const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+    logFile(req, user);
 
     const connection = await getConnection();
     
@@ -275,8 +309,10 @@ router.delete('/:id/force', async (req, res) => {
 
     const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+    logFile(req, user);
 
     const connection = await getConnection();
     
@@ -682,8 +718,10 @@ const processExcelImport = async (excelData, connection, testing = false) => {
 router.post('/test-import', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   console.log('=== EXCEL IMPORT TEST START ===');
   
@@ -730,8 +768,10 @@ router.post('/test-import', async (req, res) => {
 router.post('/import', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   console.log('=== EXCEL IMPORT START (SAVING TO DATABASE WITH AUTO-ADD) ===');
   
@@ -782,8 +822,10 @@ router.post('/import-batch', async (req, res) => {
 
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
   
   if (!excelData || !Array.isArray(excelData)) {
     return res.status(400).json({ success: false, error: 'Invalid Excel data format' });
@@ -961,8 +1003,10 @@ router.post('/import-batch', async (req, res) => {
 router.post('/detect-missing', async (req, res) => {
   const user = verifyJWTToken(req, res);
   if (!user) {
+    logFile(req);
     return res.status(403).json({ error: "Unauthorized Access" });
   }
+  logFile(req, user);
 
   try {
     const { excelData } = req.body;
@@ -1086,8 +1130,10 @@ router.patch('/excel-mass-delete', async (req, res) => {
   try {
     const user = verifyJWTToken(req, res);
     if (!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+    logFile(req, user);
 
     // Get employee IDs from request body
     const { employeeIds } = req.body;
@@ -1169,8 +1215,10 @@ router.post('/excel-mass-delete/preview', async (req, res) => {
   try {
     const user = verifyJWTToken(req, res);
     if (!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+    logFile(req, user);
 
     const { employeeIds } = req.body;
 

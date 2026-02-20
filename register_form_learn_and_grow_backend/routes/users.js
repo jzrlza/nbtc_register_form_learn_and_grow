@@ -5,6 +5,13 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET_STR = process.env.JWT_SECRET;
 
+const fs = require('fs');
+const path = require('path');
+const logDir = process.env.LOG_PATH || path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
 const verifyJWTToken = (req, res) => {
   const token = req.headers.authorization?.split(' ')[1].replace(/"/g, '');
 
@@ -21,9 +28,25 @@ const verifyJWTToken = (req, res) => {
   }
 }
 
+const logFile = (req, user=null) => {
+  let date_now = new Date().toISOString();
+  let user_str = user ? ' - '+user.username : ''
+  const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}${user_str}\n`;
+  
+  // Append to log file
+  fs.appendFile(
+    path.join(logDir, `backend-employees.js-access.log`),
+    logEntry,
+    (err) => {
+      if (err) console.error('Failed to write log:', err);
+    }
+  );
+}
+
 // GET all users
 router.get('/', async (req, res) => {
   try {
+    logFile(req);
     const { search, page = 1, limit = 10 } = req.query;
 
     const connection = await getConnection();
@@ -93,6 +116,7 @@ router.get('/', async (req, res) => {
 
 router.get('/divisions', async (req, res) => {
   try {
+    logFile(req);
     const connection = await getConnection();
     const [rows] = await connection.execute('SELECT * FROM division ORDER BY div_name');
     await connection.end();
@@ -106,6 +130,7 @@ router.get('/divisions', async (req, res) => {
 // GET departments for dropdown
 router.get('/departments', async (req, res) => {
   try {
+    logFile(req);
     const { div_id } = req.query;
     
     if (!div_id) {
@@ -130,6 +155,7 @@ router.get('/departments', async (req, res) => {
 // GET employees by department ID
 router.get('/employees', async (req, res) => {
   try {
+    logFile(req);
     const { dept_id } = req.query;
     
     if (!dept_id) {
@@ -156,6 +182,7 @@ router.get('/employees', async (req, res) => {
 // GET employee info (division and department) for edit mode
 router.get('/employee-info/:emp_id', async (req, res) => {
   try {
+    logFile(req);
     const { emp_id } = req.params;
     
     const connection = await getConnection();
@@ -199,6 +226,7 @@ router.get('/employee-info/:emp_id', async (req, res) => {
 // GET employees for search
 router.get('/employees/search', async (req, res) => {
   try {
+    logFile(req);
     const { search } = req.query;
     const connection = await getConnection();
     
@@ -225,6 +253,7 @@ router.get('/employees/search', async (req, res) => {
 // GET user by ID
 router.get('/:id', async (req, res) => {
   try {
+    logFile(req);
     const connection = await getConnection();
     const [rows] = await connection.execute('SELECT * FROM users WHERE id = ?', [req.params.id]);
     await connection.end();
@@ -245,8 +274,10 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   try {
     const { employee_id, username, is_2fa_enabled } = req.body;
@@ -293,8 +324,10 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   try {
     const { id } = req.params;
@@ -358,8 +391,10 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   try {
     const { id } = req.params;
@@ -391,8 +426,10 @@ router.delete('/:id', async (req, res) => {
 router.delete('/2fa/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
+      logFile(req);
       return res.status(403).json({ error: "Unauthorized Access" });
     }
+  logFile(req, user);
 
   try {
     const { id } = req.params;
