@@ -76,7 +76,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - DB_NAME=${DB_NAME}
       - MYSQL_HOST=database
-    entrypoint: |
+    entrypoint:
       - sh
       - -c
       - |
