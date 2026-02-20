@@ -111,8 +111,7 @@ services:
       done
       "
     depends_on:
-      database:
-        condition: service_healthy
+      - database
     networks:
       - learngrow-network
 
