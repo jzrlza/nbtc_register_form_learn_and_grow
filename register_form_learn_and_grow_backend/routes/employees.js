@@ -2,6 +2,7 @@ const express = require('express');
 const { getConnection } = require('../config/database');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const SimpleRotatingLogger = require('./SimpleRotatingLogger');
 
 const JWT_SECRET_STR = process.env.JWT_SECRET;
 
@@ -28,19 +29,26 @@ const verifyJWTToken = (req, res) => {
   }
 }
 
+const logger = new SimpleRotatingLogger(logDir, 'backend-employees.js-access.log', {
+    maxSize: 10 * 1024 * 1024, // 10MB
+    maxFiles: 5,
+    compress: true,
+    level: 'info'//,
+   // consoleOutput: process.env.NODE_ENV !== 'production'
+});
+
 const logFile = (req, user=null) => {
-  let date_now = new Date().toISOString();
-  let user_str = user ? ' - '+user.username : ''
-  const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}${user_str}\n`;
-  
-  // Append to log file
-  fs.appendFile(
-    path.join(logDir, `backend-employees.js-access.log`),
-    logEntry,
-    (err) => {
-      if (err) console.error('Failed to write log:', err);
-    }
-  );
+    //let date_now = new Date().toISOString();
+    //const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}\n`;
+    let user_str = user ? user.username : ''
+    // Write to rotating stream instead of direct append
+    logger.info('API Request', {
+        method: req.method,
+        url: req.url,
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        user: user_str
+    });
 }
 
 // GET all employees with position and department names

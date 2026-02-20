@@ -6,6 +6,7 @@ const { getConnection } = require('../config/database');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
+const SimpleRotatingLogger = require('./SimpleRotatingLogger');
 
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
 const JWT_SECRET_STR = process.env.JWT_SECRET;
@@ -28,18 +29,25 @@ const generateJWTToken = (user) => {
     );
 }
 
+const logger = new SimpleRotatingLogger(logDir, 'backend-auth.js-access.log', {
+    maxSize: 10 * 1024 * 1024, // 10MB
+    maxFiles: 5,
+    compress: true,
+    level: 'info'//,
+   // consoleOutput: process.env.NODE_ENV !== 'production'
+});
+
 const logFile = (req) => {
-  let date_now = new Date().toISOString();
-  const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}\n`;
-  
-  // Append to log file
-  fs.appendFile(
-    path.join(logDir, `backend-auth.js-access.log`),
-    logEntry,
-    (err) => {
-      if (err) console.error('Failed to write log:', err);
-    }
-  );
+    //let date_now = new Date().toISOString();
+    //const logEntry = `${date_now} - ${req.method} ${req.url} - ${req.ip} - ${req.get('User-Agent')}\n`;
+    
+    // Write to rotating stream instead of direct append
+    logger.info('API Request', {
+        method: req.method,
+        url: req.url,
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+    });
 }
 
 // Login (real, proxy to avoid CORS)
