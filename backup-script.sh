@@ -3,7 +3,7 @@
 echo 'Installing MySQL client...'
 apk add --no-cache mysql-client
 
-echo 'Backup service started. Will run initial backup now, then every 30 days.'
+echo 'Backup service started. Will run initial backup now, then every 90 days.'
 
 # Wait for database to be ready
 echo 'Waiting for database to be ready...'
@@ -35,7 +35,7 @@ while true; do
     echo "Backup failed!"
   fi
   
-  # Sleep for 30 days
-  echo 'Sleeping for 30 days until next backup...'
-  sleep 2592000
+  # Sleep for 90 days
+  echo 'Sleeping for 90 days until next backup...'
+  sleep 7776000
 done
