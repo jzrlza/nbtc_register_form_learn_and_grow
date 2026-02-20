@@ -35,7 +35,7 @@ const logFile = (req, user=null) => {
   
   // Append to log file
   fs.appendFile(
-    path.join(logDir, `backend-employees.js-access.log`),
+    path.join(logDir, `backend-users.js-access.log`),
     logEntry,
     (err) => {
       if (err) console.error('Failed to write log:', err);
