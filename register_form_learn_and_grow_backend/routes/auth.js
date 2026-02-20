@@ -180,7 +180,7 @@ router.post('/verify-2fa', async (req, res) => {
       window: 2
     });
 
-    delete user['two_factor_secret']
+    delete user['two_factor_secret']; //never make this public or send to front end at all
     const token = generateJWTToken(user);
     if (!token) {
       return res.status(500).json({ error: 'JWT Secret ยังไม่ได้ตั้งค่า' });
