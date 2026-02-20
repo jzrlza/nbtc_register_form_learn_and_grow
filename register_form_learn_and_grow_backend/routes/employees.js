@@ -104,8 +104,8 @@ router.get('/', async (req, res) => {
       LIMIT ? OFFSET ?
     `;
     
-    console.log('SQL Query:', employeeQuery);
-    console.log('Query Params:', [...queryParams, parseInt(limit).toString(), parseInt(offset).toString()]);
+    //console.log('SQL Query:', employeeQuery);
+    //console.log('Query Params:', [...queryParams, parseInt(limit).toString(), parseInt(offset).toString()]);
     
     // Add limit and offset to params
     const employeeParams = [...queryParams, parseInt(limit).toString(), parseInt(offset).toString()];
@@ -122,8 +122,8 @@ router.get('/', async (req, res) => {
       ${whereClause}
     `;
     
-    console.log('Count Query:', countQuery);
-    console.log('Count Params:', queryParams);
+    //console.log('Count Query:', countQuery);
+    //console.log('Count Params:', queryParams);
     
     const [countResult] = await connection.execute(countQuery, queryParams);
     
@@ -363,7 +363,7 @@ const detectColumnIndices = (excelData) => {
     throw new Error('Header row with "ลำดับ" not found in Excel file');
   }
   
-  console.log(`Found header row at index: ${headerRowIndex}`);
+  //console.log(`Found header row at index: ${headerRowIndex}`);
   
   // Find column indices based on header content
   const columnMap = {
@@ -405,7 +405,7 @@ const detectColumnIndices = (excelData) => {
     throw new Error(`Missing required columns in header row: ${missingColumns.join(', ')}`);
   }
   
-  console.log('Detected column indices:', columnMap);
+  //console.log('Detected column indices:', columnMap);
   return {
     headerRowIndex,
     columnMap,
@@ -482,7 +482,7 @@ const parseExcelRow = async (row, rowNumber, divisions, departments, positions, 
       );
       division = { id: result.insertId, div_name: divisionStr };
       divisions.push(division);
-      console.log(`Row ${rowNumber}: Added new division: ${divisionStr}`);
+      //console.log(`Row ${rowNumber}: Added new division: ${divisionStr}`);
     } else {
       return { 
         error: `Row ${rowNumber}: | ไม่พบสายงานชื่อ "${divisionStr}" |` 
@@ -505,7 +505,7 @@ const parseExcelRow = async (row, rowNumber, divisions, departments, positions, 
       );
       department = { id: result.insertId, dept_name: deptStr, div_id: division.id };
       departments.push(department);
-      console.log(`Row ${rowNumber}: Added new department: ${deptStr} in division: ${divisionStr}`);
+      //console.log(`Row ${rowNumber}: Added new department: ${deptStr} in division: ${divisionStr}`);
     } else {
       return { 
         error: `Row ${rowNumber}: | ไม่พบสังกัดชื่อ "${deptStr}" ในสายงาน "${divisionStr}" |` 
@@ -527,7 +527,7 @@ const parseExcelRow = async (row, rowNumber, divisions, departments, positions, 
       );
       position = { id: result.insertId, position_name: positionStr };
       positions.push(position);
-      console.log(`Row ${rowNumber}: Added new position: ${positionStr}`);
+      //console.log(`Row ${rowNumber}: Added new position: ${positionStr}`);
     } else {
       return { 
         error: `Row ${rowNumber}: | ไม่พบตำแหน่งชื่อ "${positionStr}" |` 
@@ -583,7 +583,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
     // Get data rows
     const dataRows = excelData.slice(dataStartIndex);
     
-    console.log(`Processing ${dataRows.length} rows, Testing: ${testing}`);
+    //console.log(`Processing ${dataRows.length} rows, Testing: ${testing}`);
     
     for (let index = 0; index < dataRows.length; index++) {
       const row = dataRows[index];
@@ -635,7 +635,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
               };
               
               updatedEmployees.push(updatedEmployee);
-              console.log(`Row ${rowNumber}: Employee "${empName}" updated`);
+              //console.log(`Row ${rowNumber}: Employee "${empName}" updated`);
             } else {
               // In testing mode, just show what would be updated
               const testUpdate = {
@@ -657,7 +657,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
               message: `Employee "${empName}" already exists with same details`
             };
             savedEmployees.push(unchangedEmployee);
-            console.log(`Row ${rowNumber}: Employee "${empName}" already exists, no changes needed`);
+            //console.log(`Row ${rowNumber}: Employee "${empName}" already exists, no changes needed`);
           }
           
         } else {
@@ -675,7 +675,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
             };
             
             savedEmployees.push(savedEmployee);
-            console.log(`Row ${rowNumber}: New employee "${empName}" created`);
+            //console.log(`Row ${rowNumber}: New employee "${empName}" created`);
           } else {
             // In testing mode, return validation result
             const testEmployee = {
@@ -781,7 +781,7 @@ router.post('/import', async (req, res) => {
     }
   logFile(req, user);
 
-  console.log('=== EXCEL IMPORT START (SAVING TO DATABASE WITH AUTO-ADD) ===');
+  //console.log('=== EXCEL IMPORT START (SAVING TO DATABASE WITH AUTO-ADD) ===');
   
   const connection = await getConnection();
   
@@ -839,7 +839,7 @@ router.post('/import-batch', async (req, res) => {
     return res.status(400).json({ success: false, error: 'Invalid Excel data format' });
   }
   
-  console.log(`Starting batch import with batch size: ${batchSize}`);
+  //console.log(`Starting batch import with batch size: ${batchSize}`);
   
   const connection = await getConnection();
   const results = { 
@@ -871,7 +871,7 @@ router.post('/import-batch', async (req, res) => {
       const end = start + batchSize;
       const batchRows = allDataRows.slice(start, end);
       
-      console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (rows ${start + 1} to ${Math.min(end, allDataRows.length)})`);
+      //console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (rows ${start + 1} to ${Math.min(end, allDataRows.length)})`);
       
       const batchSaved = [];
       const batchUpdated = [];
