@@ -51,8 +51,8 @@ const UsernameList = ({ user, onLogout }) => {
     setModal({ isOpen: false, type: '', message: '', userId: null });
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = (search) => {
+    setSearch(search);
     setCurrentPage(1);
     fetchUsers(1, search);
   };
@@ -157,13 +157,9 @@ const UsernameList = ({ user, onLogout }) => {
                     type="text"
                     placeholder="ค้นหาผู้ใช้งานด้วยชื่อ Username..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                     className="search-input"
                   />
-
-                  <button type="submit" disabled={loading} className="search-btn">
-                    ค้นหา
-                  </button>
                   
                 </form>
               </div>

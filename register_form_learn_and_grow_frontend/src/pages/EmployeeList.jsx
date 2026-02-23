@@ -133,8 +133,8 @@ const EmployeeList = ({ user, onLogout }) => {
     setResignModal({ isOpen: false, results: null });
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = (search) => {
+    setSearch(search);
     setCurrentPage(1);
     fetchEmployees(1, search, selectedDivision, selectedDept);
   };
@@ -391,12 +391,9 @@ const EmployeeList = ({ user, onLogout }) => {
                     type="text"
                     placeholder="ค้นหาพนักงานด้วยชื่อ..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                     className="search-input"
                   />
-                  <button type="submit" disabled={loading} className="search-btn">
-                    ค้นหา
-                  </button>
                 </form>
                 
                 <div className="filter-controls">
