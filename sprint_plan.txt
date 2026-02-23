@@ -25,13 +25,14 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-- search by employee name (via id like in input) in register list page
+
 
 Tomorrow
 
 
 
 [Done]
+- search by employee name (via id like in input) in register list page
 - do a logging system for access monitoring
 - name search type input public
 - add excel import button that specifically list the non-existing name employees (set is_delete to 1) in case they quit or retire
