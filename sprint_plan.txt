@@ -25,7 +25,7 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-
+- search by employee name (via id like in input) in register list page
 
 Tomorrow
 
