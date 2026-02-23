@@ -11,6 +11,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
   const API_URL = import.meta.env.VITE_API_URL || '';
   const [registers, setRegisters] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -18,13 +19,17 @@ const AttendRegisterList = ({ user, onLogout }) => {
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '', registerId: null });
   const navigate = useNavigate();
 
-  const fetchRegisters = async (page = 1) => {
+  const fetchRegisters = async (page = 1, searchTerm = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: page,
         limit: 10
       });
+
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
       
       const response = await axios.get(`${API_URL}/api/registers?${params}`);
       setRegisters(response.data.registers || []);
@@ -46,6 +51,12 @@ const AttendRegisterList = ({ user, onLogout }) => {
 
   const closeModal = () => {
     setModal({ isOpen: false, type: '', message: '', registerId: null });
+  };
+
+  const handleSearch = (search) => {
+    setSearch(search);
+    setCurrentPage(1);
+    fetchRegisters(1, search);
   };
 
   const handlePageChange = (newPage) => {
@@ -145,7 +156,33 @@ const AttendRegisterList = ({ user, onLogout }) => {
               </div>
           </div>
           
-          
+          <div className="filters-container">
+              <div className="filters-row">
+                <form onSubmit={handleSearch} className="search-form">
+                  <input
+                    type="text"
+                    placeholder="ค้นหาการลงทะเบียนด้วย ชื่อ-นามสกุล ของผู้ลงทะเบียน..."
+                    value={search}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="search-input"
+                  />
+                  
+                </form>
+              </div>
+              
+              <div className="active-filters">
+                {(search) && (
+                  <div className="filters-info">
+                    <span className="filter-label">ตัวกรองที่ใช้งานอยู่: </span>
+                    {search && (
+                      <span className="filter-tag">
+                        ค้นหาชื่อ: {search}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
           {registers.length > 0 ? <div className="pagination">
                 <button 
