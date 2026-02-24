@@ -278,7 +278,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // **PROTECTED**
-// POST create new register
+// POST create new user
 router.post('/', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
@@ -314,7 +314,7 @@ router.post('/', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'INSERT INTO users (username, employee_id, is_2fa_enabled, is_deleted) VALUES (?, ?, ?, 0)',
+      'INSERT INTO users (username, employee_id, type, is_2fa_enabled, is_deleted) VALUES (?, ?, 2, ?, 0)',
       [username, employee_id, (is_2fa_enabled ? 1 : 0)]
     );
     
