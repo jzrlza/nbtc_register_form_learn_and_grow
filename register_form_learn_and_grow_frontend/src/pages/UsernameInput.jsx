@@ -14,6 +14,7 @@ const UsernameInput = ({ user, onLogout }) => {
   
   const [formData, setFormData] = useState({
     emp_id: '',
+    type: 0,
     username: '',
     is_2fa_enabled: false
   });
@@ -23,6 +24,7 @@ const UsernameInput = ({ user, onLogout }) => {
   const [departments, setDepartments] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [selectedType, setSelectedType] = useState(0);
   const [selectedDivision, setSelectedDivision] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   
@@ -153,6 +155,7 @@ const UsernameInput = ({ user, onLogout }) => {
       
       setFormData({
         emp_id: userobj.employee_id || '',
+        type: userobj.type || 0,
         username: userobj.username || '',
         is_2fa_enabled: userobj.is_2fa_enabled === 1 || userobj.is_2fa_enabled === true
       });
@@ -161,8 +164,9 @@ const UsernameInput = ({ user, onLogout }) => {
       if (userobj.employee_id) {
         try {
           const employeeInfo = await axios.get(`${API_URL}/api/users/employee-info/${userobj.employee_id}`);
-          const { division_id, department_id, emp_name } = employeeInfo.data;
+          const { type, division_id, department_id, emp_name } = employeeInfo.data;
           
+          setSelectedType(parseInt(type));
           setSelectedDivision(division_id?.toString() || '');
           if (division_id) {
             await fetchDepartments(division_id);
@@ -178,6 +182,7 @@ const UsernameInput = ({ user, onLogout }) => {
               setFormData(prev => ({
                 ...prev,
                 emp_id: userobj.employee_id?.toString() || '',
+                type: parseInt(userobj.type || 0),
                 username: userobj.username || '',
                 is_2fa_enabled: userobj.is_2fa_enabled === 1 || userobj.is_2fa_enabled === true
               }));
@@ -193,6 +198,11 @@ const UsernameInput = ({ user, onLogout }) => {
     } finally {
       setPageLoading(false);
     }
+  };
+
+  const handleTypeChange = (e) => {
+    const typeId = e.target.value;
+    setSelectedType(typeId);
   };
 
   const handleDivisionChange = (e) => {
@@ -407,6 +417,7 @@ const UsernameInput = ({ user, onLogout }) => {
     try {
       const submitData = {
         employee_id: formData.emp_id,
+        type: formData.type,
         username: formData.username,
         is_2fa_enabled: formData.is_2fa_enabled
       };
@@ -495,6 +506,26 @@ const UsernameInput = ({ user, onLogout }) => {
                 placeholder="ป้อน username"
                 required
               />
+            </div>
+
+            {/* Type Selection */}
+            <div className="form-group">
+              <label>ประเภทผู้ใช้งาน</label>
+              <select
+                value={selectedType}
+                disabled={parseInt(id) === parseInt(user?.id)} //prevent self-sabotage
+                className="form-input"
+                onChange={handleTypeChange}
+                required
+              >
+                <option value={0}>เลือกประเภทผู้ใช้งาน</option>
+                <option value={1}>
+                    Super Admin
+                  </option>
+                  <option value={2}>
+                    Regular Admin
+                  </option>
+              </select>
             </div>
 
             {/* Division Selection */}

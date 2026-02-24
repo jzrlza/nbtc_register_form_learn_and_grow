@@ -202,11 +202,14 @@ router.get('/employee-info/:emp_id', async (req, res) => {
         e.dept_id,
         d.dept_name,
         d.div_id,
-        division_obj.div_name
+        division_obj.div_name,
+        user_obj.type,
+        user_obj.id as user_id
       FROM employee e
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
       LEFT JOIN division division_obj ON d.div_id = division_obj.id
+      LEFT JOIN users user_obj ON e.id = user_obj.employee_id
       WHERE e.id = ? AND e.is_deleted = 0
     `, [emp_id]);
     await connection.end();
@@ -223,7 +226,9 @@ router.get('/employee-info/:emp_id', async (req, res) => {
       department_id: employee.dept_id,
       department_name: employee.dept_name,
       division_id: employee.div_id,
-      division_name: employee.div_name
+      division_name: employee.div_name,
+      type: employee.type,
+      user_id: employee.user_id
     });
   } catch (error) {
     console.log(error.message);
@@ -288,7 +293,7 @@ router.post('/', async (req, res) => {
   logFile(req, user);
 
   try {
-    const { employee_id, username, is_2fa_enabled } = req.body;
+    const { employee_id, type, username, is_2fa_enabled } = req.body;
     
     const connection = await getConnection();
     
@@ -314,8 +319,8 @@ router.post('/', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'INSERT INTO users (username, employee_id, is_2fa_enabled, is_deleted) VALUES (?, ?, ?, 0)',
-      [username, employee_id, (is_2fa_enabled ? 1 : 0)]
+      'INSERT INTO users (username, employee_id, type, is_2fa_enabled, is_deleted) VALUES (?, ?, ?, ?, 0)',
+      [username, employee_id, type, (is_2fa_enabled ? 1 : 0)]
     );
     
     await connection.end();
@@ -339,7 +344,7 @@ router.put('/:id', async (req, res) => {
 
   try {
     const { id } = req.params;
-    const { employee_id, username, is_2fa_enabled } = req.body;
+    const { employee_id, type, username, is_2fa_enabled } = req.body;
     
     const connection = await getConnection();
     
@@ -376,8 +381,8 @@ router.put('/:id', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'UPDATE users SET username = ?, employee_id = ?, is_2fa_enabled = ? WHERE id = ? AND is_deleted = 0',
-      [username, employee_id, (is_2fa_enabled ? 1 : 0), id]
+      'UPDATE users SET username = ?, employee_id = ?, type = ?, is_2fa_enabled = ? WHERE id = ? AND is_deleted = 0',
+      [username, employee_id, type, (is_2fa_enabled ? 1 : 0), id]
     );
     
     await connection.end();
