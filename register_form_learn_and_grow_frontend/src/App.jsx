@@ -40,6 +40,10 @@ function App() {
     return user ? children : <Navigate to="/login" />;
   };
 
+  const SuperProtectedRoute = ({ children }) => {
+    return user ? (parseInt(user.type) === 1 ? children : <Navigate to="/employee" />) : <Navigate to="/login" />;
+  };
+
   // Public Route component (redirect to home if already logged in)
   const PublicRoute = ({ children }) => {
     return !user ? children : <Navigate to="/employee" />;
@@ -118,18 +122,18 @@ function App() {
           <Route 
             path="/username" 
             element={
-              <ProtectedRoute>
+              <SuperProtectedRoute>
                 <UsernameList user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
+              </SuperProtectedRoute>
             } 
           />
 
           <Route 
             path="/username/edit/:id?" 
             element={
-              <ProtectedRoute>
+              <SuperProtectedRoute>
                 <UsernameInput user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
+              </SuperProtectedRoute>
             } 
           />
           

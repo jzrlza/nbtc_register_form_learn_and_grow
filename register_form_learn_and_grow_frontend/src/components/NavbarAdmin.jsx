@@ -42,12 +42,13 @@ const NavbarAdmin = ({ user, onLogout }) => {
             >
               หน้าการลงทะเบียน
             </button>
+            {parseInt(user?.type) === 1 ? 
             <button 
               onClick={() => handleNavigation('/username')}
               className={`nav-tab ${location.pathname === '/username' ? 'active' : ''}`}
             >
               หน้าผู้ใช้งาน
-            </button>
+            </button> : ""}
           </div>
         </div>
 
@@ -91,12 +92,13 @@ const NavbarAdmin = ({ user, onLogout }) => {
           >
             หน้าการลงทะเบียน
           </button>
+          {parseInt(user?.type) === 1 ? 
           <button 
             onClick={() => handleNavigation('/username')}
             className={`mobile-menu-item ${location.pathname === '/username' ? 'active' : ''}`}
           >
             หน้าผู้ใช้งาน
-          </button>
+          </button> : ""}
         </div>
         <div className="mobile-menu-footer">
         <span className="mobile-user-greeting">{user?.CN}</span><br/><br/>
