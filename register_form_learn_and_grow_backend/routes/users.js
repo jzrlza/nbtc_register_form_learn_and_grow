@@ -314,7 +314,7 @@ router.post('/', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'INSERT INTO users (username, employee_id, type, is_2fa_enabled, is_deleted) VALUES (?, ?, 2, ?, 0)',
+      'INSERT INTO users (username, employee_id, is_2fa_enabled, is_deleted) VALUES (?, ?, ?, 0)',
       [username, employee_id, (is_2fa_enabled ? 1 : 0)]
     );
     
