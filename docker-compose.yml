@@ -50,21 +50,6 @@ services:
     mem_limit: 300M  # Add this line
     restart: always
 
-  #nginx: (no need to, just run in native ubuntu, not here for cripe sake, no wonder yesterday it sucked)
-  #  image: nginx:alpine
-  #  ports:
-  #    - "80:80"
-  #    - "443:443"
-  #  volumes:
-  #    - ./nginx.conf:/etc/nginx/nginx.conf
-  #    - ./ssl:/etc/nginx/ssl
-  #  depends_on:
-  #    - frontend
-  #    - backend
-  #  networks:
-  #    - learngrow-network
-
-  # Database Backup service
   backup:
     image: alpine:latest
     container_name: register_learn_and_grow_backup
@@ -82,6 +67,40 @@ services:
       - database
     networks:
       - learngrow-network
+
+  backend_onenbtc:
+    build: ./one_nbtc_ui_backend
+    ports:
+      - "0.0.0.0:5001:5001"
+    environment:
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
+      AD_API_URL: ${AD_API_URL}
+      AD_API_KEY: ${AD_API_KEY}
+      NODE_OPTIONS: "--max-old-space-size=300"
+      LOG_PATH: ${LOG_PATH}
+    networks:
+      - learngrow-network
+    mem_limit: 500M  # Add this line
+    restart: always  # Auto-restart if crashes
+    volumes:
+      - ./backend-logs:/app/logs
+
+  frontend_onenbtc:
+    build: ./one_nbtc_ui_frontend
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      VITE_API_URL: ${VITE_API_URL_ONENBTC}
+    networks:
+      - learngrow-network
+    mem_limit: 300M  # Add this line
+    restart: always
 
 volumes:
   mysql_data:
