@@ -71,7 +71,7 @@ services:
   backend_onenbtc:
     build: ./one_nbtc_ui_backend
     ports:
-      - "0.0.0.0:5001:5001"
+      - "0.0.0.0:5001:5000"
     environment:
       DB_HOST: database
       DB_PORT: 3306
@@ -94,7 +94,7 @@ services:
   frontend_onenbtc:
     build: ./one_nbtc_ui_frontend
     ports:
-      - "127.0.0.1:3001:3001"
+      - "127.0.0.1:3001:3000"
     environment:
       VITE_API_URL: ${VITE_API_URL_ONENBTC}
     networks:
