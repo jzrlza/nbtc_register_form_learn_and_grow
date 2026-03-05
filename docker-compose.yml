@@ -14,7 +14,8 @@ services:
       - mysql_data:/var/lib/mysql
       - ./register_form_learn_and_grow_database_production/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - learngrow-network
+      learngrow-network:
+        ipv4_address: 172.20.0.2
 
   backend:
     build: ./register_form_learn_and_grow_backend
@@ -33,7 +34,8 @@ services:
       NODE_OPTIONS: "--max-old-space-size=300"
       LOG_PATH: ${LOG_PATH}
     networks:
-      - learngrow-network
+      learngrow-network:
+        ipv4_address: 172.20.0.11
     mem_limit: 500M  # Add this line
     restart: always  # Auto-restart if crashes
     volumes:
@@ -46,7 +48,8 @@ services:
     environment:
       VITE_API_URL: ${VITE_API_URL}
     networks:
-      - learngrow-network
+      learngrow-network:
+        ipv4_address: 172.20.0.21
     mem_limit: 300M  # Add this line
     restart: always
 
@@ -66,7 +69,8 @@ services:
     depends_on:
       - database
     networks:
-      - learngrow-network
+      learngrow-network:
+        ipv4_address: 172.20.0.1
 
   backend_onenbtc:
     build: ./one_nbtc_ui_backend
@@ -85,8 +89,8 @@ services:
       NODE_OPTIONS: "--max-old-space-size=300"
       LOG_PATH: ${LOG_PATH}
     networks:
-      - learngrow-network:
-        ipv4_address: 172.20.0.11
+      learngrow-network:
+        ipv4_address: 172.20.0.31
     mem_limit: 500M  # Add this line
     restart: always  # Auto-restart if crashes
     volumes:
@@ -99,8 +103,8 @@ services:
     environment:
       VITE_API_URL: ${VITE_API_URL_ONENBTC}
     networks:
-      - learngrow-network:
-        ipv4_address: 172.20.0.21
+      learngrow-network:
+        ipv4_address: 172.20.0.41
     mem_limit: 300M  # Add this line
     restart: always
 
@@ -110,8 +114,6 @@ volumes:
 networks:
   learngrow-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
+    external: true
 
 #also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
