@@ -108,6 +108,8 @@ volumes:
   mysql_data:
 
 networks:
+  learngrow-network:
+    driver: bridge
   nbtc_register_form_learn_and_grow_learngrow-network:
     driver: bridge
     ipam:
