@@ -70,7 +70,7 @@ services:
       - database
     networks:
       learngrow-network:
-        ipv4_address: 172.20.0.1
+        ipv4_address: 172.20.0.17
 
   backend_onenbtc:
     build: ./one_nbtc_ui_backend
@@ -114,6 +114,9 @@ volumes:
 networks:
   learngrow-network:
     driver: bridge
-    external: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1
 
 #also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
