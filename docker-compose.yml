@@ -113,6 +113,5 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/24
-          gateway: 172.20.0.1
 
 #also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
