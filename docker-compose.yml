@@ -15,7 +15,7 @@ services:
       - ./register_form_learn_and_grow_database_production/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.20.0.2
+        ipv4_address: 172.25.0.2
 
   backend:
     build: ./register_form_learn_and_grow_backend
@@ -35,7 +35,7 @@ services:
       LOG_PATH: ${LOG_PATH}
     networks:
       nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.20.0.11
+        ipv4_address: 172.25.0.11
     mem_limit: 500M  # Add this line
     restart: always  # Auto-restart if crashes
     volumes:
@@ -49,7 +49,7 @@ services:
       VITE_API_URL: ${VITE_API_URL}
     networks:
       nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.20.0.21
+        ipv4_address: 172.25.0.21
     mem_limit: 300M  # Add this line
     restart: always
 
@@ -70,7 +70,7 @@ services:
       - database
     networks:
       nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.20.0.17
+        ipv4_address: 172.25.0.17
 
   backend_onenbtc:
     build: ./one_nbtc_ui_backend
@@ -90,7 +90,7 @@ services:
       LOG_PATH: ${LOG_PATH}
     networks:
       nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.20.0.12
+        ipv4_address: 172.25.0.12
     mem_limit: 500M  # Add this line
     restart: always  # Auto-restart if crashes
     volumes:
@@ -104,7 +104,7 @@ services:
       VITE_API_URL: ${VITE_API_URL_ONENBTC}
     networks:
       nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.20.0.13
+        ipv4_address: 172.25.0.13
     mem_limit: 300M  # Add this line
     restart: always
 
@@ -116,7 +116,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/24
-          gateway: 172.20.0.1
+        - subnet: 172.25.0.0/24
+          gateway: 172.25.0.1
 
 #also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
