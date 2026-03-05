@@ -14,8 +14,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./register_form_learn_and_grow_database_production/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      nbtc_register_form_learn_and_grow_learngrow-network:
-        ipv4_address: 172.25.0.2
+      - nbtc_register_form_learn_and_grow_learngrow-network
 
   backend:
     build: ./register_form_learn_and_grow_backend
