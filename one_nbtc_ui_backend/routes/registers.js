@@ -29,7 +29,7 @@ const verifyJWTToken = (req, res) => {
   }
 }
 
-const logger = new SimpleRotatingLogger(logDir, 'backend-registers.js-access.log', {
+const logger = new SimpleRotatingLogger(logDir, 'backend-register_ones.js-access.log', {
     maxSize: 10 * 1024 * 1024, // 10MB
     maxFiles: 5,
     compress: true,
@@ -51,8 +51,8 @@ const logFile = (req, user=null) => {
     });
 }
 
-// GET all registers with employee names
-// GET all registers with employee names (alternative approach)
+// GET all register_ones with employee names
+// GET all register_ones with employee names (alternative approach)
 router.get('/', async (req, res) => {
   try {
     logFile(req);
@@ -83,7 +83,7 @@ router.get('/', async (req, res) => {
       SELECT 
         r.*,
         e.emp_name
-      FROM register r
+      FROM register_one r
       LEFT JOIN employee e ON r.emp_id = e.id
       WHERE r.is_deleted = 0 AND e.is_deleted = 0 ${whereClause}
       ORDER BY r.sys_datetime DESC
@@ -95,7 +95,7 @@ router.get('/', async (req, res) => {
     // Get total count
     const countQuery = `
       SELECT COUNT(*) as total 
-      FROM register r
+      FROM register_one r
       LEFT JOIN employee e ON r.emp_id = e.id
       WHERE r.is_deleted = 0 AND e.is_deleted = 0
     `;
@@ -255,7 +255,7 @@ router.get('/employees/search', async (req, res) => {
 });
 
 // --PUBLIC-- ****this is used in home public page where no login needed****
-// POST create new register
+// POST create new register_one
 router.post('/', async (req, res) => {
   try {
     logFile(req); //ALWAYS PUBLIC
@@ -275,13 +275,13 @@ router.post('/', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'INSERT INTO register (emp_id, phone_number, is_attend, take_van_id, van_round_id, take_food, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 0)',
+      'INSERT INTO register_one (emp_id, phone_number, is_attend, take_van_id, van_round_id, take_food, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 0)',
       [emp_id, phone_number, is_attend, take_van_id, van_round_id, take_food]
     );
     
-    // Update employee's is_register status
+    // Update employee's is_register_one status
     await connection.execute(
-      'UPDATE employee SET is_register = 1 WHERE id = ?',
+      'UPDATE employee SET is_register_one = 1 WHERE id = ?',
       [emp_id]
     );
     
@@ -295,7 +295,7 @@ router.post('/', async (req, res) => {
 });
 
 // **PROTECTED**
-// PUT update register
+// PUT update register_one
 router.put('/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
@@ -310,13 +310,13 @@ router.put('/:id', async (req, res) => {
     
     const connection = await getConnection();
     
-    // Check if register exists and is not deleted
-    const [registerRows] = await connection.execute(
-      'SELECT id FROM register WHERE id = ? AND is_deleted = 0',
+    // Check if register_one exists and is not deleted
+    const [register_oneRows] = await connection.execute(
+      'SELECT id FROM register_one WHERE id = ? AND is_deleted = 0',
       [id]
     );
     
-    if (registerRows.length === 0) {
+    if (register_oneRows.length === 0) {
       await connection.end();
       return res.status(404).json({ error: 'ไม่พบการลงทะเบียน' });
     }
@@ -333,7 +333,7 @@ router.put('/:id', async (req, res) => {
     }
     
     const [result] = await connection.execute(
-      'UPDATE register SET emp_id = ?, phone_number = ?, is_attend = ?, take_van_id = ?, van_round_id = ?, take_food = ? WHERE id = ? AND is_deleted = 0',
+      'UPDATE register_one SET emp_id = ?, phone_number = ?, is_attend = ?, take_van_id = ?, van_round_id = ?, take_food = ? WHERE id = ? AND is_deleted = 0',
       [emp_id, phone_number, is_attend, take_van_id, van_round_id, take_food, id]
     );
     
@@ -350,7 +350,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// GET single register for edit
+// GET single register_one for edit
 router.get('/single/:id', async (req, res) => {
   try {
     logFile(req);
@@ -359,7 +359,7 @@ router.get('/single/:id', async (req, res) => {
     
     const [rows] = await connection.execute(`
       SELECT r.*, e.emp_name 
-      FROM register r 
+      FROM register_one r 
       LEFT JOIN employee e ON r.emp_id = e.id 
       WHERE r.id = ?
     `, [id]);
@@ -378,8 +378,8 @@ router.get('/single/:id', async (req, res) => {
 });
 
 // **PROTECTED**
-// DELETE register
-// Soft delete register
+// DELETE register_one
+// Soft delete register_one
 router.delete('/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
@@ -394,7 +394,7 @@ router.delete('/:id', async (req, res) => {
     const connection = await getConnection();
     
     const [result] = await connection.execute(
-      'UPDATE register SET is_deleted = 1 WHERE id = ?',
+      'UPDATE register_one SET is_deleted = 1 WHERE id = ?',
       [id]
     );
     
@@ -425,8 +425,8 @@ router.get('/export-data', async (req, res) => {
   try {
     connection = await getConnection();
     
-    // Get latest registers with employee details in one query
-    const [registers] = await connection.execute(`
+    // Get latest register_ones with employee details in one query
+    const [register_ones] = await connection.execute(`
       SELECT 
         r.*,
         e.emp_name,
@@ -435,17 +435,17 @@ router.get('/export-data', async (req, res) => {
         division_obj.div_name,
         division_obj.id as division_id,
         d.id as dept_id
-      FROM register r
+      FROM register_one r
       INNER JOIN employee e ON r.emp_id = e.id
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
       LEFT JOIN division division_obj ON d.div_id = division_obj.id
       INNER JOIN (
-        -- Subquery to get latest register for each employee
+        -- Subquery to get latest register_one for each employee
         SELECT 
           emp_id,
           MAX(id) as latest_id
-        FROM register
+        FROM register_one
         WHERE is_deleted = 0
         GROUP BY emp_id
       ) latest ON r.id = latest.latest_id
@@ -453,8 +453,8 @@ router.get('/export-data', async (req, res) => {
       ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
-    // Get unregistered employees
-    const [unregisteredEmployees] = await connection.execute(`
+    // Get unregister_oneed employees
+    const [unregister_oneedEmployees] = await connection.execute(`
       SELECT 
         e.id,
         e.emp_name,
@@ -470,7 +470,7 @@ router.get('/export-data', async (req, res) => {
       WHERE e.is_deleted = 0
         AND e.id NOT IN (
           SELECT DISTINCT emp_id 
-          FROM register 
+          FROM register_one 
           WHERE is_deleted = 0
         )
       ORDER BY division_obj.id, d.id, e.emp_name
@@ -478,10 +478,10 @@ router.get('/export-data', async (req, res) => {
     
     res.json({
       success: true,
-      registers: registers,
-      unregisteredEmployees: unregisteredEmployees,
-      count: registers.length,
-      unregisteredCount: unregisteredEmployees.length
+      register_ones: register_ones,
+      unregister_oneedEmployees: unregister_oneedEmployees,
+      count: register_ones.length,
+      unregister_oneedCount: unregister_oneedEmployees.length
     });
     
   } catch (error) {
