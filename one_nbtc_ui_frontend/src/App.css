@@ -200,6 +200,11 @@ button *,
     display: block;
     box-shadow: 0 0 5px #fffa9e;
 }
+@media (max-width: 818px) {
+.img-banner {
+        margin-bottom: 10px;
+    }
+}
 
 .select-form-item {
     border-radius: 20px;
@@ -411,11 +416,11 @@ button:disabled {
 }
 
 .health-section {
-    height: 450px;
+    height: 550px;
 }
 @media (max-width: 1385px) {
   .health-section {
-        height: 570px;
+        height: 670px;
     }
 }
 
