@@ -229,10 +229,10 @@ const AttendRegisterList = ({ user, onLogout }) => {
                         <td>{register.id}</td>
                         <td className="name-in-table">{register.emp_name}</td>
                         <td>{getEnumValue('is_attend', register.is_attend)}</td>
-                        <td>{register.phone_number}</td>
-                        <td>{getEnumValue('take_van_id', register.take_van_id)}</td>
-                        <td>{getEnumValue('van_round_id', register.van_round_id)}</td>
-                        <td>{getEnumValue('take_food', register.take_food)}</td>
+                        <td>{register.phone_number || "-"}</td>
+                        <td>{register.take_van_id ? getEnumValue('take_van_id', register.take_van_id) : "-"}</td>
+                        <td>{register.van_round_id ? getEnumValue('van_round_id', register.van_round_id) : "-"}</td>
+                        <td>{register.take_food ? getEnumValue('take_food', register.take_food) : "-"}</td>
                         <td>{formatDateTime(register.sys_datetime)}</td>
                         <td className="actions">
                           <button 
