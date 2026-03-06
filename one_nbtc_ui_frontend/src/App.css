@@ -1124,6 +1124,9 @@ input:focus, select:focus, textarea:focus {
     background-color: #0067ab;
     border: none;
 }
+.page-btn:disabled {
+    background-color: #8e8f91;
+}
 
 .refresh-btn {
     background-color: #de2acf;
