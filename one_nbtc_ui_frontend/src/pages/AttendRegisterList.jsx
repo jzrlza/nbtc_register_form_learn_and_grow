@@ -214,8 +214,8 @@ const AttendRegisterList = ({ user, onLogout }) => {
                     <tr>
                       <th>รหัส</th>
                       <th className="name-in-table">ชื่อ-นามสกุล</th>
-                      <th className="name-in-table">เบอร์โทรศัพท์มือถือ</th>
                       <th className="name-in-table">ประสงค์เข้าร่วมงาน</th>
+                      <th className="name-in-table">เบอร์โทรศัพท์มือถือ</th>
                       <th className="name-in-table">ประสงค์ขึ้นรถตู้ของสำนักงาน</th>
                       <th className="name-in-table">รอบรถตู้สำนักงานเดินทางในช่วงเช้า</th>
                       <th className="name-in-table">อาหาร</th>
@@ -228,8 +228,8 @@ const AttendRegisterList = ({ user, onLogout }) => {
                       <tr key={register.id}>
                         <td>{register.id}</td>
                         <td className="name-in-table">{register.emp_name}</td>
-                        <td>{register.phone_number}</td>
                         <td>{getEnumValue('is_attend', register.is_attend)}</td>
+                        <td>{register.phone_number}</td>
                         <td>{getEnumValue('take_van_id', register.take_van_id)}</td>
                         <td>{getEnumValue('van_round_id', register.van_round_id)}</td>
                         <td>{getEnumValue('take_food', register.take_food)}</td>

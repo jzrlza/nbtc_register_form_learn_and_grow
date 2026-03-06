@@ -43,6 +43,7 @@ const Home = ({ user, onLogout }) => {
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
 
   const isVanRoundDisabled = formData.take_van_id === '3' || formData.take_van_id === '4';
+  const isNotAttend = formData.is_attend !== '1';
 
   const showModal = (type, message) => {
     setModal({ isOpen: true, type, message });
@@ -392,14 +393,14 @@ const Home = ({ user, onLogout }) => {
     try {
       const submitData = {
         emp_id: formData.emp_id,
-        phone_number: formData.phone_number,
+        phone_number: parseInt(formData.is_attend) === 1 ? formData.phone_number : null,
         is_attend: parseInt(formData.is_attend),
-        take_van_id: parseInt(formData.take_van_id),
+        take_van_id: parseInt(formData.is_attend) === 1 ? parseInt(formData.take_van_id) : null,
         // Only include van_round_id if take_van_id is 1 or 2
-        van_round_id: (formData.take_van_id === '1' || formData.take_van_id === '2') 
+        van_round_id: parseInt(formData.is_attend) === 1 && (formData.take_van_id === '1' || formData.take_van_id === '2') 
           ? parseInt(formData.van_round_id) 
           : null,
-        take_food: parseInt(formData.take_food)
+        take_food: parseInt(formData.is_attend) === 1 ? parseInt(formData.take_food) : null
       };
       
       if (isEditMode) {
@@ -609,18 +610,6 @@ const Home = ({ user, onLogout }) => {
             </div>
 
             <div className="form-group">
-              <label>เบอร์โทรศัพท์มือถือ:</label>
-              <input
-                type="text"
-                className="select-form-item"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                placeholder="ป้อนเบอร์โทรศัพท์"
-              />
-            </div>
-
-            <div className="form-group">
               <label>ประสงค์เข้าร่วมงาน:</label>
               <select
                 className="select-form-item"
@@ -638,13 +627,28 @@ const Home = ({ user, onLogout }) => {
             </div>
 
             <div className="form-group">
+              <label>เบอร์โทรศัพท์มือถือ:</label>
+              <input
+                type="text"
+                className="select-form-item"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                placeholder="ป้อนเบอร์โทรศัพท์"
+                disabled={isNotAttend}
+                required={!isNotAttend}
+              />
+            </div>
+
+            <div className="form-group">
               <label>ประสงค์ขึ้นรถตู้ของสำนักงาน:</label>
               <select
                 className="select-form-item"
                 name="take_van_id"
                 value={formData.take_van_id}
                 onChange={handleChange}
-                required
+                disabled={isNotAttend}
+                required={!isNotAttend}
               >
                 {Object.entries(registerEnums.take_van_id).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -661,8 +665,8 @@ const Home = ({ user, onLogout }) => {
                 name="van_round_id"
                 value={formData.van_round_id}
                 onChange={handleChange}
-                disabled={isVanRoundDisabled}
-                required={!isVanRoundDisabled}
+                disabled={isNotAttend || isVanRoundDisabled}
+                required={!isNotAttend && !isVanRoundDisabled}
               >
                 {Object.entries(registerEnums.van_round_id).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -684,7 +688,8 @@ const Home = ({ user, onLogout }) => {
                 name="take_food"
                 value={formData.take_food}
                 onChange={handleChange}
-                required
+                disabled={isNotAttend}
+                required={!isNotAttend}
               >
                 {Object.entries(registerEnums.take_food).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -699,7 +704,7 @@ const Home = ({ user, onLogout }) => {
             <div className="form-actions">
               <button type="submit" disabled={loading} 
               className="submit-btn submit-btn-home">
-                {loading ? 'กำลังบันทึก...' : (isEditMode ? 'อัพเดท' : 'บันทึก')}
+                {loading ? 'กำลังบันทึก...' : (isEditMode ? 'อัพเดท' : 'ส่งข้อมูล')}
               </button>
             </div>
             <br/>
