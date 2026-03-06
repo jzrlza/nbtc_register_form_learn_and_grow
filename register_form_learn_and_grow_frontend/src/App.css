@@ -53,6 +53,10 @@ body {
     color: #1f029e; /* MAIN TEXT COLOR */
 }
 
+input:disabled {
+    opacity: 0.5;
+}
+
 /* =============================================
    TEXT COLOR SETTINGS
    ============================================= */
