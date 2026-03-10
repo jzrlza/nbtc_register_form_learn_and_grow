@@ -90,7 +90,7 @@ router.get('/', async (req, res) => {
         e.emp_name
       FROM users u
       LEFT JOIN employee e ON u.employee_id = e.id
-      WHERE u.is_deleted = 0 AND (u.employee_id IS NULL OR e.is_deleted = 0) ${whereClause}
+      WHERE u.is_deleted = 0 ${whereClause}
       ORDER BY u.id DESC
       LIMIT ${limitNum} OFFSET ${offset}
     `; //LEFT JOIN employee e ON u.emp_id = e.id     AND e.is_deleted = 0
@@ -101,7 +101,7 @@ router.get('/', async (req, res) => {
     const countQuery = `
       SELECT COUNT(*) as total 
       FROM users u
-      WHERE u.is_deleted = 0
+      WHERE u.is_deleted = 0 ${whereClause}
     `; //LEFT JOIN employee e ON u.employee_id = e.id     AND e.is_deleted = 0
     const [countResult] = await connection.execute(countQuery);
 

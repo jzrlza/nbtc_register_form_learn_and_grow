@@ -56,7 +56,7 @@ const logFile = (req, user=null) => {
 router.get('/', async (req, res) => {
   try {
     logFile(req);
-    const { search, page = 1, limit = 10 } = req.query;
+    const { search, year, page = 1, limit = 10 } = req.query;
     const connection = await getConnection();
 
     let whereClause = '';
@@ -66,6 +66,10 @@ router.get('/', async (req, res) => {
     
     if (search) {
       conditions.push(`e.emp_name LIKE '%${search}%'`);
+    }
+
+    if (year) {
+      conditions.push(`YEAR(r.sys_datetime) = ${parseInt(year)}`);
     }
 
     // Add conditions to WHERE clause if any exist
@@ -97,7 +101,7 @@ router.get('/', async (req, res) => {
       SELECT COUNT(*) as total 
       FROM register r
       LEFT JOIN employee e ON r.emp_id = e.id
-      WHERE r.is_deleted = 0 AND e.is_deleted = 0
+      WHERE r.is_deleted = 0 AND e.is_deleted = 0 ${whereClause}
     `;
     const [countResult] = await connection.execute(countQuery);
     
@@ -423,7 +427,13 @@ router.get('/export-data', async (req, res) => {
 
   let connection;
   try {
+    const { year } = req.query;
     connection = await getConnection();
+
+    additional_where = ``;
+    if (year) {
+      additional_where += `AND YEAR(r.sys_datetime) = ${parseInt(year)}`;
+    }
     
     // Get latest registers with employee details in one query
     const [registers] = await connection.execute(`
@@ -449,7 +459,7 @@ router.get('/export-data', async (req, res) => {
         WHERE is_deleted = 0
         GROUP BY emp_id
       ) latest ON r.id = latest.latest_id
-      WHERE r.is_deleted = 0
+      WHERE r.is_deleted = 0 ${additional_where}
       ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
@@ -472,7 +482,7 @@ router.get('/export-data', async (req, res) => {
           SELECT DISTINCT emp_id 
           FROM register 
           WHERE is_deleted = 0
-        )
+        ) ${additional_where}
       ORDER BY division_obj.id, d.id, e.emp_name
     `);
     

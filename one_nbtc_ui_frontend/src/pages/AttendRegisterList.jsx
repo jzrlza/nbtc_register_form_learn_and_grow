@@ -19,11 +19,16 @@ const AttendRegisterList = ({ user, onLogout }) => {
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '', registerId: null });
   const navigate = useNavigate();
 
+  function getCurrentYear() {
+    return new Date().getFullYear();
+  }
+
   const fetchRegisters = async (page = 1, searchTerm = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: page,
+        year: getCurrentYear(),
         limit: 10
       });
 
@@ -103,8 +108,12 @@ const AttendRegisterList = ({ user, onLogout }) => {
 
   const handleExportExcel = async () => {
     setExportLoading(true);
+    const params = new URLSearchParams({
+        year: getCurrentYear()
+      });
+    
     try {
-      const response = await axios.get(`${API_URL}/api/registers/export-data`, {
+      const response = await axios.get(`${API_URL}/api/registers/export-data?${params}`, {
         headers: {
         'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
         }
