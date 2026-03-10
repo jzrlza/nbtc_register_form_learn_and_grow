@@ -25,13 +25,14 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-- year selection in all register list pages and export/display accordingly to the year
+
 
 Tomorrow
 
 
 
 [Done]
+- year selection in all register list pages and export/display accordingly to the year
 - [one nbtc]
 : ขอปรับแก้เพิ่มเติมตามนี้ด้วยครับ
 1. ขอย้ายช่อง ประสงค์เข้าร่วมงาน ต่อท้าย ช่อง ชื่อ-นามสกุล
