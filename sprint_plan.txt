@@ -25,17 +25,18 @@ backend มีหน้าจอตามรายละเอียดข้า
 
 
 Today
-- [one nbtc]
-: ขอปรับแก้เพิ่มเติมตามนี้ด้วยครับ
-1. ขอย้ายช่อง ประสงค์เข้าร่วมงาน ต่อท้าย ช่อง ชื่อ-นามสกุล
-2. ถ้าผู้ใช้เลือก ไม่ประสงค์เข้าร่วม ให้ ซ่อน ช่องอื่นๆ ให้หมด เหลือแค่ ปุ่มบันทึก แต่ถ้า เลือก ประสงค์เข้าร่วม ให้แสดงช่องที่เหลือทั้งหมด
-3. เปลี่ยน ปุ่มบันทึก เป็น ชื่อ ปุ่ม ส่งข้อมูล
+- year selection in all register list pages and export/display accordingly to the year
 
 Tomorrow
 
 
 
 [Done]
+- [one nbtc]
+: ขอปรับแก้เพิ่มเติมตามนี้ด้วยครับ
+1. ขอย้ายช่อง ประสงค์เข้าร่วมงาน ต่อท้าย ช่อง ชื่อ-นามสกุล
+2. ถ้าผู้ใช้เลือก ไม่ประสงค์เข้าร่วม ให้ ซ่อน ช่องอื่นๆ ให้หมด เหลือแค่ ปุ่มบันทึก แต่ถ้า เลือก ประสงค์เข้าร่วม ให้แสดงช่องที่เหลือทั้งหมด
+3. เปลี่ยน ปุ่มบันทึก เป็น ชื่อ ปุ่ม ส่งข้อมูล
 - super admin type 1 and admin type 2 new user field input, and grant access accordingly (also prevent self-sabotage)
 - search by employee name (via id like in input) in register list page
 - do a logging system for access monitoring
