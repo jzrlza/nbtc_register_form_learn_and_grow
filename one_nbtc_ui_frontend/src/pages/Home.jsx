@@ -19,7 +19,7 @@ const Home = ({ user, onLogout }) => {
     emp_name: '',
     emp_id: '',
     phone_number: '',
-    is_attend: '1',
+    is_attend: '99',
     take_van_id: '1',
     van_round_id: '1',
     take_food: '1'
@@ -147,7 +147,7 @@ const Home = ({ user, onLogout }) => {
         emp_name: register.emp_name || '',
         emp_id: register.emp_id || '',
         phone_number: register.phone_number || '',
-        is_attend: register.is_attend?.toString() || '1',
+        is_attend: register.is_attend?.toString() || '99',
         take_van_id: register.take_van_id?.toString() || '1',
         van_round_id: register.van_round_id?.toString() || '1',
         take_food: register.take_food?.toString() || '1'
@@ -387,6 +387,11 @@ const Home = ({ user, onLogout }) => {
       showModal('error', 'กรุณาเลือกพนักงานจากรายการ');
       return;
     }
+
+    if (parseInt(formData.is_attend) === 99) {
+      showModal('error', 'กรุณาเลือกว่าประสงค์เข้าร่วมหรือไม่');
+      return;
+    }
     
     setLoading(true);
     
@@ -448,7 +453,7 @@ const Home = ({ user, onLogout }) => {
       emp_name: '',
       emp_id: '',
       phone_number: '',
-      is_attend: '1',
+      is_attend: '99',
       take_van_id: '1',
       van_round_id: '1',
       take_food: '1'
@@ -626,6 +631,8 @@ const Home = ({ user, onLogout }) => {
               </select>
             </div>
 
+            {!isNotAttend ? <>
+
             <div className="form-group">
               <label>เบอร์โทรศัพท์มือถือ:</label>
               <input
@@ -698,6 +705,8 @@ const Home = ({ user, onLogout }) => {
                 ))}
               </select>
             </div>
+
+            </> : ""}
 
             <br/>
 

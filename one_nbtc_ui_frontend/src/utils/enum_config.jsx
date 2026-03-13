@@ -1,6 +1,7 @@
 // Configuration for enum values
 export const registerEnums = {
   is_attend: {
+    99: '- กรุณาเลือก -',
     1: 'ประสงค์เข้าร่วม',
     0: 'ไม่ประสงค์เข้าร่วม'
   },

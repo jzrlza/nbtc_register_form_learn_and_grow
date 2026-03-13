@@ -377,11 +377,16 @@ button:disabled {
 
 .app-home {
     background-image: url("res/BG.png");
-    background-size: cover; /* This is the key property */
-  background-repeat: no-repeat; /* Prevents the image from repeating */
-  background-position: center; /* Centers the image within the container */
-  min-height: 100vh; /* Ensures the body covers the full viewport height */
-  margin: 0;
+    background-size: cover;
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-position: 0px -250px; /* Centers the image within the container */
+    min-height: 100vh; /* Ensures the body covers the full viewport height */
+    margin: 0;
+}
+@media (max-width: 1385px) {
+  .app-home {
+        background-position: center;
+    }
 }
 
 .loading {
