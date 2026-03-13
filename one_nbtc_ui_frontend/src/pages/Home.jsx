@@ -391,6 +391,11 @@ const Home = ({ user, onLogout }) => {
       return;
     }
 
+    if (formData.phone_number.length === 0) {
+      showModal('error', 'กรุณาใส่หมายเลขโทรศัพท์');
+      return;
+    }
+
     if (parseInt(formData.is_attend) === 99) {
       showModal('error', 'กรุณาเลือกว่าประสงค์เข้าร่วมหรือไม่');
       return;
@@ -651,7 +656,6 @@ const Home = ({ user, onLogout }) => {
                 onChange={handleChange}
                 placeholder="ป้อนเบอร์โทรศัพท์"
                 disabled={isNotAttend}
-                required={!isNotAttend}
               />
             </div>
 
@@ -663,7 +667,6 @@ const Home = ({ user, onLogout }) => {
                 value={formData.take_van_id}
                 onChange={handleChange}
                 disabled={isNotAttend}
-                required={!isNotAttend}
               >
                 {Object.entries(registerEnums.take_van_id).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -681,7 +684,6 @@ const Home = ({ user, onLogout }) => {
                 value={formData.van_round_id}
                 onChange={handleChange}
                 disabled={isNotAttend || isVanRoundDisabled}
-                required={!isNotAttend && !isVanRoundDisabled}
               >
                 {Object.entries(registerEnums.van_round_id).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -704,7 +706,6 @@ const Home = ({ user, onLogout }) => {
                 value={formData.take_food}
                 onChange={handleChange}
                 disabled={isNotAttend}
-                required={!isNotAttend}
               >
                 {Object.entries(registerEnums.take_food).map(([key, value]) => (
                   <option key={key} value={key}>
