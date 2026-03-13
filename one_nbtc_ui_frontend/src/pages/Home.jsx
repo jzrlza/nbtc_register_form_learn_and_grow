@@ -20,9 +20,9 @@ const Home = ({ user, onLogout }) => {
     emp_id: '',
     phone_number: '',
     is_attend: '99',
-    take_van_id: '1',
-    van_round_id: '1',
-    take_food: '1'
+    take_van_id: '0',
+    van_round_id: '0',
+    take_food: '0'
   });
   
   // State for hierarchical selection
@@ -148,9 +148,9 @@ const Home = ({ user, onLogout }) => {
         emp_id: register.emp_id || '',
         phone_number: register.phone_number || '',
         is_attend: register.is_attend?.toString() || '99',
-        take_van_id: register.take_van_id?.toString() || '1',
-        van_round_id: register.van_round_id?.toString() || '1',
-        take_food: register.take_food?.toString() || '1'
+        take_van_id: register.take_van_id?.toString() || '0',
+        van_round_id: register.van_round_id?.toString() || '0',
+        take_food: register.take_food?.toString() || '0'
       });
 
       // If editing, we need to fetch the employee's division and department
@@ -371,6 +371,9 @@ const Home = ({ user, onLogout }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const is_attending = parseInt(formData.is_attend) === 1;
+    const valid_van_round_id = (formData.take_van_id === '1' || formData.take_van_id === '2');
     
     // Final validation before submit
     if (!formData.emp_id) {
@@ -392,20 +395,25 @@ const Home = ({ user, onLogout }) => {
       showModal('error', 'กรุณาเลือกว่าประสงค์เข้าร่วมหรือไม่');
       return;
     }
+
+    if (parseInt(formData.take_van_id) === 0 || (valid_van_round_id && parseInt(formData.van_round_id) === 0) || parseInt(formData.take_food) === 0) {
+      showModal('error', 'กรุณาเลือกให้ครบ');
+      return;
+    }
     
     setLoading(true);
     
     try {
       const submitData = {
         emp_id: formData.emp_id,
-        phone_number: parseInt(formData.is_attend) === 1 ? formData.phone_number : null,
+        phone_number: is_attending ? formData.phone_number : null,
         is_attend: parseInt(formData.is_attend),
-        take_van_id: parseInt(formData.is_attend) === 1 ? parseInt(formData.take_van_id) : null,
+        take_van_id: is_attending ? parseInt(formData.take_van_id) : null,
         // Only include van_round_id if take_van_id is 1 or 2
-        van_round_id: parseInt(formData.is_attend) === 1 && (formData.take_van_id === '1' || formData.take_van_id === '2') 
+        van_round_id: is_attending && valid_van_round_id 
           ? parseInt(formData.van_round_id) 
           : null,
-        take_food: parseInt(formData.is_attend) === 1 ? parseInt(formData.take_food) : null
+        take_food: is_attending ? parseInt(formData.take_food) : null
       };
       
       if (isEditMode) {
@@ -454,9 +462,9 @@ const Home = ({ user, onLogout }) => {
       emp_id: '',
       phone_number: '',
       is_attend: '99',
-      take_van_id: '1',
-      van_round_id: '1',
-      take_food: '1'
+      take_van_id: '0',
+      van_round_id: '0',
+      take_food: '0'
     });
 
     setSelectedDivision('');
