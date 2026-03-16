@@ -110,7 +110,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.25.0.0/24
-          gateway: 172.25.0.1
+        - subnet: 10.25.0.0/24 #VPN fix
+          gateway: 10.25.0.1
 
 #also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
