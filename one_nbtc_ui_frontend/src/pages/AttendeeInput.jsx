@@ -683,7 +683,7 @@ const AttendeeInput = ({ user, onLogout }) => {
               </select>
               {isVanRoundDisabled && (
                 <small className="form-hint">
-                  รอบรถตู้ไม่สามารถเลือกได้เมื่อเลือก "กลับอย่างเดียว" หรือ "ไม่ประสงค์ (เดินทางเอง)"
+                  รอบรถตู้สามารถเลือกได้ก็ต่อเมื่อเลือก "ไป - กลับ" หรือ "ไปอย่างเดียว"
                 </small>
               )}
             </div>
