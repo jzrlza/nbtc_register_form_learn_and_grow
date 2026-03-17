@@ -113,4 +113,4 @@ networks:
         - subnet: 10.25.0.0/24 #VPN fix
           gateway: 10.25.0.1
 
-#also be sure to change "Bridge" from 16 to other numbers so the vpn can see the docker hosts
+#172.x.x.x are in use, avoid them
