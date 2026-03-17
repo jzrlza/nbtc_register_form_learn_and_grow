@@ -16,10 +16,10 @@ const AttendeeInput = ({ user, onLogout }) => {
     emp_name: '',
     emp_id: '',
     phone_number: '',
-    is_attend: '1',
-    take_van_id: '1',
-    van_round_id: '1',
-    take_food: '1'
+    is_attend: '99',
+    take_van_id: '0',
+    van_round_id: '0',
+    take_food: '0'
   });
   
   // State for hierarchical selection
@@ -40,7 +40,7 @@ const AttendeeInput = ({ user, onLogout }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
 
-  const isVanRoundDisabled = formData.take_van_id === '3' || formData.take_van_id === '4';
+  const isVanRoundDisabled = formData.take_van_id !== '1' && formData.take_van_id !== '2';
   const isNotAttend = formData.is_attend !== '1';
 
   const showModal = (type, message) => {
@@ -161,10 +161,10 @@ const AttendeeInput = ({ user, onLogout }) => {
         emp_name: register.emp_name || '',
         emp_id: register.emp_id || '',
         phone_number: register.phone_number || '',
-        is_attend: register.is_attend?.toString() || '1',
-        take_van_id: register.take_van_id?.toString() || '1',
-        van_round_id: register.van_round_id?.toString() || '1',
-        take_food: register.take_food?.toString() || '1'
+        is_attend: register.is_attend?.toString() || '99',
+        take_van_id: register.take_van_id?.toString() || '0',
+        van_round_id: register.van_round_id?.toString() || '0',
+        take_food: register.take_food?.toString() || '0'
       });
 
       // If editing, we need to fetch the employee's division and department
@@ -393,6 +393,9 @@ const AttendeeInput = ({ user, onLogout }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const is_attending = parseInt(formData.is_attend) === 1;
+    const valid_van_round_id = (formData.take_van_id === '1' || formData.take_van_id === '2');
     
     // Final validation before submit
     if (!formData.emp_id) {
@@ -409,20 +412,35 @@ const AttendeeInput = ({ user, onLogout }) => {
       showModal('error', 'กรุณาเลือกพนักงานจากรายการ');
       return;
     }
+
+    if (formData.phone_number.length === 0) {
+      showModal('error', 'กรุณาใส่หมายเลขโทรศัพท์');
+      return;
+    }
+
+    if (parseInt(formData.is_attend) === 99) {
+      showModal('error', 'กรุณาเลือกว่าประสงค์เข้าร่วมหรือไม่');
+      return;
+    }
+
+    if (parseInt(formData.take_van_id) === 0 || (valid_van_round_id && parseInt(formData.van_round_id) === 0) || parseInt(formData.take_food) === 0) {
+      showModal('error', 'กรุณาเลือกให้ครบ');
+      return;
+    }
     
     setLoading(true);
     
     try {
       const submitData = {
         emp_id: formData.emp_id,
-        phone_number: parseInt(formData.is_attend) === 1 ? formData.phone_number : null,
+        phone_number: is_attending ? formData.phone_number : null,
         is_attend: parseInt(formData.is_attend),
-        take_van_id: parseInt(formData.is_attend) === 1 ? parseInt(formData.take_van_id) : null,
+        take_van_id: is_attending ? parseInt(formData.take_van_id) : null,
         // Only include van_round_id if take_van_id is 1 or 2
-        van_round_id: parseInt(formData.is_attend) === 1 && (formData.take_van_id === '1' || formData.take_van_id === '2') 
+        van_round_id: is_attending && valid_van_round_id 
           ? parseInt(formData.van_round_id) 
           : null,
-        take_food: parseInt(formData.is_attend) === 1 ? parseInt(formData.take_food) : null
+        take_food: is_attending ? parseInt(formData.take_food) : null
       };
       
       if (isEditMode) {
@@ -615,6 +633,8 @@ const AttendeeInput = ({ user, onLogout }) => {
               </select>
             </div>
 
+            {!isNotAttend ? <>
+
             <div className="form-group">
               <label>เบอร์โทรศัพท์มือถือ:</label>
               <input
@@ -637,7 +657,6 @@ const AttendeeInput = ({ user, onLogout }) => {
                 value={formData.take_van_id}
                 onChange={handleChange}
                 disabled={isNotAttend}
-                required={!isNotAttend}
               >
                 {Object.entries(registerEnums.take_van_id).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -655,7 +674,6 @@ const AttendeeInput = ({ user, onLogout }) => {
                 value={formData.van_round_id}
                 onChange={handleChange}
                 disabled={isNotAttend || isVanRoundDisabled}
-                required={!isNotAttend && !isVanRoundDisabled}
               >
                 {Object.entries(registerEnums.van_round_id).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -678,7 +696,6 @@ const AttendeeInput = ({ user, onLogout }) => {
                 value={formData.take_food}
                 onChange={handleChange}
                 disabled={isNotAttend}
-                required={!isNotAttend}
               >
                 {Object.entries(registerEnums.take_food).map(([key, value]) => (
                   <option key={key} value={key}>
@@ -687,6 +704,8 @@ const AttendeeInput = ({ user, onLogout }) => {
                 ))}
               </select>
             </div>
+
+            </> : ""}
 
             <br/>
 

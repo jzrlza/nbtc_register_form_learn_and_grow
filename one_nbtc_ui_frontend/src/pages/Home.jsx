@@ -42,7 +42,7 @@ const Home = ({ user, onLogout }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [modal, setModal] = useState({ isOpen: false, type: '', message: '' });
 
-  const isVanRoundDisabled = formData.take_van_id === '3' || formData.take_van_id === '4';
+  const isVanRoundDisabled = formData.take_van_id !== '1' && formData.take_van_id !== '2';
   const isNotAttend = formData.is_attend !== '1';
 
   const showModal = (type, message) => {
