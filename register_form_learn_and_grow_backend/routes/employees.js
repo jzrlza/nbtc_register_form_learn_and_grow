@@ -93,8 +93,7 @@ router.get('/', async (req, res) => {
         e.emp_name,
         p.position_name,
         d.dept_name,
-        division.div_name,
-        e.is_register
+        division.div_name
       FROM employee e
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
@@ -664,7 +663,7 @@ const processExcelImport = async (excelData, connection, testing = false) => {
           // Insert new employee if not testing
           if (!testing) {
             const [insertResult] = await connection.execute(
-              'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+              'INSERT INTO employee (emp_name, position_id, dept_id) VALUES (?, ?, ?)',
               [empName, position_id, dept_id]
             );
             
@@ -941,7 +940,7 @@ router.post('/import-batch', async (req, res) => {
           } else {
             // Insert new employee
             const [insertResult] = await connection.execute(
-              'INSERT INTO employee (emp_name, position_id, dept_id, is_register) VALUES (?, ?, ?, 0)',
+              'INSERT INTO employee (emp_name, position_id, dept_id) VALUES (?, ?, ?)',
               [empName, position_id, dept_id]
             );
             
@@ -1035,8 +1034,7 @@ router.post('/detect-missing', async (req, res) => {
         e.emp_name,
         p.position_name,
         d.dept_name,
-        division.div_name,
-        e.is_register
+        division.div_name
       FROM employee e
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
@@ -1111,7 +1109,6 @@ router.post('/detect-missing', async (req, res) => {
         position_name: emp.position_name,
         dept_name: emp.dept_name,
         div_name: emp.div_name,
-        is_register: emp.is_register,
         status: 'Missing from Excel'
       })),
       newInExcel: newInExcel,
@@ -1243,7 +1240,7 @@ router.post('/excel-mass-delete/preview', async (req, res) => {
     const placeholders = ids.map(() => '?').join(',');
     
     const [employees] = await connection.execute(
-      `SELECT id, emp_name, position_id, dept_id, is_register 
+      `SELECT id, emp_name, position_id, dept_id 
        FROM employee 
        WHERE id IN (${placeholders}) AND is_deleted = 0`,
       ids

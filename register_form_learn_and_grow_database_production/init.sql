@@ -121,8 +121,6 @@ CREATE TABLE `employee`  (
   `emp_name` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `position_id` smallint NULL DEFAULT NULL,
   `dept_id` smallint NULL DEFAULT NULL,
-  `is_register` tinyint(1) NULL DEFAULT 0 COMMENT '0=Not Reister , 1=Register',
-  `is_register_one` tinyint(1) NULL DEFAULT 0 COMMENT '0=Not Reister , 1=Register',
   `is_deleted` tinyint(1) DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
