@@ -430,9 +430,9 @@ router.get('/export-data', async (req, res) => {
     const { year } = req.query;
     connection = await getConnection();
 
-    additional_where = ``;
+    additional_where_for_registered = ``;
     if (year) {
-      additional_where += `AND YEAR(r.sys_datetime) = ${parseInt(year)}`;
+      additional_where_for_registered += `AND YEAR(r.sys_datetime) = ${parseInt(year)}`;
     }
     
     // Get latest register_ones with employee details in one query
@@ -459,7 +459,7 @@ router.get('/export-data', async (req, res) => {
         WHERE is_deleted = 0
         GROUP BY emp_id
       ) latest ON r.id = latest.latest_id
-      WHERE r.is_deleted = 0 ${additional_where}
+      WHERE r.is_deleted = 0 ${additional_where_for_registered}
       ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
@@ -482,7 +482,7 @@ router.get('/export-data', async (req, res) => {
           SELECT DISTINCT emp_id 
           FROM register_one 
           WHERE is_deleted = 0
-        ) ${additional_where}
+        )
       ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
