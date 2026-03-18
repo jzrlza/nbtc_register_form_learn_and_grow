@@ -430,7 +430,7 @@ router.get('/export-data', async (req, res) => {
     }
     
     // Get latest register_ones with employee details in one query
-    const [register_ones] = await connection.execute(`
+    const [registers] = await connection.execute(`
       SELECT 
         r.*,
         e.emp_name,
@@ -458,7 +458,7 @@ router.get('/export-data', async (req, res) => {
     `);
     
     // Get unregister_oneed employees
-    const [unregister_oneedEmployees] = await connection.execute(`
+    const [unregisteredEmployees] = await connection.execute(`
       SELECT 
         e.id,
         e.emp_name,
@@ -482,10 +482,10 @@ router.get('/export-data', async (req, res) => {
     
     res.json({
       success: true,
-      register_ones: register_ones,
-      unregister_oneedEmployees: unregister_oneedEmployees,
-      count: register_ones.length,
-      unregister_oneedCount: unregister_oneedEmployees.length
+      registers: registers,
+      unregisteredEmployees: unregisteredEmployees,
+      count: registers.length,
+      unregisteredCount: unregisteredEmployees.length
     });
     
   } catch (error) {
