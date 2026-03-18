@@ -283,12 +283,6 @@ router.post('/', async (req, res) => {
       [emp_id, phone_number, is_attend, take_van_id, van_round_id, take_food]
     );
     
-    // Update employee's is_register_one status
-    await connection.execute(
-      'UPDATE employee SET is_register_one = 1 WHERE id = ?',
-      [emp_id]
-    );
-    
     await connection.end();
     
     res.json({ id: result.insertId, message: 'เพิ่มการลงทะเบียนเรียบร้อย' });
