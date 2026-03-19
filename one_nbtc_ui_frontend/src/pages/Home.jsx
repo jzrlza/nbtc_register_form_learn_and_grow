@@ -4,6 +4,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import { registerEnums } from '../utils/enum_config';
+import BG_logo from '../res/BG_logo.png';
 
 const Home = ({ user, onLogout }) => {
   const API_URL = import.meta.env.VITE_API_URL || '';
@@ -512,11 +513,11 @@ const Home = ({ user, onLogout }) => {
       
       <main className="app-main app-home">
         <section className="health-section">
-          {/*<img className="img-banner" src={bannerImage} 
+          <img className="img-home-logo" src={BG_logo} 
             alt={
-              `null image currently`
+              `ONE NBTC Logo`
             } 
-          />*/}
+          />
         </section>
 
         <section className="home-form">

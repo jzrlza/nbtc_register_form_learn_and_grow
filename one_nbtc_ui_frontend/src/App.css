@@ -421,12 +421,15 @@ button:disabled {
 }
 
 .health-section {
-    height: 550px;
+    height: auto;
+    width: 100%;
 }
-@media (max-width: 1385px) {
-  .health-section {
-        height: 670px;
-    }
+.img-home-logo {
+    margin-top: 10vh;
+    max-height: 300px;
+    max-width: 420px;
+    width: 100%;
+    margin-bottom: 10vh;
 }
 
 .users-section {
