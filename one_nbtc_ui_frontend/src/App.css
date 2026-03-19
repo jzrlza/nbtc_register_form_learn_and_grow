@@ -184,10 +184,10 @@ button *,
     border-radius: 15px;
     color: #fff;
     margin-bottom: 0.1rem;
-    margin-top: 1rem;
+    margin-top: 0.2rem;
 }
 .home-form-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     color: white;
 }
 
@@ -425,11 +425,11 @@ button:disabled {
     width: 100%;
 }
 .img-home-logo {
-    margin-top: 10vh;
-    max-height: 300px;
-    max-width: 420px;
+    margin-top: 0.5vh;
+    max-height: 80px;
+    max-width: 120px;
     width: 100%;
-    margin-bottom: 10vh;
+    margin-bottom: 0.5vh;
 }
 
 .users-section {
@@ -497,8 +497,8 @@ button:disabled {
     justify-content: space-between;
     padding-left: 2%;
     padding-right: 2%;
-    padding-top: 2vh;
-    padding-bottom: 2vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
     height: auto;
     align-items: center;
 }
