@@ -221,7 +221,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
                 <table className="registers-table">
                   <thead>
                     <tr>
-                      <th>รหัส</th>
+                      <th>#</th>
                       <th className="name-in-table">ชื่อ-นามสกุล</th>
                       <th className="name-in-table">ประสงค์เข้าร่วมงาน</th>
                       <th className="name-in-table">เบอร์โทรศัพท์มือถือ</th>

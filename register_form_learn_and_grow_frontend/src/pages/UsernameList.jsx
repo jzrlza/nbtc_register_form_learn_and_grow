@@ -206,7 +206,7 @@ const UsernameList = ({ user, onLogout }) => {
                 <table className="users-table">
                   <thead>
                     <tr>
-                      <th>รหัส</th>
+                      <th>#</th>
                       <th className="subname-in-table">ชื่อ Username</th>
                       <th className="name-in-table">ชื่อพนักงาน</th>
                       <th>ประเภท</th>

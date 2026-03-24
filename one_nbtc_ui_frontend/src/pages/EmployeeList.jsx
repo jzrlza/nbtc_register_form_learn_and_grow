@@ -490,7 +490,7 @@ const EmployeeList = ({ user, onLogout }) => {
                 <table className="employees-table">
                   <thead>
                     <tr>
-                      <th>รหัส</th>
+                      <th>#</th>
                       <th className="name-in-table">ชื่อ-นามสกุล</th>
                       <th className="subname-in-table">ตำแหน่ง</th>
                       <th>สำนัก</th>
