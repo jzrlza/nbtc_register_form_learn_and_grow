@@ -1,0 +1,1 @@
+sudo docker exec -it register_form_learn_and_grow_database_production mysqldump -u root -p db_name > db_name_backup_datetime.sql
