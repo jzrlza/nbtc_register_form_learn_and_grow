@@ -77,6 +77,10 @@ const AttendRegisterList = ({ user, onLogout }) => {
     navigate('/attendance/edit');
   };
 
+  const handleDeleteAllRegisters = () => {
+    showModal('confirm', 'คุณแน่ใจหรือไม่ที่จะลบการลงทะเบียนทั้งหมด?', "all");
+  }
+
   const handleDelete = (registerId) => {
     showModal('confirm', 'คุณแน่ใจหรือไม่ที่จะลบการลงทะเบียนนี้?', registerId);
   };
@@ -85,7 +89,7 @@ const AttendRegisterList = ({ user, onLogout }) => {
     if (!modal.registerId) return;
     
     try {
-      await axios.delete(`${API_URL}/api/registers/${modal.registerId}`, {
+      await axios.delete(`${API_URL}/api/registers/${modal.registerId !== "all" ? "single/" : ""}${modal.registerId}`, {
         headers: {
         'Authorization': `Bearer ${sessionStorage.getItem('token')}` // Send token like a password
         }
@@ -276,6 +280,11 @@ const AttendRegisterList = ({ user, onLogout }) => {
                   {">"}
                 </button>
               </div>
+
+              {parseInt(user?.type) === 1 ? 
+              <button onClick={handleDeleteAllRegisters} className="delete-btn">
+                ลบการลงทะเบียนทั้งหมด
+              </button> : ""}
             </>
           ) : (
             <p>ไม่พบการลงทะเบียน</p>

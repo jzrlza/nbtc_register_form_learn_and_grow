@@ -378,7 +378,7 @@ router.get('/single/:id', async (req, res) => {
 // **PROTECTED**
 // DELETE register
 // Soft delete register
-router.delete('/:id', async (req, res) => {
+router.delete('/single/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
       logFile(req);
@@ -424,7 +424,7 @@ router.delete('/all', async (req, res) => {
     const connection = await getConnection();
     
     const [result] = await connection.execute(
-      'UPDATE register SET is_deleted = 1'
+      'UPDATE register SET is_deleted = 1 WHERE 1'
     );
     
     await connection.end();

@@ -378,7 +378,7 @@ router.get('/single/:id', async (req, res) => {
 // **PROTECTED**
 // DELETE register_one
 // Soft delete register_one
-router.delete('/:id', async (req, res) => {
+router.delete('/single/:id', async (req, res) => {
   const user = verifyJWTToken(req,res);
     if(!user) {
       logFile(req);
