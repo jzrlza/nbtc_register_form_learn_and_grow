@@ -410,6 +410,37 @@ router.delete('/:id', async (req, res) => {
 });
 
 // **PROTECTED**
+// DELETE registers
+// Soft delete all registers
+router.delete('/all', async (req, res) => {
+  const user = verifyJWTToken(req,res);
+    if(!user) {
+      logFile(req);
+      return res.status(403).json({ error: "Unauthorized Access" });
+    }
+  logFile(req, user);
+
+  try {
+    const connection = await getConnection();
+    
+    const [result] = await connection.execute(
+      'UPDATE register SET is_deleted = 1'
+    );
+    
+    await connection.end();
+    
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ error: 'Registers not found' });
+    }
+    
+    res.json({ message: 'ลบการลงทะเบียนทั้งหมดเรียบร้อย' });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// **PROTECTED**
 // GET export data for Excel (most efficient)
 router.get('/export-data', async (req, res) => {
   const user = verifyJWTToken(req,res);
