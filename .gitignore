@@ -1,12 +1,9 @@
 .env
-/register_form_learn_and_grow_backend/.env
-/register_form_learn_and_grow_frontend/.env
-/register_form_learn_and_grow_database_production/.env
-/one_nbtc_ui_backend/.env
-/one_nbtc_ui_frontend/.env
+*/.env
 */node_modules/
 */package-lock.json
 */dist/
+*/vendor/
 /temp_files/
 /real_env_files_temp/
 /backend-logs/
