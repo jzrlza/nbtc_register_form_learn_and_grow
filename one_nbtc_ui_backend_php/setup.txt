@@ -1,0 +1,12 @@
+composer install
+
+# Create logs directory
+mkdir logs
+chmod 755 logs
+
+# Copy environment file
+cp .env.example .env
+
+# Edit .env with your database credentials
+# Run PHP server
+php -S localhost:8001 -t public/
