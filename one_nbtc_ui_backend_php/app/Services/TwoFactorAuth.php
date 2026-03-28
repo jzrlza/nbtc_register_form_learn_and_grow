@@ -1,33 +1,37 @@
 <?php
 namespace App\Services;
 
-use PragmaRX\Google2FA\Google2FA;
+use OTPHP\TOTP;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 
 class TwoFactorAuth
 {
-    private static $google2fa;
     private static $appName;
     
     public static function init()
     {
-        self::$google2fa = new Google2FA();
         self::$appName = $_ENV['TWOFACTOR_SPEAKEASY_SECRET_STR'] ?? 'CalculatorApp';
     }
     
     public static function generateSecret()
     {
         self::init();
-        return self::$google2fa->generateSecretKey();
+        $totp = TOTP::generate();
+        return $totp->getSecret();
     }
     
     public static function generateQrCode($secret, $username)
     {
         self::init();
         
+        // Create TOTP instance with existing secret
+        $totp = TOTP::create($secret);
+        $totp->setLabel($username);
+        $totp->setIssuer(self::$appName);
+        
         // Generate the OTP auth URL
-        $otpAuthUrl = self::$google2fa->getQRCodeUrl(self::$appName, $username, $secret);
+        $otpAuthUrl = $totp->getProvisioningUri();
         
         // Create QR code options
         $options = new QROptions([
@@ -35,9 +39,9 @@ class TwoFactorAuth
             'eccLevel' => QRCode::ECC_L,
             'scale' => 5,
             'imageBase64' => true,
-            'addQuietzone' => false,      // Removes quiet zone (white border)
-            'quietzoneSize' => 0,          // Sets border to 0
-            'margin' => 0                  // Removes any additional margin
+            'addQuietzone' => false,
+            'quietzoneSize' => 0,
+            'margin' => 0
         ]);
         
         // Create QR code instance and render
@@ -50,6 +54,23 @@ class TwoFactorAuth
     public static function verify($secret, $code)
     {
         self::init();
-        return self::$google2fa->verifyKey($secret, $code, 2); // window = 2
+        
+        try {
+            $totp = TOTP::create($secret);
+            return $totp->verify($code, null, 1); // window = 1 (allows 1 step time drift)
+        } catch (\Exception $e) {
+            Logger::error('2FA verification failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+    
+    public static function isValidSecret($secret)
+    {
+        try {
+            TOTP::create($secret);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }
