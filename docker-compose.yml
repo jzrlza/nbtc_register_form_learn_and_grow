@@ -16,6 +16,30 @@ services:
     networks:
       - nbtc_register_form_learn_and_grow_learngrow-network
 
+    # ========== NEW PHP BACKEND (Replacement for main backend) ==========
+  backend_php:
+    build: ./backend_php
+    ports:
+      - "0.0.0.0:8000:80"
+    environment:
+      APP_ENV: production
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      AD_API_URL: ${AD_API_URL}
+      AD_API_KEY: ${AD_API_KEY}
+      LOG_PATH: ${LOG_PATH}
+      TWOFACTOR_SPEAKEASY_SECRET_STR: ${TWOFACTOR_SPEAKEASY_SECRET_STR}
+    networks:
+      - nbtc_register_form_learn_and_grow_learngrow-network
+    mem_limit: 500M
+    restart: always
+    depends_on:
+      - database
+
   backend:
     build: ./register_form_learn_and_grow_backend
     ports:
@@ -38,30 +62,6 @@ services:
     restart: always  # Auto-restart if crashes
     volumes:
       - ./backend-logs:/app/logs
-
-    # ========== NEW PHP BACKEND (Replacement for main backend) ==========
-  backend_php:
-    build: ./register_form_learn_and_grow_backend_php
-    ports:
-      - "0.0.0.0:8000:80"
-    environment:
-      APP_ENV: production
-      DB_HOST: database
-      DB_PORT: 3306
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      AD_API_URL: ${AD_API_URL}
-      AD_API_KEY: ${AD_API_KEY}
-      LOG_PATH: ${LOG_PATH}
-      TWOFACTOR_SPEAKEASY_SECRET_STR: ${TWOFACTOR_SPEAKEASY_SECRET_STR}
-    networks:
-      - nbtc_register_form_learn_and_grow_learngrow-network
-    mem_limit: 500M
-    restart: always
-    depends_on:
-      - database
 
   frontend:
     build: ./register_form_learn_and_grow_frontend
@@ -114,30 +114,6 @@ services:
     restart: always  # Auto-restart if crashes
     volumes:
       - ./backend-logs:/app/logs
-
-    # ========== NEW PHP BACKEND (Replacement for one_nbtc backend) ==========
-  backend_php_onenbtc:
-    build: ./one_nbtc_ui_backend_php
-    ports:
-      - "0.0.0.0:8001:80"
-    environment:
-      APP_ENV: production
-      DB_HOST: database
-      DB_PORT: 3306
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      AD_API_URL: ${AD_API_URL}
-      AD_API_KEY: ${AD_API_KEY}
-      LOG_PATH: ${LOG_PATH}
-      TWOFACTOR_SPEAKEASY_SECRET_STR: ${TWOFACTOR_SPEAKEASY_SECRET_STR}
-    networks:
-      - nbtc_register_form_learn_and_grow_learngrow-network
-    mem_limit: 500M
-    restart: always
-    depends_on:
-      - database
 
   frontend_onenbtc:
     build: ./one_nbtc_ui_frontend
