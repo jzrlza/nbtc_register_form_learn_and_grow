@@ -43,7 +43,7 @@ services:
   backend_php:
     build: ./register_form_learn_and_grow_backend_php
     ports:
-      - "0.0.0.0:8000:8000"
+      - "0.0.0.0:8000:80"
     environment:
       APP_ENV: production
       DB_HOST: database
@@ -119,7 +119,7 @@ services:
   backend_php_onenbtc:
     build: ./one_nbtc_ui_backend_php
     ports:
-      - "0.0.0.0:8001:8001"
+      - "0.0.0.0:8001:80"
     environment:
       APP_ENV: production
       DB_HOST: database
