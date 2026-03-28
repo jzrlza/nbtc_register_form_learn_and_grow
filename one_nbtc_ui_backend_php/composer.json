@@ -10,7 +10,8 @@
         "lcobucci/jwt": "^5.0",
         "guzzlehttp/guzzle": "^7.8",
         "pragmarx/google2fa": "^8.0",
-        "chillerlan/php-qrcode": "^4.3"
+        "chillerlan/php-qrcode": "^4.3",
+        "spomky-labs/otphp": "^11.4"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest"
