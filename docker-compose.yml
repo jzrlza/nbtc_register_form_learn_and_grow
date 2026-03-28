@@ -54,7 +54,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       AD_API_URL: ${AD_API_URL}
       AD_API_KEY: ${AD_API_KEY}
-      LOG_PATH: /var/www/html/logs
+      LOG_PATH: ${LOG_PATH}
       TWOFACTOR_SPEAKEASY_SECRET_STR: ${TWOFACTOR_SPEAKEASY_SECRET_STR}
     networks:
       - nbtc_register_form_learn_and_grow_learngrow-network
@@ -130,7 +130,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       AD_API_URL: ${AD_API_URL}
       AD_API_KEY: ${AD_API_KEY}
-      LOG_PATH: /var/www/html/logs
+      LOG_PATH: ${LOG_PATH}
       TWOFACTOR_SPEAKEASY_SECRET_STR: ${TWOFACTOR_SPEAKEASY_SECRET_STR}
     networks:
       - nbtc_register_form_learn_and_grow_learngrow-network
