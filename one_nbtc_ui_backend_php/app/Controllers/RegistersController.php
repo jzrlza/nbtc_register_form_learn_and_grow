@@ -5,7 +5,7 @@ use App\Services\Database;
 use App\Services\Logger;
 use App\Middleware\AuthMiddleware;
 
-class RegistersOneController
+class RegistersController
 {
     public function index()
     {
