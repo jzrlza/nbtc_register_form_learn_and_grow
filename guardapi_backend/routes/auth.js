@@ -292,6 +292,13 @@ router.post('/verify-2fa', async (req, res) => {
            VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 90 DAY))`,
           [session.user_id, trustToken, fingerprint]
         );
+      } else {
+        await pool.execute(
+          `UPDATE trusted_devices SET 
+           trust_token_hash = ?, expires_at = DATE_ADD(NOW(), INTERVAL 90 DAY)
+           WHERE user_id = ? AND device_fingerprint = ?`,
+          [trustToken, session.user_id, fingerprint]
+        );
       }
 
       newTrustToken = trustToken;
