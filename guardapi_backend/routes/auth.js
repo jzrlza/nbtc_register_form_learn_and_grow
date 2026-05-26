@@ -187,7 +187,7 @@ router.post('/login', async (req, res) => {
     if (fullyMade2FA) {
       const tempToken = generateToken();
       await pool.execute(
-        `INSERT INTO sessions (user_id, token, is_2fa_verified, device_fingerprint, expires_at)
+        `INSERT INTO sessions (user_id, trust_token_hash, is_2fa_verified, device_fingerprint, expires_at)
          VALUES (?, ?, 0, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
         [user.id, tempToken, fingerprint]
       );
