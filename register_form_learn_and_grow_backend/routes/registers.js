@@ -471,7 +471,7 @@ router.get('/export-data', async (req, res) => {
         division_obj.id as division_id,
         d.id as dept_id
       FROM register r
-      INNER JOIN employee e ON r.emp_id = e.id
+      INNER JOIN employee e ON r.emp_id = e.id AND e.is_deleted = 0
       LEFT JOIN position p ON e.position_id = p.id
       LEFT JOIN dept d ON e.dept_id = d.id
       LEFT JOIN division division_obj ON d.div_id = division_obj.id
@@ -488,7 +488,7 @@ router.get('/export-data', async (req, res) => {
       ORDER BY division_obj.id, d.id, e.emp_name
     `);
     
-    // Get unregistered employees
+    // Get unregistered employees (excluding those who quit)
     const [unregisteredEmployees] = await connection.execute(`
       SELECT 
         e.id,
