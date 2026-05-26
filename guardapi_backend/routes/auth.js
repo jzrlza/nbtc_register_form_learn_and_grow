@@ -281,7 +281,7 @@ router.post('/verify-2fa', async (req, res) => {
       const city = session.city;
 
       const [existing] = await pool.execute(
-        'SELECT * FROM trusted_devices WHERE user_id = ? AND device_fingerprint = ? AND is_revoked = 0',
+        'SELECT * FROM trusted_devices WHERE user_id = ? AND device_fingerprint = ? AND is_revoked = 0 AND expires_at > NOW()',
         [session.user_id, fingerprint]
       );
 
