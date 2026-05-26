@@ -11,6 +11,9 @@ const requireAuth = require('../middleware/auth');
 
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
 
+//session age 7 days
+//remembered_devices age 90 days
+
 const fs = require('fs');
 const path = require('path');
 const logDir = process.env.LOG_PATH || path.join(__dirname, 'logs');
