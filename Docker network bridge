@@ -1,0 +1,19 @@
+Docker network bridge
+
+netstat -nr
+
+ifconfig
+  br-031146bafa4d:flags=xxxxx
+  inet 172.18.0.1 netmask....
+
+
+sudo docker network ls | grep 031146bafa4d
+sudo docker network inspect one_n_b_t_c_u_i_onenbtc-network | grep -A 10 "Containers"
+
+sudo docker network rm one_n_b_t_c_u_i_onenbtc-network
+
+sudo docker network create \
+  --driver bridge \
+  --subnet 172.22.0.0/16 \
+  --gateway 172.22.0.1 \
+  one_n_b_t_c_u_i_onenbtc-network
