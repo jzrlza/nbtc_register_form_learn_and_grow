@@ -8,3 +8,7 @@
 /real_env_files_temp/
 /backend-logs/
 /backups/
+/guardapi_backend/images/
+/guardapi_backend/.env
+/guardapi_frontend/.env
+*/logs/

@@ -1,0 +1,25 @@
+{
+  "name": "one_nbtc_ui_frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Frontend for guardapi project",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
+    "axios": "^1.5.0",
+    "vue": "^3.4.0",
+    "vue-router": "^4.6.4"
+  },
+  "keywords": [
+    "frontend",
+    "vue",
+    "vite"
+  ],
+  "author": "one_nbtc_ui",
+  "license": "MIT"
+}
