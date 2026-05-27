@@ -26,7 +26,6 @@ from meeting:
 - (for admin only) add dashboard page show daily-monthly stats
 - add title field for posts (also input and output)
 - restrict delete posts button to admins only
-- limit to 3 images per post
 - export excel translate into thai
 - export excel image names turn into full url links, break into columns image1, image2, image3
 - add search by post messages
@@ -45,6 +44,7 @@ sus
 - real time posts may or may not collide with newly registered users
 
 done
+- limit to 3 images per post
 - search bar move back to top of table
 - (back to learnandgrow) - fix vpn, and fix export the deleted
 - translate to thai
