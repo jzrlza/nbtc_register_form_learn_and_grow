@@ -43,6 +43,7 @@ DROP TABLE IF EXISTS `posts`;
 CREATE TABLE `posts` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
+  `title` text NULL,
   `text_message` text NULL,
   `filenames` text NULL,
   `is_deleted` tinyint(1) DEFAULT 0,
