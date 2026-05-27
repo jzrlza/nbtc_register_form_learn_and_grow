@@ -25,6 +25,7 @@ from meeting:
 - user ad for add those guard users (add admin page)
 - (for admin only) add dashboard page show daily-monthly stats
 - search bar move back to top of table
+- add title field for posts (also input and output)
 - restrict delete posts button to admins only
 - limit to 3 images per post
 - export excel translate into thai
