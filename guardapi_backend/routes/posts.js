@@ -36,6 +36,7 @@ const upload = multer({
 router.get('/export', requireAuth, async (req, res) => {
   try {
     const { dateFrom, dateTo } = req.query;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
 
     if (!dateFrom || !dateTo) {
       return res.status(400).json({ error: 'dateFrom and dateTo are required' });
@@ -55,10 +56,12 @@ router.get('/export', requireAuth, async (req, res) => {
 
     sheet.columns = [
       { header: 'ID', key: 'id', width: 8 },
-      { header: 'Username', key: 'username', width: 20 },
-      { header: 'Message', key: 'text_message', width: 50 },
-      { header: 'Images', key: 'images', width: 40 },
-      { header: 'Created', key: 'created_at', width: 22 },
+      { header: 'ชื่อผู้ส่ง', key: 'username', width: 20 },
+      { header: 'ข้อความ', key: 'text_message', width: 50 },
+      { header: 'รูปภาพ 1', key: 'image1', width: 40 },
+      { header: 'รูปภาพ 2', key: 'image2', width: 40 },
+      { header: 'รูปภาพ 3', key: 'image3', width: 40 },
+      { header: 'วันที่/เวลา', key: 'created_at', width: 22 },
     ];
 
     // Style header
@@ -72,9 +75,11 @@ router.get('/export', requireAuth, async (req, res) => {
     posts.forEach(p => {
       sheet.addRow({
         id: p.id,
-        username: p.username,
-        text_message: p.text_message || '',
-        images: (p.filenames || []).join(', '),
+        username: p.username || '-',
+        text_message: p.text_message || '-',
+        image1: p.filenames[0] ? `${baseUrl}/images/${p.filenames[0]}` : '-',
+        image2: p.filenames[1] ? `${baseUrl}/images/${p.filenames[1]}` : '-',
+        image3: p.filenames[2] ? `${baseUrl}/images/${p.filenames[2]}` : '-',
         created_at: new Date(p.created_at).toLocaleString(),
       });
     });

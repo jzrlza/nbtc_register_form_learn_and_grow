@@ -23,15 +23,13 @@ tomorrow
 from meeting:
 - make user table for guard use (local user) [use user_type column]
 [0 = super admin, 1 = ad_admin, 2 = general_users]
-- user ad for add those guard users (add admin page)
-- (for admin only) add dashboard page show daily-monthly stats
+- user AD for add those guard users (add admin page)
 - add title field for posts (also input and output)
 - restrict delete posts button to admins only
-- export excel translate into thai
-- export excel image names turn into full url links, break into columns image1, image2, image3
 - add search by post messages
 - theme color of the web : bloody dark red with white/yellow texts
 - age of data, posts and images : 1 year (by stamp)
+- (for admin only) add dashboard page show daily-monthly stats (do much later...)
 
 next
 - trusted devices UI indicators (right now it is unclear when newly logged in to new devices where 2fa required)
@@ -45,6 +43,8 @@ sus
 - real time posts may or may not collide with newly registered users
 
 done
+- export excel translate into thai
+- export excel image names turn into full url links, break into columns image1, image2, image3
 - limit to 3 images per post
 - search bar move back to top of table
 - (back to learnandgrow) - fix vpn, and fix export the deleted
