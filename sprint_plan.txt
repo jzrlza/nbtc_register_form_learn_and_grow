@@ -18,7 +18,7 @@ sprint plan 2 weeks
 today
 
 tomorrow
-
+- add error messages whenever 400 or 500 requests responses as new standard
 
 from meeting:
 - make user table for guard use (local user) [use user_type column]
