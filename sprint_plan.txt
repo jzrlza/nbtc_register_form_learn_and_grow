@@ -31,6 +31,7 @@ from meeting:
 - export excel translate into thai
 - export excel image names turn into full url links, break into columns image1, image2, image3
 - add search by post messages
+- theme color of the web : bloody dark red with white/yellow texts
 
 next
 - trusted devices UI indicators (right now it is unclear when newly logged in to new devices where 2fa required)
