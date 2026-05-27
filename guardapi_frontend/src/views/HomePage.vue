@@ -208,12 +208,16 @@ function connectWebSocket() {
 
 function handleFiles(e) {
   const selected = Array.from(e.target.files);
-  files.value = [...files.value, ...selected];
-  selected.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = ev => previews.value.push(ev.target.result);
-    reader.readAsDataURL(file);
-  });
+  if (files.length <= 3) {
+    files.value = [...files.value, ...selected];
+    selected.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = ev => previews.value.push(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+  } else {
+    //help make me a warning modal
+  }
 }
 
 function generateFileName(file, index) {
