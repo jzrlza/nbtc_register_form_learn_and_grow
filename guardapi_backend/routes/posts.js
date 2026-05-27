@@ -154,7 +154,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 // PUT /api/posts/:id
-router.put('/:id', requireAuth, upload.array('images', 5), async (req, res) => {
+router.put('/:id', requireAuth, upload.array('images', 3), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });

@@ -14,7 +14,7 @@
     
     <div class="form-actions">
       <div class="form-left">
-        <label class="file-label">+ เพิ่มรูปภาพ (เลือกได้ 5 รูป) <input type="file" multiple accept="image/*" @change="handleFiles" class="file-input" /></label>
+        <label class="file-label">+ เพิ่มรูปภาพ (เลือกได้ 3 รูป) <input type="file" multiple accept="image/*" @change="handleFiles" class="file-input" /></label>
         <span v-if="files.length" class="file-count">โหลดแล้ว {{ files.length }} รูป</span>
         <div v-if="previews.length" class="previews">
           <div v-for="(p, i) in previews" :key="i" class="preview-item">
@@ -28,53 +28,6 @@
       </button>
     </div>
   </div>
-
-    
-
-    <!-- Posts Table -->
-    <div class="card">
-      <h3>รายการรายงาน (แสดงทั้งหมด {{ posts.length }} รายการ)</h3>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>ชื่อผู้ส่ง</th>
-              <th>ข้อความ</th>
-              <th>รูปภาพ</th>
-              <th>วันที่/เวลา</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="post in posts" :key="post.id">
-              <td>{{ post.id }}</td>
-              <td>{{ post.username }}</td>
-              <td>{{ post.text_message?.substring(0, 50) }}{{ post.text_message?.length > 50 ? '...' : '' }}</td>
-              <td>
-                <div v-if="post.filenames && post.filenames.length" class="thumbnail-list">
-                  <a
-                    v-for="(img, i) in post.filenames"
-                    :key="i"
-                    :href="`${apiUrl}/images/${img}`"
-                    target="_blank"
-                    class="thumbnail-link"
-                  >
-                    <img :src="`${apiUrl}/images/${img}`" class="thumbnail" />
-                  </a>
-                </div>
-                <span v-else>-</span>
-              </td>
-              <td>{{ formatTime(post.created_at) }}</td>
-              <td><button @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
-            </tr>
-            <tr v-if="posts.length === 0">
-              <td colspan="6" class="empty">No posts yet</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
     <!-- Filters -->
     <div class="card filters">
@@ -124,6 +77,51 @@
       <div class="filter-actions">
         <button @click="clearFilters" class="btn-clear">✕ ล้าง</button>
         <button @click="exportPosts" :disabled="!canExport" class="btn-export">📥 รายงานผล .xlsx</button>
+      </div>
+    </div>
+
+    <!-- Posts Table -->
+    <div class="card">
+      <h3>รายการรายงาน (แสดงทั้งหมด {{ posts.length }} รายการ)</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ชื่อผู้ส่ง</th>
+              <th>ข้อความ</th>
+              <th>รูปภาพ</th>
+              <th>วันที่/เวลา</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="post in posts" :key="post.id">
+              <td>{{ post.id }}</td>
+              <td>{{ post.username }}</td>
+              <td>{{ post.text_message?.substring(0, 50) }}{{ post.text_message?.length > 50 ? '...' : '' }}</td>
+              <td>
+                <div v-if="post.filenames && post.filenames.length" class="thumbnail-list">
+                  <a
+                    v-for="(img, i) in post.filenames"
+                    :key="i"
+                    :href="`${apiUrl}/images/${img}`"
+                    target="_blank"
+                    class="thumbnail-link"
+                  >
+                    <img :src="`${apiUrl}/images/${img}`" class="thumbnail" />
+                  </a>
+                </div>
+                <span v-else>-</span>
+              </td>
+              <td>{{ formatTime(post.created_at) }}</td>
+              <td><button @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
+            </tr>
+            <tr v-if="posts.length === 0">
+              <td colspan="6" class="empty">No posts yet</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 

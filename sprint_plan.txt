@@ -24,7 +24,6 @@ from meeting:
 - make user table for guard use (local user) [use user_type column]
 - user ad for add those guard users (add admin page)
 - (for admin only) add dashboard page show daily-monthly stats
-- search bar move back to top of table
 - add title field for posts (also input and output)
 - restrict delete posts button to admins only
 - limit to 3 images per post
@@ -42,9 +41,11 @@ next week plan
 - refactor and formalize the ui
 - big admin page for admin only
 
-
+sus
+- real time posts may or may not collide with newly registered users
 
 done
+- search bar move back to top of table
 - (back to learnandgrow) - fix vpn, and fix export the deleted
 - translate to thai
 - make it responsive and pc mobile friendly
