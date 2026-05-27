@@ -21,7 +21,7 @@ tomorrow
 
 
 from meeting:
-- make user table for guard use (local user)
+- make user table for guard use (local user) [use user_type column]
 - user ad for add those guard users (add admin page)
 - (for admin only) add dashboard page show daily-monthly stats
 - restrict delete posts button to admins only
