@@ -57,6 +57,7 @@ router.get('/export', requireAuth, async (req, res) => {
     sheet.columns = [
       { header: 'ID', key: 'id', width: 8 },
       { header: 'ชื่อผู้ส่ง', key: 'username', width: 20 },
+      { header: 'หัวข้อ', key: 'title', width: 40 }, // Added title column
       { header: 'ข้อความ', key: 'text_message', width: 50 },
       { header: 'รูปภาพ 1', key: 'image1', width: 40 },
       { header: 'รูปภาพ 2', key: 'image2', width: 40 },
@@ -76,6 +77,7 @@ router.get('/export', requireAuth, async (req, res) => {
       sheet.addRow({
         id: p.id,
         username: p.username || '-',
+        title: p.title || '-', // Added title
         text_message: p.text_message || '-',
         image1: p.filenames[0] ? `${baseUrl}/images/${p.filenames[0]}` : '-',
         image2: p.filenames[1] ? `${baseUrl}/images/${p.filenames[1]}` : '-',
@@ -98,11 +100,12 @@ router.get('/export', requireAuth, async (req, res) => {
 // GET /api/posts
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const { username, dateFrom, dateTo } = req.query;
+    const { username, dateFrom, dateTo, title } = req.query; // Added title filter
     const { sql, params } = buildFilteredQuery({
       username: username || null,
       dateFrom: dateFrom ? `${dateFrom} 00:00:00` : null,
       dateTo: dateTo ? `${dateTo} 23:59:59` : null,
+      title: title || null, // Added title filter
       limit: 100
     });
 
@@ -117,13 +120,13 @@ router.get('/', requireAuth, async (req, res) => {
 // POST /api/posts
 router.post('/', requireAuth, upload.array('images', 3), async (req, res) => {
   try {
-    const { text_message } = req.body;
+    const { title, text_message } = req.body; // Added title
     const files = req.files || [];
     const filenames = files.map(f => f.filename).join(',') || null;
 
     const [result] = await pool.query(
-      'INSERT INTO posts (user_id, text_message, filenames) VALUES (?, ?, ?)',
-      [req.user.id, text_message || null, filenames]
+      'INSERT INTO posts (user_id, title, text_message, filenames) VALUES (?, ?, ?, ?)', // Added title
+      [req.user.id, title || null, text_message || null, filenames]
     );
 
     const [rows] = await pool.query(
@@ -170,16 +173,38 @@ router.put('/:id', requireAuth, upload.array('images', 3), async (req, res) => {
     );
     if (existing.length === 0) return res.status(404).json({ error: 'Post not found' });
 
-    const { text_message } = req.body;
+    const { title, text_message } = req.body; // Added title
     const files = req.files || [];
     const newFilenames = files.map(f => f.filename);
     const oldFilenames = existing[0].filenames ? existing[0].filenames.split(',') : [];
     const allFilenames = [...oldFilenames, ...newFilenames].join(',') || null;
 
-    await pool.query(
-      'UPDATE posts SET text_message = ?, filenames = ? WHERE id = ?',
-      [text_message !== undefined ? text_message : existing[0].text_message, allFilenames, id]
-    );
+    // Prepare update fields
+    const updateFields = [];
+    const updateValues = [];
+
+    if (title !== undefined) {
+      updateFields.push('title = ?');
+      updateValues.push(title);
+    }
+    
+    if (text_message !== undefined) {
+      updateFields.push('text_message = ?');
+      updateValues.push(text_message);
+    }
+    
+    if (allFilenames !== null) {
+      updateFields.push('filenames = ?');
+      updateValues.push(allFilenames);
+    }
+
+    if (updateFields.length > 0) {
+      updateValues.push(id);
+      await pool.query(
+        `UPDATE posts SET ${updateFields.join(', ')} WHERE id = ?`,
+        updateValues
+      );
+    }
 
     const [rows] = await pool.query(
       POSTS_QUERY + ' AND p.id = ?',

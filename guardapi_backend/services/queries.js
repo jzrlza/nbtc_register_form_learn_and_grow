@@ -1,5 +1,5 @@
 const POSTS_QUERY = `
-  SELECT p.id, p.user_id, p.text_message, p.filenames, p.created_at, u.username
+  SELECT p.id, p.user_id, p.title, p.text_message, p.filenames, p.created_at, u.username
   FROM posts p JOIN users u ON p.user_id = u.id
   WHERE p.is_deleted = 0
 `;
