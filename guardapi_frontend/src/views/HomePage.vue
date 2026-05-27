@@ -126,6 +126,21 @@
     </div>
 
   </div>
+
+  <div v-if="showWarningModal" class="modal-overlay" @click.self="closeWarningModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚠️ คำเตือน</h3>
+        <button class="modal-close" @click="closeWarningModal">×</button>
+      </div>
+      <div class="modal-body">
+        <p>{{ warningMessage }}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-primary" @click="closeWarningModal">ตกลง</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -147,6 +162,9 @@ const filterDateFrom = ref('');
 const filterDateTo = ref('');
 const filterMonth = ref('');
 const filterYear = ref('');
+
+const showWarningModal = ref(false);
+const warningMessage = ref('');
 
 let ws = null;
 let filterTimeout = null;
@@ -208,16 +226,27 @@ function connectWebSocket() {
 
 function handleFiles(e) {
   const selected = Array.from(e.target.files);
-  if (files.length <= 3) {
-    files.value = [...files.value, ...selected];
-    selected.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = ev => previews.value.push(ev.target.result);
-      reader.readAsDataURL(file);
-    });
-  } else {
-    //help make me a warning modal
+  const currentCount = files.value.length;
+  const newCount = selected.length;
+  const totalCount = currentCount + newCount;
+  
+  // Only show warning if trying to exceed 3 images
+  if (totalCount > 3) {
+    warningMessage.value = 'คุณสามารถอัปโหลดรูปภาพได้สูงสุด 3 รูปเท่านั้น';
+    showWarningModal.value = true;
+    e.target.value = '';
+    return;
   }
+  
+  // Add all files (within limit)
+  files.value = [...files.value, ...selected];
+  selected.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => previews.value.push(ev.target.result);
+    reader.readAsDataURL(file);
+  });
+  
+  e.target.value = '';
 }
 
 function generateFileName(file, index) {
@@ -325,6 +354,11 @@ async function deletePost(id) {
 function formatTime(date) {
   if (!date) return '-';
   return new Date(date).toLocaleString();
+}
+
+function closeWarningModal() {
+  showWarningModal.value = false;
+  warningMessage.value = '';
 }
 
 onMounted(() => connectWebSocket());
@@ -472,5 +506,109 @@ tr:hover { background: #f9fafb; }
 
 .thumbnail-link:hover {
   opacity: 0.8;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #f59e0b;
+  font-size: 18px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-body p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-primary {
+  background: #667eea;
+  color: white;
+  border: none;
+}
+
+.modal-btn-primary:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
 }
 </style>
