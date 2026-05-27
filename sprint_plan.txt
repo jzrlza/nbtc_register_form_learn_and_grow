@@ -1,3 +1,99 @@
+ความต้องการ
+พัฒนา Web Application สำหรับบริหารจัดการข้อมูลด้านการรักษาความปลอดภัยพื้นที่ ผ่าน LINE Bot และ Dashboard แบบ Real-time โดยระบบสามารถ:
+- รับแจ้งเหตุ ข้อความ และรูปภาพจากเจ้าหน้าที่ภาคสนามผ่าน LINE
+- จัดเก็บข้อมูลและรูปภาพอัตโนมัติ
+- ค้นหา ตรวจสอบ และติดตามเหตุการณ์ย้อนหลังได้
+- แสดงสถานะเหตุการณ์และข้อมูลแบบ Real-time
+- Export รายงานประจำวัน/เดือน
+- รองรับการใช้งานทั้ง Desktop และ Mobile
+- UI/UX เน้นใช้งานง่าย รวดเร็ว ลดขั้นตอนการทำงานของเจ้าหน้าที่ภาคสนาม
+
+อันนี้ที่คุยเมื่อเช้า ทาง พี่สมเดชที่อยู่สำนัก อบ. ส่งมาครับ เจเจ ลองดูรายงานที่เขาสรุป ว่าเก็บอะไรบ้าง และ ก็ความต้องการที่เขาอยากได้ ลองออกแบบ database และหน้าจอดูก่อนนะ
+
+ถ้าติดอะไรแจ้งพี่อีกทีครับ
+
+
+sprint plan 2 weeks
+
+today
+
+tomorrow
+
+
+from meeting:
+- make user table for guard use (local user)
+- user ad for add those guard users 
+- limit to 3 images per post
+- export excel translate into thai
+- export excel image names turn into full url links, break into columns image1, image2, image3
+
+next
+- trusted devices UI indicators (right now it is unclear when newly logged in to new devices where 2fa required)
+
+
+next week plan
+- refactor and formalize the ui
+- big admin page for admin only
+
+
+
+done
+- (back to learnandgrow) - fix vpn, and fix export the deleted
+- translate to thai
+- make it responsive and pc mobile friendly
+- make images file names more readable using datetime and post id to tell exact post
+- make the images downloadable from the table
+- excel export
+- daily monthy date filter
+- limit display messages by 100 messages in default view, enable vertical scroll
+- real time message and image recording
+  - when open, input UI must be ready
+- do the device login token as simple as possible
+- merge the two functions into template
+- test trusting devices and locations in LINE fashion for ease of use
+- test real-time database table frontend update (strictly need node.js)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Primary Features :
 1. หน้าจอลงทะเบียน ประกอบด้วย
   - เพิ่มรูป Bandner ตามรูปข้างล่างนี้นะ
