@@ -26,7 +26,7 @@ from meeting:
 - user AD for add those guard users (add admin page)
 - restrict delete posts button to admins only
 - theme color of the web : bloody dark red with white/yellow texts
-- age of data, posts and images : 1 year (by stamp)
+- age of data, posts and images : 1 year (by stamp)   [test by using age of 3 seconds first]
 - (for admin only) add dashboard page show daily-monthly stats (do much later...)
 
 next
