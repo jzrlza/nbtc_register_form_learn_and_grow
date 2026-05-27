@@ -10,33 +10,51 @@
 
     <!-- Create Post -->
     <div class="card post-form">
-    <textarea v-model="textMessage" placeholder="เขียนข้อความรายงาน..." rows="4" class="text-area"></textarea>
-    
-    <div class="form-actions">
-      <div class="form-left">
-        <label class="file-label">+ เพิ่มรูปภาพ (เลือกได้ 3 รูป) <input type="file" multiple accept="image/*" @change="handleFiles" class="file-input" /></label>
-        <span v-if="files.length" class="file-count">โหลดแล้ว {{ files.length }} รูป</span>
-        <div v-if="previews.length" class="previews">
-          <div v-for="(p, i) in previews" :key="i" class="preview-item">
-            <img :src="p" alt="แสดงรูป" />
-            <button @click="removeFile(i)" class="remove-btn">✕</button>
+      <input 
+        v-model="title" 
+        type="text" 
+        placeholder="หัวข้อรายงาน..." 
+        class="title-input"
+      />
+      <textarea v-model="textMessage" placeholder="เขียนข้อความรายงาน..." rows="4" class="text-area"></textarea>
+      
+      <div class="form-actions">
+        <div class="form-left">
+          <label class="file-label">+ เพิ่มรูปภาพ (เลือกได้ 3 รูป) <input type="file" multiple accept="image/*" @change="handleFiles" class="file-input" /></label>
+          <span v-if="files.length" class="file-count">โหลดแล้ว {{ files.length }} รูป</span>
+          <div v-if="previews.length" class="previews">
+            <div v-for="(p, i) in previews" :key="i" class="preview-item">
+              <img :src="p" alt="แสดงรูป" />
+              <button @click="removeFile(i)" class="remove-btn">✕</button>
+            </div>
           </div>
         </div>
+        <button @click="createPost" :disabled="loading || (!title && !textMessage && !files.length)" class="btn">
+          {{ loading ? 'กำลังบันทึก...' : 'บันทึก' }}
+        </button>
       </div>
-      <button @click="createPost" :disabled="loading || (!textMessage && !files.length)" class="btn">
-        {{ loading ? 'กำลังบันทึก...' : 'บันทึก' }}
-      </button>
     </div>
-  </div>
 
     <!-- Filters -->
     <div class="card filters">
       <div class="filter-row">
         <div class="filter-group">
-          <label class="filter-label">🔍 ค้นหา</label>
+          <label class="filter-label">🔍 ค้นหาชื่อผู้ส่ง</label>
           <input v-model="filterUsername" type="text" placeholder="Username..." class="filter-input" @input="applyFilters" />
         </div>
 
+        <div class="filter-group">
+          <label class="filter-label">📌 ค้นหาหัวข้อ</label>
+          <input v-model="filterTitle" type="text" placeholder="Title..." class="filter-input" @input="applyFilters" />
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">💬 ค้นหาข้อความ</label>
+          <input v-model="filterTextMessage" type="text" placeholder="Message content..." class="filter-input" @input="applyFilters" />
+        </div>
+
+      </div>
+      <div class="filter-row">
         <div class="filter-group">
           <label class="filter-label">📅 โหมดการเลือกเวลา</label>
           <select v-model="filterMode" class="filter-input" @change="onModeChange">
@@ -89,6 +107,7 @@
             <tr>
               <th>ID</th>
               <th>ชื่อผู้ส่ง</th>
+              <th>หัวข้อ</th>
               <th>ข้อความ</th>
               <th>รูปภาพ</th>
               <th>วันที่/เวลา</th>
@@ -99,7 +118,10 @@
             <tr v-for="post in posts" :key="post.id">
               <td>{{ post.id }}</td>
               <td>{{ post.username }}</td>
-              <td>{{ post.text_message?.substring(0, 50) }}{{ post.text_message?.length > 50 ? '...' : '' }}</td>
+              <td>{{ post.title || '-' }}</td>
+              <td class="message-cell">
+                {{ post.text_message ? truncateText(post.text_message, 100) : '-' }}
+              </td>
               <td>
                 <div v-if="post.filenames && post.filenames.length" class="thumbnail-list">
                   <a
@@ -118,7 +140,7 @@
               <td><button @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
             </tr>
             <tr v-if="posts.length === 0">
-              <td colspan="6" class="empty">No posts yet</td>
+              <td colspan="7" class="empty">No posts yet</td>
             </tr>
           </tbody>
         </table>
@@ -149,6 +171,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const title = ref('');
 const textMessage = ref('');
 const files = ref([]);
 const previews = ref([]);
@@ -157,7 +180,9 @@ const posts = ref([]);
 const connected = ref(false);
 
 const filterUsername = ref('');
-const filterMode = ref('date');
+const filterTitle = ref('');
+const filterTextMessage = ref('');  // Add text message filter
+const filterMode = ref('month');
 const filterDateFrom = ref('');
 const filterDateTo = ref('');
 const filterMonth = ref('');
@@ -195,6 +220,18 @@ const canExport = computed(() => {
   return filterMonth.value && filterYear.value;
 });
 
+// Helper function to truncate text
+function truncateText(text, length) {
+  if (!text) return '-';
+  return text.length > length ? text.substring(0, length) + '...' : text;
+}
+
+// Helper function to show error modal
+function showError(message) {
+  warningMessage.value = message;
+  showWarningModal.value = true;
+}
+
 function onModeChange() {
   filterDateFrom.value = '';
   filterDateTo.value = '';
@@ -215,13 +252,26 @@ function onMonthChange() {
 
 function connectWebSocket() {
   ws = new WebSocket(wsUrl);
-  ws.onopen = () => { connected.value = true; fetchPosts(); };
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === 'posts_updated') posts.value = data.data;
+  ws.onopen = () => { 
+    connected.value = true; 
+    fetchPosts(); 
   };
-  ws.onclose = () => { connected.value = false; setTimeout(connectWebSocket, 2000); };
-  ws.onerror = () => { connected.value = false; };
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'posts_updated') posts.value = data.data;
+    } catch (err) {
+      console.error('WebSocket message error:', err);
+    }
+  };
+  ws.onclose = () => { 
+    connected.value = false; 
+    setTimeout(connectWebSocket, 2000); 
+  };
+  ws.onerror = () => { 
+    connected.value = false;
+    showError('การเชื่อมต่อ WebSocket ล้มเหลว');
+  };
 }
 
 function handleFiles(e) {
@@ -230,19 +280,25 @@ function handleFiles(e) {
   const newCount = selected.length;
   const totalCount = currentCount + newCount;
   
-  // Only show warning if trying to exceed 3 images
   if (totalCount > 3) {
-    warningMessage.value = 'คุณสามารถอัปโหลดรูปภาพได้สูงสุด 3 รูปเท่านั้น';
-    showWarningModal.value = true;
+    showError('คุณสามารถอัปโหลดรูปภาพได้สูงสุด 3 รูปเท่านั้น');
     e.target.value = '';
     return;
   }
   
-  // Add all files (within limit)
+  const maxSize = 10 * 1024 * 1024;
+  const oversizedFiles = selected.filter(file => file.size > maxSize);
+  if (oversizedFiles.length > 0) {
+    showError('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 10MB');
+    e.target.value = '';
+    return;
+  }
+  
   files.value = [...files.value, ...selected];
   selected.forEach(file => {
     const reader = new FileReader();
     reader.onload = ev => previews.value.push(ev.target.result);
+    reader.onerror = () => showError('ไม่สามารถอ่านไฟล์รูปภาพได้');
     reader.readAsDataURL(file);
   });
   
@@ -263,12 +319,21 @@ function generateFileName(file, index) {
   return `${year}${month}${day}t${hour12}${ampm}${min}min_img${index + 1}.${ext}`;
 }
 
-function removeFile(index) { files.value.splice(index, 1); previews.value.splice(index, 1); }
+function removeFile(index) { 
+  files.value.splice(index, 1); 
+  previews.value.splice(index, 1); 
+}
 
 async function createPost() {
+  if (!title.value && !textMessage.value && files.value.length === 0) {
+    showError('กรุณากรอกหัวข้อหรือข้อความรายงาน หรือเพิ่มรูปภาพ');
+    return;
+  }
+  
   loading.value = true;
   try {
     const formData = new FormData();
+    formData.append('title', title.value);
     formData.append('text_message', textMessage.value);
     
     files.value.forEach((file, i) => {
@@ -277,31 +342,68 @@ async function createPost() {
       formData.append('images', renamedFile);
     });
 
-    await fetch(`${apiUrl}/api/posts`, {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showError('ไม่พบข้อมูลการเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');
+      return;
+    }
+
+    const response = await fetch(`${apiUrl}/api/posts`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: formData
     });
 
+    const data = await response.json().catch(() => null);
+    
+    if (!response.ok) {
+      throw new Error(data?.error || 'ไม่สามารถบันทึกรายงานได้');
+    }
+
+    title.value = '';
     textMessage.value = '';
     files.value = [];
     previews.value = [];
-  } catch (err) { console.error(err); }
-  finally { loading.value = false; }
+    
+  } catch (err) { 
+    console.error('Create post error:', err);
+    showError(err.message);
+  } finally { 
+    loading.value = false; 
+  }
 }
 
 async function fetchPosts() {
   try {
     const params = new URLSearchParams();
     if (filterUsername.value) params.append('username', filterUsername.value);
+    if (filterTitle.value) params.append('title', filterTitle.value);
+    if (filterTextMessage.value) params.append('text_message', filterTextMessage.value);  // Add text_message to API call
     if (filterDateFrom.value) params.append('dateFrom', filterDateFrom.value);
     if (filterDateTo.value) params.append('dateTo', filterDateTo.value);
 
-    const res = await fetch(`${apiUrl}/api/posts?${params}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showError('ไม่พบข้อมูลการเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');
+      return;
+    }
+
+    const response = await fetch(`${apiUrl}/api/posts?${params}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-    posts.value = await res.json();
-  } catch {}
+
+    const data = await response.json().catch(() => null);
+    
+    if (!response.ok) {
+      throw new Error(data?.error || 'ไม่สามารถโหลดข้อมูลได้');
+    }
+    
+    posts.value = data || [];
+  } catch (err) {
+    console.error('Fetch posts error:', err);
+    showError(err.message);
+    posts.value = [];
+  }
 }
 
 function applyFilters() {
@@ -311,6 +413,8 @@ function applyFilters() {
 
 function clearFilters() {
   filterUsername.value = '';
+  filterTitle.value = '';
+  filterTextMessage.value = '';  // Clear text message filter
   filterDateFrom.value = '';
   filterDateTo.value = '';
   filterMonth.value = '';
@@ -319,18 +423,32 @@ function clearFilters() {
 }
 
 async function exportPosts() {
-  if (!canExport.value) return;
+  if (!canExport.value) {
+    showError('กรุณาเลือกช่วงวันที่หรือเดือน/ปีที่ต้องการส่งออก');
+    return;
+  }
 
   try {
     const params = new URLSearchParams();
     params.append('dateFrom', filterDateFrom.value);
     params.append('dateTo', filterDateTo.value);
 
-    const res = await fetch(`${apiUrl}/api/posts/export?${params}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showError('ไม่พบข้อมูลการเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');
+      return;
+    }
+
+    const response = await fetch(`${apiUrl}/api/posts/export?${params}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    const blob = await res.blob();
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.error || 'ไม่สามารถส่งออกข้อมูลได้');
+    }
+
+    const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -339,21 +457,39 @@ async function exportPosts() {
     window.URL.revokeObjectURL(url);
   } catch (err) {
     console.error('Export error:', err);
+    showError(err.message);
   }
 }
 
 async function deletePost(id) {
+  if (!confirm('คุณต้องการลบรายงานนี้ใช่หรือไม่?')) return;
+  
   try {
-    await fetch(`${apiUrl}/api/posts/${id}`, {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showError('ไม่พบข้อมูลการเข้าสู่ระบบ กรุณาเข้าสู่ระบบใหม่');
+      return;
+    }
+
+    const response = await fetch(`${apiUrl}/api/posts/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-  } catch {}
+
+    const data = await response.json().catch(() => null);
+    
+    if (!response.ok) {
+      throw new Error(data?.error || 'ไม่สามารถลบรายงานได้');
+    }
+  } catch (err) {
+    console.error('Delete error:', err);
+    showError(err.message);
+  }
 }
 
 function formatTime(date) {
   if (!date) return '-';
-  return new Date(date).toLocaleString();
+  return new Date(date).toLocaleString('th-TH');
 }
 
 function closeWarningModal() {
@@ -361,12 +497,43 @@ function closeWarningModal() {
   warningMessage.value = '';
 }
 
-onMounted(() => connectWebSocket());
-onUnmounted(() => { if (ws) ws.close(); });
+onMounted(() => {
+  connectWebSocket();
+  if (!localStorage.getItem('token')) {
+    showError('กรุณาเข้าสู่ระบบก่อนใช้งาน');
+  }
+});
+
+onUnmounted(() => { 
+  if (ws) ws.close(); 
+});
 </script>
 
 <style scoped>
-.page { max-width: 900px; margin: 0 auto; padding: 20px; }
+/* Keep all existing styles and add these */
+
+.message-cell {
+  max-width: 300px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.title-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.title-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Rest of the styles remain the same as before */
+.page { max-width: 1200px; margin: 0 auto; padding: 20px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .page-header h1 { font-size: 24px; color: #333; }
 
@@ -397,10 +564,6 @@ onUnmounted(() => { if (ws) ws.close(); });
   flex: 1;
 }
 
-.previews {
-  display: flex;
-  gap: 8px;
-}
 .file-label { cursor: pointer; padding: 8px 14px; background: #f0f0f0; border-radius: 6px; font-size: 14px; }
 .file-input { display: none; }
 .file-count { font-size: 13px; color: #888; }
@@ -444,7 +607,7 @@ onUnmounted(() => { if (ws) ws.close(); });
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 13px;
-  min-width: 130px;
+  min-width: 150px;
 }
 
 .filter-input:focus {
@@ -486,15 +649,15 @@ onUnmounted(() => { if (ws) ws.close(); });
   cursor: not-allowed;
 }
 
-.table-scroll { max-height: 300px; overflow-y: auto; }
+.table-scroll { max-height: 400px; overflow-y: auto; }
 table { width: 100%; border-collapse: collapse; }
-thead { position: sticky; top: 0; z-index: 1; }
+thead { position: sticky; top: 0; z-index: 1; background: white; }
 th { background: #f9fafb; padding: 10px; text-align: left; font-size: 13px; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
 td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #4b5563; }
 tr:hover { background: #f9fafb; }
 .empty { text-align: center; padding: 40px; color: #999; }
 
-.thumbnail-list { display: flex; gap: 4px; }
+.thumbnail-list { display: flex; gap: 4px; flex-wrap: wrap; }
 .thumbnail { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; }
 .btn-danger-sm { background: #e74c3c; color: white; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; cursor: pointer; }
 
@@ -584,6 +747,7 @@ tr:hover { background: #f9fafb; }
   margin: 0;
   color: #4b5563;
   line-height: 1.5;
+  word-wrap: break-word;
 }
 
 .modal-footer {

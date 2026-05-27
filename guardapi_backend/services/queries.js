@@ -5,13 +5,23 @@ const POSTS_QUERY = `
 `;
 
 function buildFilteredQuery(filters = {}) {
-  const { username, dateFrom, dateTo, limit } = filters;
+  const { username, title, text_message, dateFrom, dateTo, limit } = filters;
   let sql = POSTS_QUERY;
   const params = [];
 
   if (username) {
     sql += ' AND u.username LIKE ?';
     params.push(`%${username}%`);
+  }
+
+  if (title) {  // Add text message search
+    sql += ' AND p.title LIKE ?';
+    params.push(`%${title}%`);
+  }
+
+  if (text_message) {  // Add text message search
+    sql += ' AND p.text_message LIKE ?';
+    params.push(`%${text_message}%`);
   }
 
   if (dateFrom) {

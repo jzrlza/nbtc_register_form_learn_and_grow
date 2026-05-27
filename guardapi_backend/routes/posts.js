@@ -100,12 +100,13 @@ router.get('/export', requireAuth, async (req, res) => {
 // GET /api/posts
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const { username, dateFrom, dateTo, title } = req.query; // Added title filter
+    const { username, dateFrom, dateTo, title, text_message } = req.query; // Added title filter
     const { sql, params } = buildFilteredQuery({
       username: username || null,
       dateFrom: dateFrom ? `${dateFrom} 00:00:00` : null,
       dateTo: dateTo ? `${dateTo} 23:59:59` : null,
       title: title || null, // Added title filter
+      text_message: text_message || null,  // Add text_message filter
       limit: 100
     });
 
