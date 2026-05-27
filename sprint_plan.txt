@@ -22,6 +22,7 @@ tomorrow
 
 from meeting:
 - make user table for guard use (local user) [use user_type column]
+[0 = super admin, 1 = ad_admin, 2 = general_users]
 - user ad for add those guard users (add admin page)
 - (for admin only) add dashboard page show daily-monthly stats
 - add title field for posts (also input and output)
