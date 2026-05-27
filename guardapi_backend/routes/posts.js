@@ -110,7 +110,7 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // POST /api/posts
-router.post('/', requireAuth, upload.array('images', 5), async (req, res) => {
+router.post('/', requireAuth, upload.array('images', 3), async (req, res) => {
   try {
     const { text_message } = req.body;
     const files = req.files || [];
