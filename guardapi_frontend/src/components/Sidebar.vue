@@ -11,6 +11,9 @@
     <nav v-if="currentUser?.type < 3" class="sidebar-nav">
       <router-link to="/users" class="nav-item" exact-active-class="active" @click="closeOnMobile">จัดการรายชื่อผู้ใช้งาน</router-link>
     </nav>
+    <nav v-if="currentUser?.type < 3" class="sidebar-nav">
+      <router-link to="/dashboard" class="nav-item" exact-active-class="active" @click="closeOnMobile">Dashboard</router-link>
+    </nav>
     <div class="sidebar-footer">
       <a href="#" class="nav-item logout-item" @click.prevent="handleLogout">ออกจากระบบ</a>
     </div>
