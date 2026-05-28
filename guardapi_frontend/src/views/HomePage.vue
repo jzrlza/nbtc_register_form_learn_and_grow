@@ -137,7 +137,7 @@
                 <span v-else>-</span>
               </td>
               <td>{{ formatTime(post.created_at) }}</td>
-              <td><button v-if="currentUser.type < 2" @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
+              <td><button v-if="currentUser.type < 3" @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
             </tr>
             <tr v-if="posts.length === 0">
               <td colspan="7" class="empty">ไม่พบข้อความรายงาน</td>
