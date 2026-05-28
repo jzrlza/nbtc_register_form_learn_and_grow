@@ -75,9 +75,9 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     const [users] = await pool.execute(
-      'SELECT id, username, is_2fa_enabled, two_factor_secret, is_deleted, created_at, type FROM users WHERE username = ? AND is_deleted = 0',
+      'SELECT id, username, password, is_2fa_enabled, two_factor_secret, is_deleted, created_at, type FROM users WHERE username = ? AND is_deleted = 0',
       [username]
-    );
+    ); //password is null when type = 1
 
     if (users.length <= 0) {
       return res.status(401).json({ success: false, error: 'ขออภัย ไม่พบ Username ในฐานข้อมูล' });
