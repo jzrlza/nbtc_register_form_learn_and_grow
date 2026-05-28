@@ -8,8 +8,10 @@ const axios = require('axios');
 const router = express.Router();
 const SimpleRotatingLogger = require('../SimpleRotatingLogger');
 const requireAuth = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
 
 const SPEAKEASY_SECRET_STR = process.env.TWOFACTOR_SPEAKEASY_SECRET_STR;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 //session age 7 days
 //remembered_devices age 90 days
@@ -200,9 +202,17 @@ router.post('/login', async (req, res) => {
           [user.id, sessionToken, fingerprint]
         );
 
+        // Create JWT with user data (readable by frontend)
+        const userToken = jwt.sign(
+          { id: user.id, username: user.username, type: user.type },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        );
+
         return res.json({
           success: true,
           token: sessionToken,
+          userToken: userToken,
           user: { id: user.id, username: user.username, type: user.type, ...userAD },
           requires2FA: false,
           message: 'Welcome back! (trusted device)'
@@ -331,9 +341,17 @@ router.post('/verify-2fa', async (req, res) => {
       newTrustToken = trustToken;
     }
 
+    // Session already has username and type from the JOIN — no second query needed
+    const userToken = jwt.sign(
+      { id: session.user_id, username: session.username, type: session.type },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       success: true,
       token: token,
+      userToken: userToken,
       trustToken: newTrustToken,
       user: {
         id: session.user_id,

@@ -118,6 +118,19 @@ const closeModal = () => {
 
 const emit = defineEmits(['login-success']);
 
+function parseUserToken() {
+  const token = localStorage.getItem('userToken');
+  if (!token) return null;
+  try {
+    // JWT payload is base64 encoded JSON
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
 async function handleLogin() {
   loading.value = true;
   
@@ -148,9 +161,11 @@ async function handleLogin() {
       pendingToken.value = data.token;
     } else if (data.success) {
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userToken', data.userToken);
       if (data.trustToken) localStorage.setItem('trustToken', data.trustToken);
       emit('login-success', data.user);
       router.push('/');
+      //console.log(parseUserToken());
     } else {
       showModal('error', data.error || 'Login failed');
     }
