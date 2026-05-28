@@ -84,7 +84,7 @@ router.post('/login', async (req, res) => {
     }
 
     const user = users[0];
-    const isInitialAdmin = parseInt(user.type) <= 0;
+    const userType = parseInt(user.type);
 
     // Fix corrupted state
     if (user.is_2fa_enabled == 1 && user.two_factor_secret == null) {
@@ -94,9 +94,12 @@ router.post('/login', async (req, res) => {
 
     const has2FA = user.is_2fa_enabled == 1;
     const fullyMade2FA = has2FA && user.two_factor_secret != null;
+    const AD_API_URL = process.env.AD_API_URL;
+    const AD_API_KEY = process.env.AD_API_KEY;
+    let userAD;
 
     // ─── Initial Admin Bypass ──────────────────────────
-    if (isInitialAdmin) {
+    if (userType <= 0) {
       const sessionToken = generateToken();
       await pool.execute(
         `INSERT INTO sessions (user_id, token, is_2fa_verified, device_fingerprint, ip_address, city, expires_at)
@@ -110,49 +113,70 @@ router.post('/login', async (req, res) => {
         user: { id: user.id, username: user.username, type: user.type, code: 200, CN: "coreadmin", email: "core" },
         requires2FA: false
       });
-    }
-
-    // ─── AD Authentication ─────────────────────────────
-    const AD_API_URL = process.env.AD_API_URL;
-    const AD_API_KEY = process.env.AD_API_KEY;
-
-    if (!AD_API_URL || !AD_API_KEY) {
-      return res.status(500).json({ success: false, error: 'Server configuration error' });
-    }
-
-    let userAD;
-    try {
-      const tokenResponse = await axios.post(`${AD_API_URL}/token`, { api_key: AD_API_KEY });
-      if (!tokenResponse.data.access_token) {
-        return res.status(500).json({ success: false, error: 'การเชื่อมระบบ AD api_key ผิดพลาดในหลังบ้าน' });
+    } else if (userType == 1) {
+      //AD user, no need for internal password
+      // ─── AD Authentication ─────────────────────────────
+      if (!AD_API_URL || !AD_API_KEY) {
+        return res.status(500).json({ success: false, error: 'Server configuration error' });
       }
 
-      const userResponse = await axios.post(`${AD_API_URL}/user-info`, {
-        username, password,
-        token: tokenResponse.data.access_token,
-        api_key: AD_API_KEY
-      });
+      try {
+        const tokenResponse = await axios.post(`${AD_API_URL}/token`, { api_key: AD_API_KEY });
+        if (!tokenResponse.data.access_token) {
+          return res.status(500).json({ success: false, error: 'การเชื่อมระบบ AD api_key ผิดพลาดในหลังบ้าน' });
+        }
 
-      if (!userResponse.data) {
-        return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
-      }
+        const userResponse = await axios.post(`${AD_API_URL}/user-info`, {
+          username, password,
+          token: tokenResponse.data.access_token,
+          api_key: AD_API_KEY
+        });
 
-      // Create user if first time
-      const [existing] = await pool.execute(
-        'SELECT id FROM users WHERE username = ? AND is_deleted = 0',
-        [username]
-      );
+        if (!userResponse.data) {
+          return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
+        }
 
-      if (existing.length === 0) {
-        await pool.execute(
-          'INSERT INTO users (username, type, is_2fa_enabled) VALUES (?, 1, 1)',
+        // Create user if first time
+        const [existing] = await pool.execute(
+          'SELECT id FROM users WHERE username = ? AND is_deleted = 0',
           [username]
         );
-      }
 
-      userAD = userResponse.data;
-    } catch {
-      return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
+        if (existing.length === 0) {
+          await pool.execute(
+            'INSERT INTO users (username, type, is_2fa_enabled) VALUES (?, 1, 1)',
+            [username]
+          );
+        }
+
+        userAD = userResponse.data;
+        /*
+         looks like this
+          {
+          "code": 200,
+          "CN": "",
+          "email": ""
+          }
+        */
+      } catch {
+        return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
+      }
+    } else if (userType == 2) {
+      //internal user admin, need password
+      //return userAD object that simulates real AD one if password match
+      userAD = {
+          "code": 200,
+          "CN": "",
+          "email": "" //TBA
+      }
+    } else {
+      //normal users, limited access when use
+      //return userAD object that simulates real AD one if password match
+      userAD = {
+          "code": 200,
+          "CN": "",
+          "email": "" //TBA
+      }
     }
 
     // ─── Device ────────────────────────────────────────
