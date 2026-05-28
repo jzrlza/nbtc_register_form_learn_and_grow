@@ -66,7 +66,7 @@
   </div>
 
   <!-- Login Screen -->
-  <div v-else class="login-container">
+  <div v-else class="login-container-small">
     <form @submit.prevent="handleLogin">
       <div class="form-group">
         <label>ชื่อผู้ใช้งาน</label>
