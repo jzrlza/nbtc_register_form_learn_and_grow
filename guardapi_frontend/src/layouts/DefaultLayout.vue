@@ -12,12 +12,31 @@
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted, provide, onMounted } from 'vue';
 import Navbar from '../components/Navbar.vue'
 import Footer from '../components/Footer.vue'
 import Sidebar from '../components/Sidebar.vue'
 
 const sidebarOpen = ref(false);
+const currentUser = ref(null);
+
+// Make available to all child components
+provide('currentUser', currentUser);
+
+function parseUserToken() {
+  const token = localStorage.getItem('userToken');
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
+
+onMounted(() => {
+  currentUser.value = parseUserToken();
+});
 
 watch(sidebarOpen, (val) => {
   if (val && window.innerWidth <= 768) {
@@ -31,7 +50,6 @@ onUnmounted(() => {
   document.body.style.overflow = '';
 });
 </script>
-
 <style scoped>
 .default-layout {
   display: flex;

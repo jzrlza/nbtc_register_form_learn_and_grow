@@ -12,17 +12,28 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 defineEmits(['menu-click']);
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const route = useRoute();
+const router = useRouter();
 const username = ref('');
+
+function forceLogout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userToken');
+  username.value = '';
+  router.push('/auth/login');
+}
 
 async function checkAuth() {
   const token = localStorage.getItem('token');
-  if (!token) return;
+  if (!token) {
+    forceLogout();
+    return;
+  }
   try {
     const res = await fetch(`${apiUrl}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -30,8 +41,12 @@ async function checkAuth() {
     if (res.ok) {
       const data = await res.json();
       username.value = data.user.username;
+    } else {
+      forceLogout();
     }
-  } catch {}
+  } catch {
+    // Backend down — keep current state, don't force logout
+  }
 }
 
 onMounted(() => { if (route.path !== '/auth/login') checkAuth(); });

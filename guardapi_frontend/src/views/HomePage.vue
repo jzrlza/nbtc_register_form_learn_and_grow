@@ -137,7 +137,7 @@
                 <span v-else>-</span>
               </td>
               <td>{{ formatTime(post.created_at) }}</td>
-              <td><button @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
+              <td><button v-if="currentUser.type < 2" @click="deletePost(post.id)" class="btn-danger-sm">✕</button></td>
             </tr>
             <tr v-if="posts.length === 0">
               <td colspan="7" class="empty">ไม่พบข้อความรายงาน</td>
@@ -166,7 +166,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, inject } from 'vue';
 
 const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -190,6 +190,8 @@ const filterYear = ref('');
 
 const showWarningModal = ref(false);
 const warningMessage = ref('');
+
+const currentUser = inject('currentUser');
 
 let ws = null;
 let filterTimeout = null;

@@ -426,6 +426,7 @@ router.post('/logout', requireAuth, async (req, res) => {
 
 // ─── Check Auth Status ────────────────────────────────
 // Protected route
+//requireAuth checks if session expired or not as well
 router.get('/me', requireAuth, (req, res) => {
   res.json({
     authenticated: true,

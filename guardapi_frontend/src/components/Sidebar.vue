@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, inject } from 'vue';
 import { useRouter } from 'vue-router';
 
 defineProps({ isOpen: Boolean });
@@ -23,6 +23,7 @@ const emit = defineEmits(['close']);
 const router = useRouter();
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const isMobile = ref(window.innerWidth <= 768);
+const currentUser = inject('currentUser');
 
 function checkMobile() {
   isMobile.value = window.innerWidth <= 768;
