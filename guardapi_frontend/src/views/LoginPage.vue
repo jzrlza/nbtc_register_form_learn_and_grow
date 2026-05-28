@@ -288,14 +288,14 @@ h6 {
   border: 1px solid #333;
   border-radius: 6px;
   font-size: 14px;
-  background: #fff;
-  color: #000;
+  background: #360c0c;
+  color: #fff673;
 }
 
 .form-group input:focus,
 .login-input:focus {
   outline: none;
-  border-color: #800000;
+  border-color: #fff673;
 }
 
 .btn {
