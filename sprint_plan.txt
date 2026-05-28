@@ -18,9 +18,7 @@ sprint plan 2 weeks
 today
 
 tomorrow
-- add error messages whenever 400 or 500 requests responses as new standard
-  - hoem (done)
-  - login
+
 
 from meeting:
 - make user table for guard use (local user) [use user_type column]
@@ -42,6 +40,9 @@ sus
 - real time posts may or may not collide with newly registered users
 
 done
+- add error messages whenever 400 or 500 requests responses as new standard
+  - hoem (done)
+  - login
 - theme color of the web : bloody dark red with white/yellow texts
 - add search by post messages
 - add title field for posts (also input and output)
