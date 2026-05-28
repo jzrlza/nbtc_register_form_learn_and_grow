@@ -163,23 +163,23 @@ router.post('/login', async (req, res) => {
       } catch {
         return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
       }
-    } else if (userType == 2) {
-      //internal user admin, need password
-      //return userAD object that simulates real AD one if password match
-      userAD = {
-          "code": 200,
-          "CN": "",
-          "email": "" //TBA
-      }
-    } else {
-      //normal users, limited access when use
-      //return userAD object that simulates real AD one if password match
-      userAD = {
-          "code": 200,
-          "CN": "",
-          "email": "" //TBA
-      }
+    } else if (userType == 2 || userType == 3) {
+    // Internal users — check bcrypt password
+    if (!user.password) {
+      return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
     }
+
+    const passwordMatch = bcrypt.compareSync(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ success: false, error: 'ชื่อหรือรหัสผ่านผิดพลาด' });
+    }
+
+    userAD = {
+      code: 200,
+      CN: user.username,
+      email: ''
+    };
+  }
 
     // ─── Device ────────────────────────────────────────
     const fingerprint = getDeviceFingerprint(req);

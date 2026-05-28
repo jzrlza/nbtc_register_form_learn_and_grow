@@ -19,7 +19,7 @@
       </div>
       <p class="instruction">หลังจากตั้งค่าแล้ว กรุณาป้อนรหัส 6 หลักจากแอปยืนยันตัวตน:</p>
       <form @submit.prevent="verify2FA">
-        <input class="login-input" type="text" placeholder="ป้อนรหัส 6 หลัก" v-model="code" required maxlength="6" />
+        <input class="login-input" type="password" placeholder="ป้อนรหัส 6 หลัก" v-model="code" required maxlength="6" />
         <button class="btn btn-full" type="submit" :disabled="loading">
           {{ loading ? 'กำลังตรวจสอบ...' : 'ยืนยันและตั้งค่าให้เสร็จสิ้น' }}
         </button>
@@ -202,6 +202,7 @@ async function verify2FA() {
 
     if (data.success) {
       localStorage.setItem('token', data.token);
+      localStorage.setItem('userToken', data.userToken);
       if (data.trustToken) localStorage.setItem('trustToken', data.trustToken);
       showSetup2FA.value = false;
       requires2FA.value = false;

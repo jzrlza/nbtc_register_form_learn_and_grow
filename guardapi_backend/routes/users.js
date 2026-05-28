@@ -106,8 +106,10 @@ router.put('/:id', requireAuth, async (req, res) => {
       await pool.query('UPDATE users SET password = ? WHERE id = ?', [hash, id]);
     }
 
-    if (is_2fa_enabled) {
-      await pool.query('UPDATE users SET is_2fa_enabled = ? WHERE id = ?', [is_2fa_enabled, id]);
+    if (is_2fa_enabled !== undefined) {
+      if (is_2fa_enabled) {
+        await pool.query('UPDATE users SET is_2fa_enabled = ? WHERE id = ?', [is_2fa_enabled, id]);
+      }
     }
 
     res.json({ message: 'User updated' });
