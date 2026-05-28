@@ -1,15 +1,18 @@
 const pool = require('../config/database.js');
 const { broadcast } = require('./websocketService.js');
-const { POSTS_QUERY, buildFilteredQuery, parsePosts } = require('./queries.js');
+const { buildFilteredQuery, buildFilteredQueryUsers, parsePosts, parseUsers } = require('./queries.js');
 
 let lastData = {};
 
 async function startPolling() {
-  const tables = ['posts'];
+  const tables = {
+    posts: { builder: buildFilteredQuery, parser: parsePosts, defaultArgs: { limit: 100 } },
+    users: { builder: buildFilteredQueryUsers, parser: parseUsers, defaultArgs: {} }
+  };
 
-  for (const table of tables) {
+  for (const [table, config] of Object.entries(tables)) {
     try {
-      const { sql, params } = buildFilteredQuery({ limit: 100 });
+      const { sql, params } = config.builder(config.defaultArgs);
       const [rows] = await pool.query(sql, params);
       lastData[table] = JSON.stringify(rows);
     } catch (err) {
@@ -20,9 +23,9 @@ async function startPolling() {
   console.log('🔄 Real-time polling started (every 2s)');
 
   setInterval(async () => {
-    for (const table of tables) {
+    for (const [table, config] of Object.entries(tables)) {
       try {
-        const { sql, params } = buildFilteredQuery({ limit: 100 });
+        const { sql, params } = config.builder(config.defaultArgs);
         const [rows] = await pool.query(sql, params);
         const currentData = JSON.stringify(rows);
 
@@ -31,7 +34,7 @@ async function startPolling() {
 
           broadcast({
             type: `${table}_updated`,
-            data: parsePosts(rows)
+            data: config.parser(rows)
           });
 
           lastData[table] = currentData;

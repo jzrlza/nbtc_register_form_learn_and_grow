@@ -4,6 +4,12 @@ const POSTS_QUERY = `
   WHERE p.is_deleted = 0
 `;
 
+const USERS_QUERY = `
+  SELECT u.id, u.username, u.type, u.is_2fa_enabled, u.created_at
+  FROM users u
+  WHERE u.is_deleted = 0
+`;
+
 function buildFilteredQuery(filters = {}) {
   const { username, title, text_message, dateFrom, dateTo, limit } = filters;
   let sql = POSTS_QUERY;
@@ -14,12 +20,12 @@ function buildFilteredQuery(filters = {}) {
     params.push(`%${username}%`);
   }
 
-  if (title) {  // Add text message search
+  if (title) {
     sql += ' AND p.title LIKE ?';
     params.push(`%${title}%`);
   }
 
-  if (text_message) {  // Add text message search
+  if (text_message) {
     sql += ' AND p.text_message LIKE ?';
     params.push(`%${text_message}%`);
   }
@@ -44,6 +50,26 @@ function buildFilteredQuery(filters = {}) {
   return { sql, params };
 }
 
+function buildFilteredQueryUsers(filters = {}) {
+  const { username, type } = filters;
+  let sql = USERS_QUERY;
+  const params = [];
+
+  if (username) {
+    sql += ' AND u.username LIKE ?';
+    params.push(`%${username}%`);
+  }
+
+  if (type !== undefined && type !== null && type !== '') {
+    sql += ' AND u.type = ?';
+    params.push(parseInt(type));
+  }
+
+  sql += ' ORDER BY u.id ASC';
+
+  return { sql, params };
+}
+
 function parsePost(row) {
   if (!row) return null;
   return {
@@ -56,4 +82,8 @@ function parsePosts(rows) {
   return rows.map(parsePost);
 }
 
-module.exports = { POSTS_QUERY, buildFilteredQuery, parsePost, parsePosts };
+function parseUsers(rows) {
+  return rows;
+}
+
+module.exports = { POSTS_QUERY, USERS_QUERY, buildFilteredQuery, buildFilteredQueryUsers, parsePost, parsePosts, parseUsers };

@@ -14,7 +14,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="filter-label">ชื่อผู้ใช้งาน</label>
-          <input v-model="formUsername" type="text" placeholder="Username..." class="title-input" :disabled="!!editingUser" />
+          <input v-model="formUsername" type="text" placeholder="Username..." class="title-input" />
         </div>
         <div class="form-group">
           <label class="filter-label">รหัสผ่าน</label>
@@ -60,7 +60,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="user in users" :key="user.id">
+            <tr v-for="user in users" :key="user.id" :class="{ 'new-row': newIds.has(user.id) }">
               <td>{{ user.id }}</td>
               <td>{{ user.username }}</td>
               <td>{{ typeLabel(user.type) }}</td>
@@ -68,8 +68,8 @@
               <td>{{ formatTime(user.created_at) }}</td>
               <td>
                 <span v-if="user.type > 1">
-                <button @click="editUser(user)" class="btn-edit">✏️</button>
-                <button @click="confirmDelete(user)" class="btn-danger-sm">✕</button>
+                  <button @click="editUser(user)" class="btn-edit">✏️</button>
+                  <button @click="confirmDelete(user)" class="btn-danger-sm">✕</button>
                 </span>
               </td>
             </tr>
@@ -117,13 +117,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted, onUnmounted, inject } from 'vue';
 
+const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const currentUser = inject('currentUser');
 const users = ref([]);
 const loading = ref(false);
 const connected = ref(false);
+const newIds = ref(new Set());
 
 const showForm = ref(false);
 const editingUser = ref(null);
@@ -137,6 +139,30 @@ const deleteTarget = ref(null);
 
 const showErrorModal = ref(false);
 const errorMessage = ref('');
+
+let ws = null;
+
+function connectWebSocket() {
+  ws = new WebSocket(wsUrl);
+  ws.onopen = () => { connected.value = true; fetchUsers(); };
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'users_updated') {
+        const oldIds = new Set(users.value.map(u => u.id));
+        users.value = data.data;
+        data.data.forEach(u => {
+          if (!oldIds.has(u.id)) {
+            newIds.value.add(u.id);
+            setTimeout(() => newIds.value.delete(u.id), 2000);
+          }
+        });
+      }
+    } catch {}
+  };
+  ws.onclose = () => { connected.value = false; setTimeout(connectWebSocket, 2000); };
+  ws.onerror = () => { connected.value = false; };
+}
 
 function typeLabel(type) {
   if (parseInt(type) <= 1) return 'AD Admin';
@@ -182,10 +208,7 @@ async function saveUser() {
   loading.value = true;
   try {
     const token = localStorage.getItem('token');
-    const body = {
-      username: formUsername.value,
-      type: parseInt(formType.value)
-    };
+    const body = { username: formUsername.value, type: parseInt(formType.value) };
     if (formPassword.value) body.password = formPassword.value;
 
     const url = editingUser.value
@@ -202,12 +225,44 @@ async function saveUser() {
     const data = await res.json().catch(() => null);
     if (!res.ok) throw new Error(data?.error || 'Failed');
 
+    // Instant local update while waiting for WebSocket
+    if (editingUser.value) {
+      const idx = users.value.findIndex(u => u.id === editingUser.value.id);
+      if (idx !== -1) {
+        users.value[idx] = {
+          ...users.value[idx],
+          username: formUsername.value,
+          type: parseInt(formType.value)
+        };
+      }
+    }
+
     cancelForm();
-    fetchUsers();
   } catch (err) {
     showError(err.message);
   } finally {
     loading.value = false;
+  }
+}
+
+async function deleteUser() {
+  if (!deleteTarget.value) return;
+  const targetId = deleteTarget.value.id;
+  showDeleteModal.value = false;
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${apiUrl}/api/users/${targetId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || 'Delete failed');
+
+    // Instant local removal
+    users.value = users.value.filter(u => u.id !== targetId);
+    deleteTarget.value = null;
+  } catch (err) {
+    showError(err.message);
   }
 }
 
@@ -216,30 +271,13 @@ function confirmDelete(user) {
   showDeleteModal.value = true;
 }
 
-async function deleteUser() {
-  if (!deleteTarget.value) return;
-  showDeleteModal.value = false;
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${apiUrl}/api/users/${deleteTarget.value.id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) throw new Error(data?.error || 'Delete failed');
-    deleteTarget.value = null;
-    fetchUsers();
-  } catch (err) {
-    showError(err.message);
-  }
-}
-
 function formatTime(date) {
   if (!date) return '-';
   return new Date(date).toLocaleString('th-TH');
 }
 
-onMounted(fetchUsers);
+onMounted(() => connectWebSocket());
+onUnmounted(() => { if (ws) ws.close(); });
 </script>
 
 <style scoped>
@@ -449,4 +487,13 @@ tr:hover { background: #2a0808; }
 }
 
 .modal-btn:hover { opacity: 0.9; }
+
+.new-row {
+  animation: highlightRow 2s ease-out;
+}
+
+@keyframes highlightRow {
+  from { background: #4a1515; }
+  to { background: transparent; }
+}
 </style>
