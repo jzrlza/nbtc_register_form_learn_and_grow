@@ -20,6 +20,7 @@ import Footer from '../components/Footer.vue'
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: rgba(81, 1, 0, 1);
 }
 
 .main-content {
@@ -31,7 +32,6 @@ import Footer from '../components/Footer.vue'
 .page-content {
   flex: 1;
   padding: 24px;
-  background: #f5f5f5;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;

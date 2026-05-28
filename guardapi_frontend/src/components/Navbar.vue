@@ -79,7 +79,7 @@ onMounted(() => {
 
 <style scoped>
 .navbar {
-  background: #1a1a2e;
+  background: rgba(51, 1, 0, 1);
   color: white;
   padding: 0 24px;
   height: 56px;
