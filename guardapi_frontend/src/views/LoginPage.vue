@@ -278,7 +278,7 @@ h6 {
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
-  color: #fff312;
+  color: #fff;
 }
 
 .form-group input,
@@ -288,8 +288,8 @@ h6 {
   border: 1px solid #333;
   border-radius: 6px;
   font-size: 14px;
-  background: #1a1a1a;
-  color: #fff312;
+  background: #fff;
+  color: #000;
 }
 
 .form-group input:focus,
