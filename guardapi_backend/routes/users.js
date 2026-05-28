@@ -34,7 +34,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 // POST /api/users (add)
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { username, password, type } = req.body;
+    const { username, password, type, is_2fa_enabled } = req.body;
 
     if (type < 2) {
         return res.status(400).json({ error: 'AD Admin cannot be added directly' });
@@ -57,8 +57,8 @@ router.post('/', requireAuth, async (req, res) => {
     const userType = type || 3;
 
     const [result] = await pool.query(
-      'INSERT INTO users (username, password, type) VALUES (?, ?, ?)',
-      [username, hash, userType]
+      'INSERT INTO users (username, password, type, is_2fa_enabled) VALUES (?, ?, ?, ?)',
+      [username, hash, userType, is_2fa_enabled]
     );
 
     res.status(201).json({
@@ -75,16 +75,8 @@ router.post('/', requireAuth, async (req, res) => {
 // PUT /api/users/:id (edit)
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const { username, password, type } = req.body;
+    const { username, password, type, is_2fa_enabled } = req.body;
     const id = parseInt(req.params.id);
-
-    // Update type if provided
-    if (type !== undefined) {
-      if (type < 2) {
-        return res.status(400).json({ error: 'AD Admin cannot be editted directly' });
-      }
-      await pool.query('UPDATE users SET type = ? WHERE id = ?', [type, id]);
-    }
 
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
@@ -95,6 +87,14 @@ router.put('/:id', requireAuth, async (req, res) => {
     );
     if (existing.length === 0) return res.status(404).json({ error: 'User not found' });
 
+    // Update type if provided
+    if (type !== undefined) {
+      if (type < 2) {
+        return res.status(400).json({ error: 'AD Admin cannot be editted directly' });
+      }
+      await pool.query('UPDATE users SET type = ? WHERE id = ?', [type, id]);
+    }
+
     // Update username if provided
     if (username) {
       await pool.query('UPDATE users SET username = ? WHERE id = ?', [username, id]);
@@ -104,6 +104,10 @@ router.put('/:id', requireAuth, async (req, res) => {
     if (password) {
       const hash = bcrypt.hashSync(password, 10);
       await pool.query('UPDATE users SET password = ? WHERE id = ?', [hash, id]);
+    }
+
+    if (is_2fa_enabled) {
+      await pool.query('UPDATE users SET is_2fa_enabled = ? WHERE id = ?', [is_2fa_enabled, id]);
     }
 
     res.json({ message: 'User updated' });

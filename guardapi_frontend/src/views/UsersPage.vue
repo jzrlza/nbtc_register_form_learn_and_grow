@@ -30,6 +30,13 @@
             <option :value="3">ผู้ใช้ทั่วไป (User)</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="filter-label">เปิดใช้งาน 2FA</label>
+          <select v-model="form2FA" class="filter-input">
+            <option :value="1">✅ เปิดใช้งาน</option>
+            <option :value="0">❌ ไม่เปิดใช้งาน</option>
+          </select>
+        </div>
       </div>
       <div class="form-actions">
         <button @click="cancelForm" class="btn-clear">✕ ยกเลิก</button>
@@ -133,6 +140,7 @@ const formUsername = ref('');
 const formPassword = ref('');
 const formType = ref(3);
 const showPassword = ref(false);
+const form2FA = ref(1);
 
 const showDeleteModal = ref(false);
 const deleteTarget = ref(null);
@@ -191,6 +199,7 @@ function cancelForm() {
   formUsername.value = '';
   formPassword.value = '';
   formType.value = 3;
+  form2FA.value = 1;
   showPassword.value = false;
 }
 
@@ -199,6 +208,7 @@ function editUser(user) {
   formUsername.value = user.username;
   formPassword.value = '';
   formType.value = user.type;
+  form2FA.value = user.is_2fa_enabled ? 1 : 0;
   showPassword.value = false;
   showForm.value = true;
 }
@@ -208,7 +218,11 @@ async function saveUser() {
   loading.value = true;
   try {
     const token = localStorage.getItem('token');
-    const body = { username: formUsername.value, type: parseInt(formType.value) };
+    const body = {
+      username: formUsername.value,
+      type: parseInt(formType.value),
+      is_2fa_enabled: form2FA.value
+    };
     if (formPassword.value) body.password = formPassword.value;
 
     const url = editingUser.value
@@ -232,7 +246,8 @@ async function saveUser() {
         users.value[idx] = {
           ...users.value[idx],
           username: formUsername.value,
-          type: parseInt(formType.value)
+          type: parseInt(formType.value),
+          is_2fa_enabled: form2FA.value
         };
       }
     }
