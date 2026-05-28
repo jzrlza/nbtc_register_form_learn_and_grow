@@ -15,32 +15,40 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  background: #510100;
 }
 
 .not-found h1 {
   font-size: 120px;
-  color: #667eea;
+  color: #ff6b6b;
   margin: 0;
   line-height: 1;
+  text-shadow: 0 0 30px rgba(255,107,107,0.3);
 }
 
 .not-found h2 {
   font-size: 32px;
-  color: #333;
+  color: #fff;
   margin: 16px 0;
 }
 
 .not-found p {
-  color: #666;
+  color: #c99;
   margin-bottom: 24px;
 }
 
 .btn {
   padding: 12px 24px;
-  background: #667eea;
-  color: white;
+  background: #8b2020;
+  color: #e8e0e0;
   text-decoration: none;
   border-radius: 6px;
   font-size: 16px;
+  border: 1px solid #a02828;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: #a02828;
 }
 </style>

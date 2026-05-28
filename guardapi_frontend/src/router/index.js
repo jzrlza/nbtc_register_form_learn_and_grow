@@ -6,6 +6,7 @@ import AuthLayout from '../layouts/AuthLayout.vue'
 
 // Pages
 import HomePage from '../views/HomePage.vue'
+import UsersPage from '../views/UsersPage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import NotFoundPage from '../views/NotFoundPage.vue'
 
@@ -19,6 +20,18 @@ const routes = [
         name: 'Home',
         component: HomePage,
         meta: { title: 'แบบรายงาน รปภ.', requiresAuth: true }
+      }
+    ]
+  },
+  {
+    path: '/users',
+    component: DefaultLayout,
+    children: [
+      {
+        path: '',
+        name: 'Users',
+        component: UsersPage,
+        meta: { title: 'จัดการรายชื่อผู้ใช้งาน', requiresAuth: true }
       }
     ]
   },
