@@ -1,435 +1,452 @@
 <template>
   <div class="page">
     <div class="page-header">
-      <h1>👥 Users</h1>
-      <p>Manage your users</p>
-    </div>
-    
-    <div class="card">
-      <div class="header">
-      <h1>📊 Real-time MySQL Test</h1>
+      <h1>👥 จัดการผู้ใช้งาน</h1>
       <div class="status">
         <span :class="['dot', connected ? 'green' : 'red']"></span>
-        {{ connected ? 'Connected' : 'Disconnected' }}
+        {{ connected ? 'เชื่อมต่อเรียบร้อย' : 'ไม่ได้เชื่อมต่อ' }}
       </div>
     </div>
 
-      
-      <div class="controls">
-      <button @click="addRandomUser" class="btn">Add Random User</button>
-      <button @click="updateRandomUser" class="btn">Update Random User</button>
-      <button @click="deleteRandomUser" class="btn btn-danger">Delete Random User</button>
-      <span class="update-count">Updates: {{ updateCount }}</span>
-    </div>
-
-    <h3>Users Table</h3>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in users" :key="user.id" :class="{ 'new-row': isNew(user.id) }">
-            <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ formatTime(user.created_at) }}</td>
-          </tr>
-          <tr v-if="users.length === 0">
-            <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
-              No data yet...
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="log">
-      <h3>Update Log (Last 10 changes)</h3>
-      <div v-for="(log, index) in logs" :key="index" class="log-item">
-        <span class="log-time">{{ log.time }}</span>
-        <span :class="['log-type', log.type]">{{ log.type }}</span>
-        <span>{{ log.message }}</span>
+    <!-- Add/Edit User Form -->
+    <div class="card post-form" v-if="showForm">
+      <h3>{{ editingUser ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งาน' }}</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="filter-label">ชื่อผู้ใช้งาน</label>
+          <input v-model="formUsername" type="text" placeholder="Username..." class="title-input" :disabled="!!editingUser" />
+        </div>
+        <div class="form-group">
+          <label class="filter-label">รหัสผ่าน</label>
+          <div class="password-wrap">
+            <input v-model="formPassword" :type="showPassword ? 'text' : 'password'" placeholder="Password..." class="title-input" />
+            <button type="button" class="toggle-pw" @click="showPassword = !showPassword">{{ showPassword ? '🙈' : '👁️' }}</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="filter-label">ประเภทผู้ใช้</label>
+          <select v-model="formType" class="filter-input">
+            <option :value="2">ผู้ดูแลระบบ (Admin)</option>
+            <option :value="3">ผู้ใช้ทั่วไป (User)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button @click="cancelForm" class="btn-clear">✕ ยกเลิก</button>
+        <button @click="saveUser" :disabled="loading || !formUsername" class="btn btn-submit">
+          {{ loading ? 'กำลังบันทึก...' : editingUser ? 'อัปเดต' : 'เพิ่มผู้ใช้' }}
+        </button>
       </div>
     </div>
-      <!-- Insert your real-time table component here -->
+
+    <!-- Toggle Form Button -->
+    <div class="card filters" v-if="!showForm">
+      <button @click="showForm = true" class="btn btn-submit">+ เพิ่มผู้ใช้งาน</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+      <h3>รายชื่อผู้ใช้งาน ({{ users.length }})</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>ประเภท</th>
+              <th>2FA</th>
+              <th>สร้างเมื่อ</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="user in users" :key="user.id">
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ typeLabel(user.type) }}</td>
+              <td>{{ user.is_2fa_enabled ? '✅' : '❌' }}</td>
+              <td>{{ formatTime(user.created_at) }}</td>
+              <td>
+                <span v-if="user.type > 1">
+                <button @click="editUser(user)" class="btn-edit">✏️</button>
+                <button @click="confirmDelete(user)" class="btn-danger-sm">✕</button>
+                </span>
+              </td>
+            </tr>
+            <tr v-if="users.length === 0">
+              <td colspan="6" class="empty">ไม่พบผู้ใช้งาน</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚠️ ยืนยันการลบ</h3>
+        <button class="modal-close" @click="showDeleteModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <p>คุณต้องการลบผู้ใช้งาน <strong>{{ deleteTarget?.username }}</strong> ใช่หรือไม่?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" @click="showDeleteModal = false">ยกเลิก</button>
+        <button class="modal-btn modal-btn-danger" @click="deleteUser">ลบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div v-if="showErrorModal" class="modal-overlay" @click.self="showErrorModal = false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚠️ ข้อผิดพลาด</h3>
+        <button class="modal-close" @click="showErrorModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <p>{{ errorMessage }}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-primary" @click="showErrorModal = false">ตกลง</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, inject } from 'vue';
 
-const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3000'
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const currentUser = inject('currentUser');
+const users = ref([]);
+const loading = ref(false);
+const connected = ref(false);
 
-const users = ref([])
-const connected = ref(false)
-const updateCount = ref(0)
-const logs = ref([])
-const newIds = ref(new Set())
+const showForm = ref(false);
+const editingUser = ref(null);
+const formUsername = ref('');
+const formPassword = ref('');
+const formType = ref(3);
+const showPassword = ref(false);
 
-let ws = null
+const showDeleteModal = ref(false);
+const deleteTarget = ref(null);
 
-// Connect to WebSocket
-function connectWebSocket() {
-  console.log('Connecting to WebSocket...')
-  ws = new WebSocket(wsUrl)
+const showErrorModal = ref(false);
+const errorMessage = ref('');
 
-  ws.onopen = () => {
-    console.log('✅ WebSocket connected')
-    connected.value = true
-    fetchUsers()
-  }
-
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data)
-    console.log('📨 Received:', data.type)
-    
-    if (data.type === 'users_updated') {
-      // Update the table
-      users.value = data.data
-      updateCount.value++
-      
-      // Highlight new rows
-      if (data.operation === 'INSERT' && data.data.length > users.value.length) {
-        // Find new IDs
-        const oldIds = new Set(users.value.map(u => u.id))
-        data.data.forEach(user => {
-          if (!oldIds.has(user.id)) {
-            newIds.value.add(user.id)
-            setTimeout(() => newIds.value.delete(user.id), 2000)
-          }
-        })
-      }
-      
-      // Add to log
-      addLog(data.operation || 'UPDATE', `${data.data.length} rows in table`)
-    }
-  }
-
-  ws.onclose = () => {
-    console.log('❌ WebSocket disconnected')
-    connected.value = false
-    // Auto reconnect after 2 seconds
-    setTimeout(connectWebSocket, 2000)
-  }
-
-  ws.onerror = (error) => {
-    console.error('WebSocket error:', error)
-    connected.value = false
-  }
+function typeLabel(type) {
+  if (parseInt(type) <= 1) return 'AD Admin';
+  if (parseInt(type) == 2) return 'Admin';
+  return 'User';
 }
 
-function addLog(type, message) {
-  logs.value.unshift({
-    type: type || 'UPDATE',
-    message: message,
-    time: new Date().toLocaleTimeString()
-  })
-  // Keep only last 10 logs
-  if (logs.value.length > 10) {
-    logs.value.pop()
-  }
+function showError(msg) {
+  errorMessage.value = msg;
+  showErrorModal.value = true;
 }
 
-function isNew(id) {
-  return newIds.value.has(id)
-}
-
-// Fetch users from API
 async function fetchUsers() {
   try {
-    const res = await fetch(`${apiUrl}/api/users`)
-    users.value = await res.json()
-    console.log(`Loaded ${users.value.length} users`)
-  } catch (err) {
-    console.error('Error fetching users:', err)
-  }
-}
-
-// Add random user
-async function addRandomUser() {
-  const names = ['ta', 'wa', 'cze', 'ewr', '32df', 'cdsd', 'fewr']
-  const name = names[Math.floor(Math.random() * names.length)]
-  const email = `${name.toLowerCase()}_${Date.now()}@test.com`
-  const age = Math.floor(Math.random() * 50) + 20
-  
-  try {
+    const token = localStorage.getItem('token');
     const res = await fetch(`${apiUrl}/api/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, age })
-    })
-    
-    if (res.ok) {
-      console.log('✅ User added')
-      addLog('INSERT', `${name} (${email})`)
-    }
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) users.value = await res.json();
+  } catch {}
+}
+
+function cancelForm() {
+  showForm.value = false;
+  editingUser.value = null;
+  formUsername.value = '';
+  formPassword.value = '';
+  formType.value = 3;
+  showPassword.value = false;
+}
+
+function editUser(user) {
+  editingUser.value = user;
+  formUsername.value = user.username;
+  formPassword.value = '';
+  formType.value = user.type;
+  showPassword.value = false;
+  showForm.value = true;
+}
+
+async function saveUser() {
+  if (!formUsername.value) return;
+  loading.value = true;
+  try {
+    const token = localStorage.getItem('token');
+    const body = {
+      username: formUsername.value,
+      type: parseInt(formType.value)
+    };
+    if (formPassword.value) body.password = formPassword.value;
+
+    const url = editingUser.value
+      ? `${apiUrl}/api/users/${editingUser.value.id}`
+      : `${apiUrl}/api/users`;
+    const method = editingUser.value ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || 'Failed');
+
+    cancelForm();
+    fetchUsers();
   } catch (err) {
-    console.error('Error adding user:', err)
+    showError(err.message);
+  } finally {
+    loading.value = false;
   }
 }
 
-// Update random user
-async function updateRandomUser() {
-  if (users.value.length === 0) return
-  
-  const user = users.value[Math.floor(Math.random() * users.value.length)]
-  
-  try {
-    const res = await fetch(`${apiUrl}/api/users/${user.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'Updated_' + Date.now(),
-        age: Math.floor(Math.random() * 50) + 20
-      })
-    })
-    
-    if (res.ok) {
-      console.log('✅ User updated')
-      addLog('UPDATE', `User ID: ${user.id}`)
-    }
-  } catch (err) {
-    console.error('Error updating user:', err)
-  }
+function confirmDelete(user) {
+  deleteTarget.value = user;
+  showDeleteModal.value = true;
 }
 
-// Delete random user
-async function deleteRandomUser() {
-  if (users.value.length === 0) return
-  
-  const user = users.value[Math.floor(Math.random() * users.value.length)]
-  
+async function deleteUser() {
+  if (!deleteTarget.value) return;
+  showDeleteModal.value = false;
   try {
-    const res = await fetch(`${apiUrl}/api/users/${user.id}`, {
-      method: 'DELETE'
-    })
-    
-    if (res.ok) {
-      console.log('✅ User deleted')
-      addLog('DELETE', `User ID: ${user.id}`)
-    }
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${apiUrl}/api/users/${deleteTarget.value.id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || 'Delete failed');
+    deleteTarget.value = null;
+    fetchUsers();
   } catch (err) {
-    console.error('Error deleting user:', err)
+    showError(err.message);
   }
 }
 
 function formatTime(date) {
-  if (!date) return '-'
-  return new Date(date).toLocaleString()
+  if (!date) return '-';
+  return new Date(date).toLocaleString('th-TH');
 }
 
-onMounted(() => {
-  connectWebSocket()
-})
-
-onUnmounted(() => {
-  if (ws) ws.close()
-})
+onMounted(fetchUsers);
 </script>
 
 <style scoped>
-.page {
-  max-width: 1200px;
-  margin: 0 auto;
+select.filter-input option {
+  background: #1a1a1a;
+  color: #fff;
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
+.page { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-header h1 { font-size: 24px; color: #fff; }
 
-.page-header h1 {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.card {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.card h3 {
-  margin-bottom: 12px;
-  color: #333;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f0f2f5;
-  padding: 20px;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.header {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
+.status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #fff; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
 .dot.green { background: #22c55e; }
 .dot.red { background: #ef4444; }
 
-.controls {
-  background: white;
-  padding: 15px 20px;
+.card {
+  background: rgba(101, 21, 20, 1);
+  padding: 20px;
   border-radius: 8px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #5a1a1a;
+  margin-bottom: 16px;
 }
 
+.card h3 { margin-bottom: 12px; color: #fff; }
+
+.post-form { display: flex; flex-direction: column; gap: 16px; }
+
+.form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 4px; }
+
+.password-wrap { position: relative; display: flex; align-items: center; }
+.password-wrap .title-input { flex: 1; padding-right: 40px; }
+.toggle-pw { position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 18px; }
+
+.title-input,
+.filter-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #333;
+}
+
+.title-input:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 0 2px rgba(255,215,0,0.2);
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
 .btn {
-  padding: 8px 16px;
-  background: #3b82f6;
-  color: white;
+  padding: 10px 20px;
+  background: #8b2020;
+  color: #e8e0e0;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.2s;
 }
 
-.btn:hover { background: #2563eb; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-danger {
-  background: #ef4444;
-}
+.btn-submit { background: #005cb3; }
+.btn-submit:hover:not(:disabled) { background: #0c81f0; }
 
-.btn-danger:hover {
-  background: #dc2626;
-}
-
-.update-count {
-  margin-left: auto;
+.btn-clear {
+  padding: 10px 20px;
+  background: #3a1010;
+  color: #ff6b6b;
+  border: 1px solid #6b1a1a;
+  border-radius: 6px;
+  cursor: pointer;
   font-size: 14px;
-  color: #666;
-  font-weight: 500;
 }
 
-.table-container {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.table-scroll { max-height: 400px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; border: 1px solid #3a1010; }
+thead { position: sticky; top: 0; z-index: 1; }
 
 th {
-  background: #f9fafb;
-  padding: 12px;
+  background: #3a1010;
+  padding: 10px;
   text-align: left;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #374151;
-  border-bottom: 2px solid #e5e7eb;
+  color: #fff;
+  border-bottom: 2px solid #6b1a1a;
 }
 
 td {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 14px;
-  color: #4b5563;
+  padding: 10px;
+  border-bottom: 1px solid #3a1010;
+  font-size: 13px;
+  color: #fff;
 }
 
-tr:hover {
-  background: #f9fafb;
+tr:hover { background: #2a0808; }
+.empty { text-align: center; padding: 40px; color: #fff; }
+
+.btn-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 8px;
 }
 
-.new-row {
-  animation: highlightRow 2s ease-out;
-}
-
-@keyframes highlightRow {
-  from { background: #dbeafe; }
-  to { background: transparent; }
-}
-
-.log {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.log h3 {
-  margin-bottom: 15px;
-  color: #1f2937;
-}
-
-.log-item {
-  padding: 8px 12px;
-  border-left: 3px solid #3b82f6;
-  margin-bottom: 8px;
-  background: #f9fafb;
-  font-size: 14px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.log-time {
-  color: #6b7280;
-  font-size: 12px;
-  min-width: 80px;
-}
-
-.log-type {
-  padding: 2px 8px;
+.btn-danger-sm {
+  background: #8b2020;
+  color: #e8e0e0;
+  border: none;
   border-radius: 4px;
+  width: 24px;
+  height: 24px;
   font-size: 12px;
-  font-weight: 600;
-  color: white;
-  min-width: 60px;
-  text-align: center;
+  cursor: pointer;
 }
 
-.log-type.INSERT { background: #22c55e; }
-.log-type.UPDATE { background: #f59e0b; }
-.log-type.DELETE { background: #ef4444; }
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(20, 5, 5, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #2a1010;
+  border: 1px solid #6b1a1a;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #3a1010;
+}
+
+.modal-header h3 { margin: 0; color: #f59e0b; font-size: 18px; }
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #b99;
+  padding: 0;
+  width: 30px; height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.modal-body { padding: 20px; }
+.modal-body p { margin: 0; color: #c9a; line-height: 1.5; }
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #3a1010;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #3a1010;
+  color: #e8e0e0;
+  border: 1px solid #6b1a1a;
+}
+
+.modal-btn-primary {
+  background: #8b2020;
+  color: #e8e0e0;
+  border: none;
+}
+
+.modal-btn-danger {
+  background: #a00000;
+  color: #fff;
+  border: none;
+}
+
+.modal-btn:hover { opacity: 0.9; }
 </style>
