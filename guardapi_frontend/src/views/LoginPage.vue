@@ -66,7 +66,7 @@
   </div>
 
   <!-- Login Screen -->
-  <div v-else>
+  <div v-else class="login-container">
     <form @submit.prevent="handleLogin">
       <div class="form-group">
         <label>ชื่อผู้ใช้งาน</label>
@@ -248,9 +248,26 @@ function copyToClipboard() {
 </script>
 
 <style scoped>
+* {
+  color: #e0e0e0;
+}
+
 h2 {
   margin-bottom: 24px;
-  color: #333;
+  color: #c44;
+}
+
+h6 {
+  color: #c44;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: transparent;
 }
 
 .form-group {
@@ -261,28 +278,30 @@ h2 {
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
-  color: #333;
+  color: #fff312;
 }
 
 .form-group input,
 .login-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #333;
   border-radius: 6px;
   font-size: 14px;
+  background: #1a1a1a;
+  color: #fff312;
 }
 
 .form-group input:focus,
 .login-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #800000;
 }
 
 .btn {
   padding: 12px 24px;
-  background: #667eea;
-  color: white;
+  background: #800000;
+  color: #e0e0e0;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -291,7 +310,7 @@ h2 {
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -300,26 +319,21 @@ h2 {
 }
 
 .btn:hover:not(:disabled) {
-  background: #5a67d8;
-}
-
-.setup-btn {
-  background: #4a5568;
-  margin-top: 8px;
-}
-
-.setup-btn:hover {
-  background: #2d3748;
+  background: #a00000;
 }
 
 .copy-btn {
   padding: 6px 12px;
-  background: #667eea;
-  color: white;
+  background: #800000;
+  color: #e0e0e0;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
+}
+
+.copy-btn:hover {
+  background: #a00000;
 }
 
 .qr-code-container {
@@ -330,8 +344,10 @@ h2 {
 .qr-code {
   width: 200px;
   height: 200px;
-  border: 1px solid #ddd;
+  border: 1px solid #333;
   border-radius: 8px;
+  background: white;
+  padding: 8px;
 }
 
 .secret-container {
@@ -342,21 +358,23 @@ h2 {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f5f5f5;
+  background: #1a1a1a;
   padding: 10px;
   border-radius: 6px;
   margin-top: 8px;
+  border: 1px solid #333;
 }
 
 .secret-display code {
   flex: 1;
   word-break: break-all;
   font-size: 13px;
+  color: #c44;
 }
 
 .instruction {
   margin: 16px 0 8px;
-  color: #666;
+  color: #999;
 }
 
 .checkbox-label {
@@ -364,7 +382,7 @@ h2 {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #555;
+  color: #aaa;
   cursor: pointer;
   margin: 8px 0;
 }
@@ -372,24 +390,10 @@ h2 {
 .checkbox-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #667eea;
+  accent-color: #800000;
 }
 
-.setup-prompt {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #eee;
-  text-align: center;
-}
-
-.setup-prompt p {
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.login-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 40px 20px;
+p {
+  color: #aaa;
 }
 </style>

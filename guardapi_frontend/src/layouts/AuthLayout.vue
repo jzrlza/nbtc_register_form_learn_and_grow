@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(81, 1, 0, 1);
   padding: 20px;
 }
 
@@ -27,10 +27,9 @@
 }
 
 .auth-card {
-  background: white;
+  background: transparent;
   border-radius: 12px;
   padding: 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .auth-logo {
@@ -40,6 +39,6 @@
 
 .auth-logo h1 {
   font-size: 28px;
-  color: #333;
+  color: #eee;
 }
 </style>
