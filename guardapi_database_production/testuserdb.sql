@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(80) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `password` varchar(255) NULL DEFAULT NULL,
   `type` int NOT NULL DEFAULT 1,
   `two_factor_secret` varchar(255) NULL DEFAULT NULL,
   `is_2fa_enabled` tinyint(1) DEFAULT 0,
