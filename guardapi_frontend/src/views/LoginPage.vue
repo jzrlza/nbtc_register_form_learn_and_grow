@@ -285,7 +285,7 @@ h6 {
 .login-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #333;
+  border: 1px solid #fff;
   border-radius: 6px;
   font-size: 14px;
   background: #360c0c;
