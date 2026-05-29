@@ -1,4 +1,3 @@
-const cron = require('node-cron');
 const fs = require('fs').promises;
 const path = require('path');
 const pool = require('../config/database.js');
@@ -25,10 +24,6 @@ class CleanupService {
     
     this.scheduleCleanup();
     
-    // Also run daily at 3 AM
-    cron.schedule('0 3 * * *', async () => {
-      await this.cleanup();
-    });
   }
 
   scheduleCleanup() {
