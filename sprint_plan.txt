@@ -21,7 +21,7 @@ sprint plan 2 weeks
 today
 
 tomorrow
-- age of data, posts and images : 1 year (by stamp)   [test by using age of 3 seconds first]
+
 
 
 
@@ -38,6 +38,7 @@ sus
 - real time posts may or may not collide with newly registered users
 
 done
+- age of data, posts and images : 1 year (by stamp)   [test by using age of 3 seconds first]
 - password policy อย่างน้อย 8 หลัก ตัวเล็ก ตัวใหญ่ ตัวเลข อักขระพิเศษ
 - user AD for add those guard users (add users admin page)
 - make user table for guard use (local user) [use user_type column]

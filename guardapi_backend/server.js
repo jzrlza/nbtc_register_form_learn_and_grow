@@ -6,6 +6,7 @@ const cors = require('cors');
 const http = require('http');
 const { initWebSocket } = require('./services/websocketService.js');
 const { startPolling } = require('./services/pollService.js');
+const cleanupService = require('./services/cleanupService.js');
 const pool = require('./config/database.js');
 const os = require('os');
 const path = require('path');
@@ -54,6 +55,66 @@ app.use('/api/users', usersRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api', indexRoutes);
 
+// Run cleanup manually
+app.post('/api/admin/cleanup', async (req, res) => {
+  const stats = await cleanupService.cleanup();
+  res.json(stats);
+});
+
+// Set time in seconds (for testing)
+app.put('/api/admin/cleanup/seconds', (req, res) => {
+  const { seconds } = req.body;
+  cleanupService.setSeconds(seconds || 30);
+  res.json({ 
+    message: `Delete after ${seconds} seconds`,
+    config: cleanupService.getConfig() 
+  });
+});
+
+// Set time in minutes
+app.put('/api/admin/cleanup/minutes', (req, res) => {
+  const { minutes } = req.body;
+  cleanupService.setMinutes(minutes || 5);
+  res.json({ 
+    message: `Delete after ${minutes} minutes`,
+    config: cleanupService.getConfig() 
+  });
+});
+
+// Set time in hours
+app.put('/api/admin/cleanup/hours', (req, res) => {
+  const { hours } = req.body;
+  cleanupService.setHours(hours || 1);
+  res.json({ 
+    message: `Delete after ${hours} hours`,
+    config: cleanupService.getConfig() 
+  });
+});
+
+// Set time in days
+app.put('/api/admin/cleanup/days', (req, res) => {
+  const { days } = req.body;
+  cleanupService.setDays(days || 365);
+  res.json({ 
+    message: `Delete after ${days} days`,
+    config: cleanupService.getConfig() 
+  });
+});
+
+// Universal setter
+app.put('/api/admin/cleanup/config', (req, res) => {
+  const { value, unit } = req.body;
+  cleanupService.setTime(value, unit);
+  res.json({ 
+    message: `Delete after ${value} ${unit}`,
+    config: cleanupService.getConfig() 
+  });
+});
+
+// Get current config
+app.get('/api/admin/cleanup/config', (req, res) => {
+  res.json(cleanupService.getConfig());
+});
 
 // Start server
 const SERVER_HOST = process.env.SERVER_HOST || 'localhost';
@@ -76,4 +137,5 @@ server.listen(SERVER_PORT, SERVER_HOST, async () => {
   // Start real-time polling
   // ******modify additional tables in services/pollService.js
   await startPolling();
+  await cleanupService.start();
 });
