@@ -81,7 +81,7 @@
               <td>{{ user.is_2fa_enabled ? '✅' : '❌' }}</td>
               <td>{{ formatTime(user.created_at) }}</td>
               <td>
-                <span v-if="user.type > 1">
+                <span v-if="user.type > currentUser.type && currentUser.id != user.id">
                   <button @click="editUser(user)" class="btn-edit">✏️</button>
                   <button @click="confirmDelete(user)" class="btn-danger-sm">✕</button>
                 </span>
