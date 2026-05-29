@@ -332,6 +332,7 @@ h6 {
 
 .btn-full {
   width: 100%;
+  margin-top: 1px;
 }
 
 .btn:hover:not(:disabled) {
