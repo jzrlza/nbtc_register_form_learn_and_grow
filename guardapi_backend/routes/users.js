@@ -5,6 +5,15 @@ const requireAuth = require('../middleware/auth');
 
 const router = Router();
 
+function validatePassword(password) {
+  if (!password || password.length < 8) return 'Password must be at least 8 characters';
+  if (!/[a-z]/.test(password)) return 'Password must contain lowercase letter';
+  if (!/[A-Z]/.test(password)) return 'Password must contain uppercase letter';
+  if (!/[0-9]/.test(password)) return 'Password must contain number';
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return 'Password must contain special character';
+  return null;
+}
+
 // GET /api/users
 router.get('/', requireAuth, async (req, res) => {
   try {
@@ -42,6 +51,11 @@ router.post('/', requireAuth, async (req, res) => {
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return res.status(400).json({ error: passwordError });
     }
 
     // Check duplicate
@@ -102,6 +116,10 @@ router.put('/:id', requireAuth, async (req, res) => {
 
     // Update password if provided
     if (password) {
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+      }
       const hash = bcrypt.hashSync(password, 10);
       await pool.query('UPDATE users SET password = ? WHERE id = ?', [hash, id]);
     }

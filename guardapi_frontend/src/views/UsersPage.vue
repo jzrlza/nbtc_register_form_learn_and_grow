@@ -22,6 +22,13 @@
             <input v-model="formPassword" :type="showPassword ? 'text' : 'password'" placeholder="Password..." class="title-input" />
             <button type="button" class="toggle-pw" @click="showPassword = !showPassword">{{ showPassword ? '🙈' : '👁️' }}</button>
           </div>
+          <div v-if="formPassword && !passwordValid" class="password-hint">
+            <p :class="[hasMinLength ? 'met' : 'unmet']">{{ hasMinLength ? '✅' : '❌' }} อย่างน้อย 8 หลัก</p>
+            <p :class="[hasLower ? 'met' : 'unmet']">{{ hasLower ? '✅' : '❌' }} ตัวพิมพ์เล็ก (a-z)</p>
+            <p :class="[hasUpper ? 'met' : 'unmet']">{{ hasUpper ? '✅' : '❌' }} ตัวพิมพ์ใหญ่ (A-Z)</p>
+            <p :class="[hasNumber ? 'met' : 'unmet']">{{ hasNumber ? '✅' : '❌' }} ตัวเลข (0-9)</p>
+            <p :class="[hasSpecial ? 'met' : 'unmet']">{{ hasSpecial ? '✅' : '❌' }} อักขระพิเศษ (!@#$%^&*)</p>
+          </div>
         </div>
         <div class="form-group">
           <label class="filter-label">ประเภทผู้ใช้</label>
@@ -40,7 +47,7 @@
       </div>
       <div class="form-actions">
         <button @click="cancelForm" class="btn-clear">✕ ยกเลิก</button>
-        <button @click="saveUser" :disabled="loading || !formUsername" class="btn btn-submit">
+        <button @click="saveUser" :disabled="loading || !formUsername || (formPassword != '' && !passwordValid)" class="btn btn-submit">
           {{ loading ? 'กำลังบันทึก...' : editingUser ? 'อัปเดต' : 'เพิ่มผู้ใช้' }}
         </button>
       </div>
@@ -124,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, inject } from 'vue';
+import { ref, onMounted, onUnmounted, inject, computed } from 'vue';
 
 const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3000';
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -147,6 +154,15 @@ const deleteTarget = ref(null);
 
 const showErrorModal = ref(false);
 const errorMessage = ref('');
+
+const hasMinLength = computed(() => formPassword.value.length >= 8);
+const hasLower = computed(() => /[a-z]/.test(formPassword.value));
+const hasUpper = computed(() => /[A-Z]/.test(formPassword.value));
+const hasNumber = computed(() => /[0-9]/.test(formPassword.value));
+const hasSpecial = computed(() => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formPassword.value));
+const passwordValid = computed(() =>
+  hasMinLength.value && hasLower.value && hasUpper.value && hasNumber.value && hasSpecial.value
+);
 
 let ws = null;
 
@@ -511,4 +527,19 @@ tr:hover { background: #2a0808; }
   from { background: #4a1515; }
   to { background: transparent; }
 }
+
+.password-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.password-hint p {
+  margin: 0;
+}
+
+.met { color: #22c55e; }
+.unmet { color: #ef4444; }
 </style>
