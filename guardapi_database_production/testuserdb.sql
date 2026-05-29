@@ -11,7 +11,7 @@ CREATE TABLE `users`  (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
-INSERT INTO `users` VALUES (1, 'p.r', 1, NULL, 1, NOW(), 0);
+INSERT INTO `users` VALUES (1, 'p.r', NULL, 1, NULL, 1, NOW(), 0);
 
 DROP TABLE IF EXISTS `trusted_devices`;
 CREATE TABLE `trusted_devices` (
